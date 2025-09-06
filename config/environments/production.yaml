@@ -1,0 +1,21 @@
+# Production Environment Configuration
+# 
+# This configuration extends the base configuration with production-specific settings.
+# It is used for production deployments.
+
+# Security settings for production environment
+security:
+  # In production, the salt should be set via environment variable
+  # This is a fallback value that should be overridden
+  salt: "CHANGE_ME_IN_PRODUCTION"
+  date_shift_days: 30
+
+# Logging settings for production
+logging:
+  level: "WARNING"
+
+# Models configuration for production
+models:
+  spacy: "en_core_web_md"
+  huggingface: "obi/deid_bert_i2b2"
+  device: 0  # Use GPU if available in production

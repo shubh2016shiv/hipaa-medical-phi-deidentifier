@@ -1,0 +1,82 @@
+# HIPAA De-identification Base Configuration
+# 
+# This is the base configuration file that defines core settings.
+# It serves as the foundation for all other configuration files.
+
+# Detection settings
+detect:
+  # Enable rule-based detection (using patterns and regular expressions)
+  enable_rules: true
+  
+  # Enable machine learning-based detection
+  enable_ml: true
+  
+  # List of PHI categories to detect
+  # These correspond to the 18 HIPAA Safe Harbor identifiers
+  categories:
+    - NAME                 # 1. Names
+    - LOCATION             # 2. Geographic subdivisions smaller than state
+    - DATE                 # 3. Dates (except year)
+    - PHONE_NUMBER         # 4. Phone numbers
+    - FAX_NUMBER           # 5. Fax numbers
+    - EMAIL_ADDRESS        # 6. Email addresses
+    - US_SSN               # 7. Social Security numbers
+    - MRN                  # 8. Medical record numbers
+    - HEALTH_PLAN_ID       # 9. Health plan beneficiary numbers
+    - ACCOUNT_NUMBER       # 10. Account numbers
+    - LICENSE_NUMBER       # 11. Certificate/license numbers
+    - VEHICLE_ID           # 12. Vehicle identifiers and serial numbers
+    - MEDICAL_DEVICE_ID    # 13. Device identifiers and serial numbers
+    - URL                  # 14. Web URLs
+    - IP_ADDRESS           # 15. IP addresses
+    - BIOMETRIC_ID         # 16. Biometric identifiers
+    - PHOTO_ID             # 17. Full-face photographs
+    - OTHER_ID             # 18. Any other unique identifying characteristic
+
+# Transformation settings
+transform:
+  # Default action for PHI categories not explicitly listed
+  default_action: redact
+  
+  # Specific rules for each PHI category based on HIPAA Safe Harbor
+  rules:
+    NAME: pseudonym          # 1. Names - Replace with consistent pseudonym
+    LOCATION: generalize     # 2. Geographic subdivisions - Generalize to higher level
+    DATE: date_shift         # 3. Dates - Shift dates by a consistent amount
+    PHONE_NUMBER: redact     # 4. Phone numbers - Completely redact
+    FAX_NUMBER: redact       # 5. Fax numbers - Completely redact
+    EMAIL_ADDRESS: redact    # 6. Email addresses - Completely redact
+    US_SSN: redact           # 7. Social Security numbers - Completely redact
+    MRN: hash                # 8. Medical record numbers - Replace with hash
+    HEALTH_PLAN_ID: hash     # 9. Health plan beneficiary numbers - Replace with hash
+    ACCOUNT_NUMBER: hash     # 10. Account numbers - Replace with hash
+    LICENSE_NUMBER: hash     # 11. Certificate/license numbers - Replace with hash
+    VEHICLE_ID: redact       # 12. Vehicle identifiers - Completely redact
+    MEDICAL_DEVICE_ID: hash  # 13. Device identifiers - Replace with hash
+    URL: redact              # 14. Web URLs - Completely redact
+    IP_ADDRESS: redact       # 15. IP addresses - Completely redact
+    BIOMETRIC_ID: redact     # 16. Biometric identifiers - Completely redact
+    PHOTO_ID: redact         # 17. Full-face photographs - Completely redact
+    OTHER_ID: redact         # 18. Any other unique identifying - Completely redact
+
+# Format templates for pseudonyms
+pseudonym_formats:
+  NAME: "PATIENT_{code}"
+  PERSON: "PATIENT_{code}"
+  ORGANIZATION: "FACILITY_{code}"
+  ADDRESS: "ADDRESS_{code}"
+  DEFAULT: "{code}"
+
+# Format templates for hashed values
+hash_formats:
+  MRN: "MRN_{code}"
+  ENCOUNTER_ID: "ENC_{code}"
+  ACCOUNT_NUMBER: "ACC_{code}"
+  LICENSE_NUMBER: "LIC_{code}"
+  MEDICAL_DEVICE_ID: "DEV_{code}"
+  HEALTH_PLAN_ID: "PLAN_{code}"
+  DEFAULT: "{code}"
+
+# Logging configuration
+logging:
+  level: "INFO"

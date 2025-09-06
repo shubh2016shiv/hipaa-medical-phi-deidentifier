@@ -1,0 +1,491 @@
+{
+  "text": "Patient Name: [REDACTED:PERSON]: [REDACTED:DATE_TIME]\nMedical MRN_15a96678 ([REDACTED:ORGANIZATION]): [REDACTED:OTHER]\n[REDACTED:ENCOUNTER_ID]\nAddress: [REDACTED:OTHER] [GENERALIZED:LOCATION], [GENERALIZED:LOCATION], [REDACTED:ORGANIZATION]: [REDACTED:PHONE_NUMBER]\nPrimary Care Provider: PATIENT_76c08c64. [REDACTED:PERSON], [REDACTED:ORGANIZATION]: [REDACTED:DATE_TIME]\n\nChief Complaint:\nMRN_4c5a4957 for follow-up of type [REDACTED:OTHER] diabetes mellitus and hypertension.\n\nHistory of Present Illness:\nMr. [REDACTED:PERSON] is a [REDACTED:DATE_TIME] male with a history of type [REDACTED:OTHER] diabetes (diagnosed [REDACTED:DATE_TIME]) and hypertension (diagnosed [REDACTED:DATE_TIME]). \nHe reports adherence to metformin 1000 mg BID and [REDACTED:IN_PAN] [REDACTED:DATE_TIME] [REDACTED:DATE_TIME]. \nHe has noticed [REDACTED:IN_PAN] dizziness in [REDACTED:DATE_TIME] and increased thirst over [REDACTED:DATE_TIME]. \nNo chest pain, shortness of breath, or vision changes. \nBlood glucose logs show fasting values ranging 145–170 mg/dL, [REDACTED:IN_PAN] post-prandial >200 mg/dL.\n\nPast Medical History:\n- Type 2 Diabetes Mellitus ([REDACTED:DATE_TIME])\n- Hypertension ([REDACTED:DATE_TIME])\n- [REDACTED:PERSON] ([REDACTED:DATE_TIME])\n\nSurgical History:\n- Appendectomy, [REDACTED:DATE_TIME]\n\nFamily History:\n- Father: Coronary artery disease, deceased at [REDACTED:OTHER]\n- Mother: Type [REDACTED:OTHER] Diabetes\n- Sister: Hypertension\n\nSocial History:\n- Former smoker (quit [REDACTED:DATE_TIME], [REDACTED:OTHER] [REDACTED:IN_PAN])\n- Drinks alcohol occasionally (1–2 beers[REDACTED:DATE_TIME])\n- Lives with wife, [REDACTED:PERSON], in [GENERALIZED:LOCATION], [REDACTED:ORGANIZATION] part-time as a school bus driver\n\nMedications:\n- Metformin 1000 mg BID\n- [REDACTED:IN_PAN] 20 mg [REDACTED:DATE_TIME]\n- Atorvastatin 40 mg [REDACTED:DATE_TIME]\n- Aspirin 81 mg daily\n\nAllergies:\n- [REDACTED:IN_PAN] (rash)\n\n[REDACTED:ORGANIZATION]:\n- General: No fever or chills\n- Cardiac: No chest pain, palpitations, or edema\n- Respiratory: No dyspnea or cough\n- Endocrine: Reports increased thirst and urination\n\nPhysical Exam:\n- BP: [REDACTED:OTHER] mmHg\n- HR: [REDACTED:OTHER], regular\n- Weight: 92 kg, Height: 177 cm (BMI: [REDACTED:OTHER])\n- Cardiovascular: Normal [GENERALIZED:LOCATION], [GENERALIZED:LOCATION], no murmurs\n- Lungs: Clear to auscultation bilaterally\n- Abdomen: Soft, [REDACTED:IN_PAN]\n- Extremities: No edema; pedal pulses intact\n\nLabs:\n- [REDACTED:IN_PAN] A1c: 8.2% ([REDACTED:DATE_TIME])\n- [REDACTED:IN_PAN]: 1.1 mg/dL\n- LDL cholesterol: 124 mg/dL\n\n[REDACTED:IN_PAN]:\n[REDACTED:OTHER]. Type [REDACTED:OTHER] Diabetes Mellitus, [REDACTED:IN_PAN] control (HbA1c 8.2%)\n[REDACTED:OTHER]. Hypertension, uncontrolled ([REDACTED:ORGANIZATION])\n[REDACTED:OTHER]. [REDACTED:PERSON], on statin therapy\n\nPlan:\n- Increase [REDACTED:IN_PAN] to [REDACTED:OTHER] mg [REDACTED:DATE_TIME]\n- Continue metformin, reinforce lifestyle modification\n- Consider adding [REDACTED:PERSON] inhibitor if glucose not improved at next [REDACTED:ENCOUNTER_ID] HbA1c in [REDACTED:DATE_TIME]\n- Order basic metabolic panel in [REDACTED:DATE_TIME] to monitor kidney function\n- Recommend [REDACTED:DATE_TIME] home [REDACTED:ORGANIZATION] [REDACTED:IN_PAN]\n- Encourage [REDACTED:IN_PAN] DASH diet and increased physical activity\n- Follow-up in clinic in [REDACTED:DATE_TIME]\n\nProvider Signature:\nDr. [REDACTED:PERSON], [GENERALIZED:LOCATION][REDACTED:ORGANIZATION]\n[REDACTED:DATE_TIME]\n",
+  "entities": [
+    {
+      "start": 14,
+      "end": 47,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 49,
+      "end": 59,
+      "category": "DATE_TIME",
+      "confidence": 0.95
+    },
+    {
+      "start": 68,
+      "end": 81,
+      "category": "MRN",
+      "confidence": 0.65
+    },
+    {
+      "start": 83,
+      "end": 86,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 89,
+      "end": 97,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 98,
+      "end": 128,
+      "category": "ENCOUNTER_ID",
+      "confidence": 0.95
+    },
+    {
+      "start": 138,
+      "end": 142,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 143,
+      "end": 156,
+      "category": "LOCATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 158,
+      "end": 169,
+      "category": "LOCATION",
+      "confidence": 0.85
+    },
+    {
+      "start": 171,
+      "end": 185,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 187,
+      "end": 201,
+      "category": "PHONE_NUMBER",
+      "confidence": 0.75
+    },
+    {
+      "start": 225,
+      "end": 227,
+      "category": "NAME",
+      "confidence": 0.85
+    },
+    {
+      "start": 229,
+      "end": 243,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 245,
+      "end": 281,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 283,
+      "end": 293,
+      "category": "DATE_TIME",
+      "confidence": 0.95
+    },
+    {
+      "start": 312,
+      "end": 328,
+      "category": "MRN",
+      "confidence": 0.65
+    },
+    {
+      "start": 351,
+      "end": 352,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 422,
+      "end": 428,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 434,
+      "end": 445,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 474,
+      "end": 475,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 496,
+      "end": 500,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 530,
+      "end": 534,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 588,
+      "end": 598,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 599,
+      "end": 604,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 605,
+      "end": 610,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 628,
+      "end": 638,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 652,
+      "end": 663,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 690,
+      "end": 708,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 829,
+      "end": 839,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 917,
+      "end": 921,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 939,
+      "end": 943,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 947,
+      "end": 961,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 963,
+      "end": 967,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1004,
+      "end": 1008,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1073,
+      "end": 1075,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1091,
+      "end": 1092,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1164,
+      "end": 1168,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1170,
+      "end": 1172,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1173,
+      "end": 1183,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 1225,
+      "end": 1230,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1251,
+      "end": 1262,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 1267,
+      "end": 1278,
+      "category": "LOCATION",
+      "confidence": 0.85
+    },
+    {
+      "start": 1280,
+      "end": 1290,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 1364,
+      "end": 1374,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 1381,
+      "end": 1386,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1408,
+      "end": 1413,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 1450,
+      "end": 1460,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 1469,
+      "end": 1486,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 1676,
+      "end": 1682,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1694,
+      "end": 1700,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1748,
+      "end": 1752,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 1779,
+      "end": 1781,
+      "category": "LOCATION",
+      "confidence": 0.85
+    },
+    {
+      "start": 1783,
+      "end": 1785,
+      "category": "LOCATION",
+      "confidence": 0.85
+    },
+    {
+      "start": 1858,
+      "end": 1868,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 1923,
+      "end": 1933,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 1945,
+      "end": 1955,
+      "category": "DATE_TIME",
+      "confidence": 0.6
+    },
+    {
+      "start": 1959,
+      "end": 1969,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2011,
+      "end": 2021,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2023,
+      "end": 2024,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 2031,
+      "end": 2032,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 2052,
+      "end": 2062,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2084,
+      "end": 2085,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 2115,
+      "end": 2129,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 2131,
+      "end": 2132,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 2134,
+      "end": 2148,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 2186,
+      "end": 2196,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2200,
+      "end": 2202,
+      "category": "OTHER",
+      "confidence": 0.7
+    },
+    {
+      "start": 2206,
+      "end": 2211,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 2285,
+      "end": 2290,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 2333,
+      "end": 2347,
+      "category": "ENCOUNTER_ID",
+      "confidence": 0.95
+    },
+    {
+      "start": 2357,
+      "end": 2365,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 2399,
+      "end": 2406,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 2446,
+      "end": 2451,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 2457,
+      "end": 2459,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 2460,
+      "end": 2470,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2483,
+      "end": 2493,
+      "category": "IN_PAN",
+      "confidence": 0.05
+    },
+    {
+      "start": 2561,
+      "end": 2569,
+      "category": "DATE_TIME",
+      "confidence": 0.85
+    },
+    {
+      "start": 2595,
+      "end": 2609,
+      "category": "PERSON",
+      "confidence": 0.85
+    },
+    {
+      "start": 2611,
+      "end": 2614,
+      "category": "LOCATION",
+      "confidence": 0.85
+    },
+    {
+      "start": 2614,
+      "end": 2636,
+      "category": "ORGANIZATION",
+      "confidence": 0.7
+    },
+    {
+      "start": 2637,
+      "end": 2647,
+      "category": "DATE_TIME",
+      "confidence": 0.6
+    }
+  ]
+}

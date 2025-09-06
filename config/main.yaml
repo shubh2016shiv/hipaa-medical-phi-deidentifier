@@ -1,0 +1,12 @@
+# Main Configuration File
+#
+# This is the main entry point for configuration.
+# It imports the base configuration and the appropriate environment configuration.
+
+# Import base configuration
+imports:
+  - defaults/base.yaml
+  - environments/development.yaml  # Change to production.yaml or testing.yaml as needed
+
+# Override any settings here if needed
+# These will take precedence over imported configurations

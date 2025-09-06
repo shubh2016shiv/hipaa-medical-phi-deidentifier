@@ -1,0 +1,19 @@
+# Development Environment Configuration
+# 
+# This configuration extends the base configuration with development-specific settings.
+# It is used for local development and testing.
+
+# Security settings for development environment
+security:
+  salt: "DEV_SALT_DO_NOT_USE_IN_PRODUCTION"
+  date_shift_days: 30
+
+# Logging settings for development
+logging:
+  level: "DEBUG"
+
+# Models configuration for development
+models:
+  spacy: "en_core_web_md"
+  huggingface: "obi/deid_bert_i2b2"
+  device: -1  # Use CPU for development

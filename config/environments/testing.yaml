@@ -1,0 +1,19 @@
+# Testing Environment Configuration
+# 
+# This configuration extends the base configuration with testing-specific settings.
+# It is used for automated tests and CI/CD pipelines.
+
+# Security settings for testing environment
+security:
+  salt: "TEST_SALT_CONSISTENT_FOR_TESTS"
+  date_shift_days: 30
+
+# Logging settings for testing
+logging:
+  level: "ERROR"  # Minimal logging during tests
+
+# Models configuration for testing
+models:
+  spacy: "en_core_web_md"
+  huggingface: "obi/deid_bert_i2b2"
+  device: -1  # Use CPU for testing

@@ -1,0 +1,86 @@
+Patient Name: Johnathan M. Carter
+Date of Birth: 03/12/1958
+Medical Record Number (MRN): 54782934
+Encounter ID: ENC-20250905-233
+Address: 2456 Oakwood Drive, Springfield, IL 62704
+Phone: (217) 555-0187
+Primary Care Provider: Dr. Linda Thompson, Mercy General Hospital
+Date of Visit: 09/05/2025
+
+Chief Complaint:
+Patient presents for follow-up of type 2 diabetes mellitus and hypertension.
+
+History of Present Illness:
+Mr. Carter is a 67-year-old male with a history of type 2 diabetes (diagnosed 2012) and hypertension (diagnosed 2010). 
+He reports adherence to metformin 1000 mg BID and lisinopril 20 mg daily. 
+He has noticed occasional dizziness in the morning and increased thirst over the past two weeks. 
+No chest pain, shortness of breath, or vision changes. 
+Blood glucose logs show fasting values ranging 145–170 mg/dL, occasional post-prandial >200 mg/dL.
+
+Past Medical History:
+- Type 2 Diabetes Mellitus (2012)
+- Hypertension (2010)
+- Hyperlipidemia (2016)
+
+Surgical History:
+- Appendectomy, 1978
+
+Family History:
+- Father: Coronary artery disease, deceased at 72
+- Mother: Type 2 Diabetes
+- Sister: Hypertension
+
+Social History:
+- Former smoker (quit 2015, 20 pack-years)
+- Drinks alcohol occasionally (1–2 beers/week)
+- Lives with wife, Mary Carter, in Springfield, IL
+- Works part-time as a school bus driver
+
+Medications:
+- Metformin 1000 mg BID
+- Lisinopril 20 mg daily
+- Atorvastatin 40 mg daily
+- Aspirin 81 mg daily
+
+Allergies:
+- Penicillin (rash)
+
+Review of Systems:
+- General: No fever or chills
+- Cardiac: No chest pain, palpitations, or edema
+- Respiratory: No dyspnea or cough
+- Endocrine: Reports increased thirst and urination
+
+Physical Exam:
+- BP: 152/92 mmHg
+- HR: 78 bpm, regular
+- Weight: 92 kg, Height: 177 cm (BMI: 29.4)
+- Cardiovascular: Normal S1, S2, no murmurs
+- Lungs: Clear to auscultation bilaterally
+- Abdomen: Soft, non-tender
+- Extremities: No edema; pedal pulses intact
+
+Labs:
+- Hemoglobin A1c: 8.2% (08/15/2025)
+- Creatinine: 1.1 mg/dL
+- LDL cholesterol: 124 mg/dL
+
+Assessment:
+1. Type 2 Diabetes Mellitus, suboptimal control (HbA1c 8.2%)
+2. Hypertension, uncontrolled (BP 152/92 mmHg)
+3. Hyperlipidemia, on statin therapy
+
+Plan:
+- Increase lisinopril to 40 mg daily
+- Continue metformin, reinforce lifestyle modification
+- Consider adding SGLT2 inhibitor if glucose not improved at next visit
+- Repeat HbA1c in 3 months
+- Order basic metabolic panel in 1 month to monitor kidney function
+- Recommend daily home BP monitoring
+- Encourage low-sodium DASH diet and increased physical activity
+- Follow-up in clinic in 3 months
+
+Provider Signature:
+Dr. Linda Thompson, MD
+Mercy General Hospital
+09/05/2025
