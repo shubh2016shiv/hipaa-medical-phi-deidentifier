@@ -44,6 +44,8 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
+# Synchronization is now handled by assets/sync_scroll.js
+
 # Professional healthcare color scheme
 HEALTHCARE_COLORS = {
     'primary': '#2c3e50',      # Dark blue-gray
@@ -242,6 +244,7 @@ def fallback_deidentify_text(text):
 
 # Main app layout
 app.layout = html.Div([
+    
     # Header with professional healthcare branding
     html.Div([
         html.Div([
