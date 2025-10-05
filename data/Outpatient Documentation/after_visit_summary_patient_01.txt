@@ -1,0 +1,63 @@
+After Visit Summary
+Mercy Medical Group - Internal Medicine
+Visit Date: 06/12/2024
+Visit Time: 09:15 AM
+
+Patient: Patricia Ann Martinez
+DOB: 04/15/1968 (Age: 56 years)
+MRN: MR-2024-089456
+Account Number: ACCT-789123456
+
+Provider: Dr. Jennifer Lopez, MD
+Location: 5678 Maple Street, Springfield, IL 62701
+Phone: (217) 555-2000
+Fax: (217) 555-2001
+Email: info@mercymedicalgroup.com
+
+Reason for Visit:
+Annual wellness examination and follow-up for hypothyroidism
+
+Vital Signs:
+BP: 128/78 mmHg
+HR: 68 bpm
+Weight: 152 lbs
+Height: 5'6"
+BMI: 24.5 kg/m²
+Temperature: 98.0°F
+
+Assessment:
+1. Hypothyroidism (stable on levothyroxine)
+2. Well adult, no acute issues
+3. Age-appropriate cancer screening up to date
+
+Plan:
+- Continue levothyroxine 75 mcg daily
+- Recheck TSH in 6 months
+- Annual wellness visit next year
+- Continue current preventive care regimen
+
+Medications:
+1. Levothyroxine 75 mcg daily
+2. Multivitamin daily
+3. Calcium + Vitamin D daily
+
+Next Appointment:
+Date: 06/12/2025 (1 year)
+Time: 09:15 AM
+Location: Same as above
+
+Patient Instructions:
+- Take medications as prescribed
+- Return immediately if symptoms of thyroid dysfunction develop
+- Continue healthy lifestyle habits
+- Schedule mammogram as recommended by age guidelines
+
+Provider Signature:
+/es/Jennifer Lopez, MD
+
+This summary contains important information about your recent visit. Please keep this document for your records. If you have questions about this summary, please contact our office.
+
+Insurance Information:
+Primary: Aetna Health Insurance
+Member ID: AET-IL-456789123
+Group: GRP-987654

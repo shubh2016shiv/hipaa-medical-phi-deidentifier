@@ -1,0 +1,127 @@
+MEDICATION RECONCILIATION FORM
+Mercy Medical Center Pharmacy Services
+
+Patient Name: Anna Maria Rodriguez
+DOB: 09/18/1942 (Age: 82 years)
+MRN: MR-2024-667788
+FIN: FIN-990011223
+
+Date of Reconciliation: 09/20/2025
+Time: 14:00 PM
+Pharmacist: Jennifer Chen, PharmD
+Location: Inpatient Pharmacy Consultation Room
+
+REASON FOR RECONCILIATION:
+82-year-old female admitted for medication review and reconciliation following hospital admission for congestive heart failure exacerbation. Patient reports confusion about current medications and recent changes made by multiple providers.
+
+CURRENT HOME MEDICATIONS (PATIENT REPORTED):
+1. FUROSEMIDE 40 mg - Take 1 tablet by mouth daily
+2. LISINOPROL 10 mg - Take 1 tablet by mouth daily
+3. DIGOXIN 0.125 mg - Take 1 tablet by mouth daily
+4. WARFARIN 5 mg - Take 1 tablet by mouth daily (dose varies)
+5. METOPROLOL 25 mg - Take 1 tablet by mouth twice daily
+6. SIMVASTATIN 20 mg - Take 1 tablet by mouth daily
+7. OMEPRAZOLE 20 mg - Take 1 tablet by mouth daily
+8. CALCIUM CARBONATE 500 mg - Take 2 tablets by mouth twice daily
+9. VITAMIN D3 1000 IU - Take 1 tablet by mouth daily
+10. MULTIVITAMIN - Take 1 tablet by mouth daily
+11. ASPIRIN 81 mg - Take 1 tablet by mouth daily
+
+HOSPITAL MEDICATIONS DURING ADMISSION:
+1. FUROSEMIDE 40 mg IV - Every 12 hours (converted from PO)
+2. LISINOPROL 10 mg PO - Daily
+3. DIGOXIN 0.125 mg PO - Daily
+4. WARFARIN 5 mg PO - Daily (held for procedure)
+5. METOPROLOL 25 mg PO - Twice daily
+6. SIMVASTATIN 20 mg PO - Daily
+7. OMEPRAZOLE 20 mg PO - Daily
+8. CALCIUM CARBONATE 500 mg PO - Twice daily
+9. VITAMIN D3 1000 IU PO - Daily
+10. MULTIVITAMIN PO - Daily
+11. ASPIRIN 81 mg PO - Daily
+12. HEPARIN 5000 units SC - Every 8 hours (bridge for warfarin)
+13. POTASSIUM CHLORIDE 20 mEq PO - Daily (added for low potassium)
+14. ALBUTEROL NEBULIZER - Every 4 hours as needed
+15. PREDNISONE 40 mg PO - Daily for 5 days (for COPD exacerbation)
+
+DISCREPANCIES IDENTIFIED:
+
+1. POTASSIUM SUPPLEMENTATION:
+   - Patient was not taking potassium at home
+   - Added during hospitalization for hypokalemia
+   - Will continue on discharge for maintenance
+
+2. ALBUTEROL INHALER:
+   - Patient reports she has an albuterol inhaler at home but was not using it regularly
+   - Inhaler technique assessed and reinforced
+   - Will continue regular use at home
+
+3. PREDNISONE COURSE:
+   - Started for COPD exacerbation during admission
+   - Will complete 5-day course after discharge
+   - Taper not needed due to short duration
+
+4. WARFARIN DOSE VARIATION:
+   - Patient reports taking same dose daily at home
+   - Dose varies based on INR results
+   - Education provided on importance of INR monitoring
+
+MEDICATION ALLERGIES AND ADVERSE REACTIONS:
+- SULFA DRUGS: Rash and hives
+- CODEINE: Nausea and vomiting
+- No other known allergies
+
+CURRENT DISCHARGE MEDICATIONS:
+1. FUROSEMIDE 40 mg - Take 1 tablet by mouth daily
+2. LISINOPROL 10 mg - Take 1 tablet by mouth daily
+3. DIGOXIN 0.125 mg - Take 1 tablet by mouth daily
+4. WARFARIN 5 mg - Take 1 tablet by mouth daily (INR goal 2.0-3.0)
+5. METOPROLOL 25 mg - Take 1 tablet by mouth twice daily
+6. SIMVASTATIN 20 mg - Take 1 tablet by mouth daily
+7. OMEPRAZOLE 20 mg - Take 1 tablet by mouth daily
+8. CALCIUM CARBONATE 500 mg - Take 2 tablets by mouth twice daily
+9. VITAMIN D3 1000 IU - Take 1 tablet by mouth daily
+10. MULTIVITAMIN - Take 1 tablet by mouth daily
+11. ASPIRIN 81 mg - Take 1 tablet by mouth daily
+12. POTASSIUM CHLORIDE 20 mEq - Take 1 tablet by mouth daily
+13. ALBUTEROL INHALER - 2 puffs every 4-6 hours as needed
+14. PREDNISONE 40 mg - Take 1 tablet by mouth daily for 3 more days
+
+PATIENT EDUCATION PROVIDED:
+1. Medication indications and proper usage
+2. Potential side effects and when to report
+3. Importance of adherence to medication regimen
+4. Proper inhaler technique for albuterol
+5. Warfarin dosing based on INR results
+6. Signs and symptoms of medication toxicity
+7. How to organize medications (pill organizer recommended)
+
+PHARMACIST RECOMMENDATIONS:
+1. Use pill organizer for all medications to improve adherence
+2. Continue potassium supplementation for 3 months, then recheck levels
+3. Consider once-daily dosing for some medications to simplify regimen
+4. Regular INR monitoring (weekly until stable, then monthly)
+5. Follow-up with primary care physician in 1 week
+6. Medication therapy management appointment in 1 month
+
+FOLLOW-UP PLAN:
+- Primary Care Physician: 09/27/2025
+- Cardiologist: 10/15/2025
+- Pharmacy consultation: 10/20/2025
+- INR check: Weekly for 4 weeks, then monthly
+
+PATIENT UNDERSTANDING:
+Patient verbalized understanding of medication changes and follow-up plan. She demonstrated proper inhaler technique and stated she has a pill organizer at home. Daughter present during consultation and will assist with medication management.
+
+Jennifer Chen, PharmD
+Clinical Pharmacist
+
+Date: 09/20/2025
+
+Patient Signature: ___________________________
+
+Family Member Signature: ____________________
+
+Physician Acknowledgment:
+Dr. Robert Martinez, MD
+Date: 09/20/2025

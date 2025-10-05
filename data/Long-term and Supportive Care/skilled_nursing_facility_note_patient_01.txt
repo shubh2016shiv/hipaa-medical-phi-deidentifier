@@ -1,0 +1,142 @@
+SKILLED NURSING FACILITY PROGRESS NOTE
+Springfield Rehabilitation Center
+
+Patient: Harold William Peterson
+DOB: 07/08/1928 (Age: 96 years)
+MRN: MR-2024-334455
+FIN: FIN-667788990
+
+Date: 06/15/2025
+Time: 09:00 AM
+Provider: Dr. Robert Thompson, MD (Geriatrician)
+Nurse: Jennifer Adams, RN
+Physical Therapist: Michael Chen, PT
+Location: Room 214, Springfield Rehabilitation Center
+
+ADMISSION INFORMATION:
+96-year-old male admitted 06/01/2025 from Mercy Hospital following treatment for pneumonia. Admitted to skilled nursing facility for rehabilitation and skilled nursing care. Expected length of stay: 30 days.
+
+CHIEF COMPLAINT:
+Rehabilitation following hospitalization for pneumonia.
+
+CURRENT MEDICAL STATUS:
+Patient recovering from community-acquired pneumonia treated with intravenous antibiotics for 7 days. Currently on oral antibiotics. Oxygen requirement has decreased from 4L nasal cannula to 2L. Physical therapy initiated for deconditioning.
+
+ACTIVE PROBLEMS:
+1. Pneumonia (resolved)
+2. Deconditioning
+3. Dyspnea on exertion
+4. Mild cognitive impairment
+5. Osteoarthritis
+6. Hypertension
+
+CURRENT MEDICATIONS:
+1. Amoxicillin 500 mg three times daily (until 06/20/2025)
+2. Lisinopril 5 mg daily
+3. Aspirin 81 mg daily
+4. Vitamin D 1000 IU daily
+5. Calcium 500 mg twice daily
+6. Tylenol 650 mg every 6 hours as needed for pain
+7. Albuterol inhaler 2 puffs every 4-6 hours as needed
+
+ALLERGIES:
+- Codeine (nausea)
+- No other known allergies
+
+VITAL SIGNS:
+BP: 135/75 mmHg
+HR: 72 bpm
+RR: 18/min
+Temp: 98.1°F
+O2 Sat: 95% on 2L nasal cannula
+Weight: 165 lbs (stable)
+
+PHYSICAL EXAMINATION:
+
+General: Elderly male, appears stated age, no acute distress. Sitting in wheelchair.
+
+HEENT: Normocephalic. Oral mucosa dry but intact. Dentures in place.
+
+Neck: Supple, no JVD.
+
+Heart: Regular rate and rhythm. No murmurs appreciated.
+
+Lungs: Decreased breath sounds at bases bilaterally. No wheezes or crackles. Using 2L oxygen.
+
+Abdomen: Soft, non-tender. Normoactive bowel sounds. No distension.
+
+Extremities: No edema. Peripheral pulses 1+ bilaterally.
+
+Skin: Intact except for Stage II pressure ulcer on coccyx (2cm x 1cm, improving).
+
+Neurologic: Alert and oriented to person and place. Short-term memory deficits noted. Cranial nerves II-XII intact. Strength 4/5 bilateral upper and lower extremities.
+
+FUNCTIONAL STATUS:
+- Mobility: Requires moderate assistance for transfers. Uses walker for short distances.
+- Activities of Daily Living: Independent with feeding and grooming. Requires assistance with bathing and dressing.
+- Continence: Continent of bowel and bladder.
+- Cognitive: Mild cognitive impairment, requires cueing for complex tasks.
+
+REHABILITATION PROGRESS:
+Physical Therapy (6 sessions completed):
+- Ambulation: 100 feet with walker and contact guard assist
+- Transfers: Moderate assistance required
+- Balance: Improved static standing tolerance to 2 minutes
+- Strength: Upper extremities 4/5, lower extremities 4-/5
+- Endurance: Improved from 5 minutes to 15 minutes of therapy
+
+Occupational Therapy (4 sessions completed):
+- Activities of Daily Living: Independent with adaptive equipment
+- Home safety assessment completed
+- Adaptive equipment recommendations made
+
+Speech Therapy: Not indicated at this time.
+
+NURSING CARE:
+- Respiratory: Oxygen weaning protocol initiated. Currently 2L nasal cannula.
+- Skin: Pressure ulcer healing well with daily dressing changes and positioning.
+- Pain: Mild osteoarthritis pain well controlled with acetaminophen.
+- Nutrition: Regular diet tolerated well. Weight stable.
+- Elimination: Regular bowel movements, no constipation.
+
+LABORATORY RESULTS (06/14/2025):
+- CBC: WBC 6.2, Hgb 11.8, Hct 35.2, Plt 245
+- CMP: BUN 22, Creatinine 1.1, GFR 55
+- Chest X-ray: Improved infiltrates, no acute pneumonia
+- Sputum culture: No growth
+
+ASSESSMENT:
+1. Recent pneumonia, improving
+2. Deconditioning with rehabilitation potential
+3. Mild cognitive impairment
+4. Osteoarthritis, stable
+5. Hypertension, controlled
+6. At risk for falls due to age and weakness
+
+PLAN:
+1. Continue antibiotic therapy until 06/20/2025
+2. Physical therapy 5x/week for strength and mobility training
+3. Occupational therapy 3x/week for activities of daily living
+4. Oxygen weaning as tolerated
+5. Pressure ulcer care with daily assessment
+6. Fall prevention measures
+7. Discharge planning to assisted living facility
+
+GOALS:
+- Short-term (2 weeks): Independent transfers and ambulation 200 feet with walker
+- Long-term (4 weeks): Return to assisted living with home health services
+
+FAMILY CONFERENCE:
+Held with patient's daughter on 06/12/2025. Discussed rehabilitation progress, discharge planning, and long-term care needs. Daughter expressed understanding and agreement with care plan.
+
+PROGNOSIS: Good for functional recovery with continued rehabilitation.
+
+Dr. Robert Thompson, MD
+Geriatrician
+
+Electronic Signature: /es/Robert Thompson, MD
+
+Next Visit: 06/22/2025
+
+Nursing Addendum:
+Patient participated well in morning therapy session. Ate 75% of breakfast. Oxygen saturations maintained above 92% on current settings. No acute complaints.

@@ -1,0 +1,89 @@
+Cardiology Consultation Report
+Heart Care Specialists
+
+Consultation Date: 12/01/2024
+Patient: Daniel Patrick Murphy
+DOB: 01/22/1948 (Age: 76 years)
+MRN: MR-2024-556677
+Referring Physician: Dr. Lisa Wong, MD (Primary Care)
+
+REASON FOR CONSULTATION:
+76-year-old male with exertional dyspnea and chest discomfort. Recent echocardiogram shows reduced ejection fraction.
+
+HISTORY OF PRESENT ILLNESS:
+Mr. Murphy reports progressive shortness of breath with minimal exertion over the past 6 months. He notes chest discomfort described as "tightness" that occurs with walking 2 blocks. Symptoms improve with rest. No orthopnea, paroxysmal nocturnal dyspnea, or lower extremity edema. He has noticed decreased exercise tolerance.
+
+PAST MEDICAL HISTORY:
+- Coronary artery disease s/p CABG (2005) - LIMA to LAD, SVG to RCA
+- Hypertension
+- Hyperlipidemia
+- Type 2 diabetes mellitus
+- Chronic kidney disease stage 2
+- Osteoarthritis
+
+CURRENT MEDICATIONS:
+1. Aspirin 81 mg daily
+2. Clopidogrel 75 mg daily
+3. Atorvastatin 80 mg daily
+4. Lisinopril 10 mg daily
+5. Metoprolol XL 50 mg daily
+6. Insulin glargine 30 units nightly
+7. Metformin 500 mg twice daily
+8. Furosemide 20 mg daily
+
+PHYSICAL EXAMINATION:
+BP: 132/78 mmHg
+HR: 68 bpm, regular
+Weight: 190 lbs
+Height: 5'11"
+BMI: 26.6 kg/m²
+
+General: Alert, no acute distress
+HEENT: Normal
+Neck: No JVD
+Heart: Regular rhythm, S1/S2 normal, no murmurs
+Lungs: Clear bilaterally
+Abdomen: Soft, non-tender
+Extremities: No edema, pulses 2+
+Neurologic: Intact
+
+DIAGNOSTIC STUDIES:
+EKG: Normal sinus rhythm, left bundle branch block
+Echocardiogram: LVEF 35%, regional wall motion abnormalities
+Cardiac Cath (2005): Three-vessel disease, CABG as noted
+Stress Test: Unable to complete due to dyspnea
+
+ASSESSMENT:
+1. Congestive heart failure with reduced ejection fraction (HFrEF)
+2. Coronary artery disease s/p CABG
+3. Hypertension, hyperlipidemia, diabetes mellitus
+
+PLAN:
+1. Optimize heart failure therapy:
+   - Increase lisinopril to 20 mg daily
+   - Increase metoprolol XL to 100 mg daily
+   - Add spironolactone 25 mg daily
+   - Continue furosemide 20 mg daily
+
+2. Cardiac rehabilitation referral
+3. Follow-up echocardiogram in 3 months
+4. ICD evaluation for primary prevention
+5. Lifestyle modifications
+
+RECOMMENDATIONS:
+- Low sodium diet (<2g daily)
+- Daily weights
+- Limit fluid intake to 2L daily
+- Regular moderate exercise as tolerated
+- Smoking cessation (quit 2005)
+
+FOLLOW-UP:
+- Return to cardiology clinic in 2 weeks
+- Primary care follow-up in 1 month
+- Labs: BNP, renal function, electrolytes
+
+Dr. Michael Chen, MD
+Board Certified Cardiologist
+Heart Care Specialists
+Phone: (217) 555-4000
+Fax: (217) 555-4001

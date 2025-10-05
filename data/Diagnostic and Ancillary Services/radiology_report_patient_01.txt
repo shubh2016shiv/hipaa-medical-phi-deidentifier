@@ -1,0 +1,87 @@
+RADIOLOGY REPORT
+Mercy Imaging Center
+
+Patient Name: Mark Anthony Johnson
+DOB: 07/15/1960 (Age: 64 years)
+MRN: MR-2024-334455
+Accession Number: ACC-789456123
+Study Date: 10/03/2024
+Study Time: 13:30 PM
+
+Ordering Physician: Dr. Jennifer Smith, MD
+Referring Physician: Dr. Michael Brown, MD
+
+Clinical History:
+64-year-old male with 3 weeks of intermittent chest pain. Recent cardiac stress test showed equivocal results. Evaluate for coronary artery disease.
+
+Technique:
+- Images acquired on Siemens Somatom Force CT scanner
+- Cardiac gating utilized
+- Contrast: Isovue 370 (100 mL)
+- Slice thickness: 0.75 mm
+- Reconstructions: Axial, coronal, sagittal, and curved multiplanar
+
+Findings:
+
+CORONARY ARTERIES:
+- Left Main Coronary Artery: Normal caliber, no stenosis
+- Left Anterior Descending Artery: Mild plaque in proximal segment (20-30% stenosis)
+- Left Circumflex Artery: Patent, minimal plaque
+- Right Coronary Artery: Moderate plaque in mid segment (40-50% stenosis)
+- Posterior Descending Artery: Patent
+- Overall coronary calcium score: 145 (moderate)
+
+CARDIAC CHAMBERS AND VALVES:
+- Left ventricle: Normal size and function
+- Right ventricle: Normal
+- Left atrium: Mildly enlarged (45 mm)
+- Right atrium: Normal
+- Mitral valve: Mild regurgitation, trace
+- Aortic valve: Normal
+- Tricuspid valve: Normal regurgitation, trace
+- Pulmonary valve: Normal
+
+GREAT VESSELS:
+- Aorta: Normal caliber, no aneurysm or dissection
+- Pulmonary arteries: Normal
+- Superior vena cava: Patent
+- Inferior vena cava: Patent
+
+PERICARDIUM:
+- No pericardial effusion
+
+OTHER FINDINGS:
+- Lungs: Clear, no nodules or infiltrates
+- Mediastinum: Normal
+- Lymph nodes: No enlarged lymph nodes
+- Thyroid: Normal
+- Esophagus: Normal
+- Airways: Patent
+
+Impression:
+1. Moderate coronary artery atherosclerosis with 40-50% stenosis in the mid right coronary artery and mild plaque in the proximal left anterior descending artery.
+2. No high-grade coronary stenosis identified.
+3. Cardiac chambers normal size with preserved function.
+4. No pericardial effusion or other significant findings.
+
+Recommendations:
+1. Medical management with antiplatelet therapy, statin, and beta-blocker as indicated.
+2. Consider cardiology consultation for further evaluation and management.
+3. Follow-up coronary CT angiogram in 12-18 months to monitor disease progression.
+4. Lifestyle modifications: Smoking cessation (if applicable), weight management, regular exercise.
+
+Report Status: Final
+Reported By: Dr. Sarah Wilson, MD (Radiologist)
+Date/Time Reported: 10/03/2024 15:45 PM
+
+Electronically Signed:
+/es/Sarah Wilson, MD
+
+Critical Findings: None
+Communication: Results discussed with ordering physician Dr. Jennifer Smith at 16:00 PM on 10/03/2024.
+
+Image Archive Location: PACS System
+Study Protocol: Cardiac CTA with coronary calcium scoring
+Total Radiation Dose: CTDIvol 12.5 mGy, DLP 285 mGy-cm
+
+Patient Contact: Results mailed to patient and referring physician. Patient instructed to follow up with cardiologist.

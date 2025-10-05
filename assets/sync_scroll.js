@@ -109,3 +109,5 @@ function initSyncScroll() {
         console.error('Error initializing synchronized scrolling:', e);
     }
 }
+
+

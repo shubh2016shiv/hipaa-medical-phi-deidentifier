@@ -1,0 +1,135 @@
+PHYSICAL THERAPY EVALUATION AND PROGRESS NOTE
+Mercy Rehabilitation Services
+
+Patient Name: Joseph Michael O'Connor
+DOB: 09/05/1938 (Age: 85 years)
+MRN: MR-2024-778899
+FIN: FIN-556677889
+
+Date of Service: 02/10/2025
+Time: 10:00 AM - 11:00 AM
+Physical Therapist: Sarah Martinez, PT, DPT
+Location: Outpatient Rehabilitation Clinic
+
+REFERRAL INFORMATION:
+Referred by Dr. Robert Kim, MD for evaluation and treatment of right total knee arthroplasty rehabilitation.
+
+SUBJECTIVE:
+85-year-old male s/p right TKA on 01/28/2025. Patient reports moderate pain (4/10) in right knee with weight bearing and transfers. Pain improves with rest. He has been using a walker for ambulation. Goals include independent ambulation with cane and return to independent living.
+
+PAST MEDICAL HISTORY:
+- Right total knee arthroplasty (01/28/2025)
+- Hypertension
+- Osteoarthritis bilateral knees
+- Cataract surgery both eyes
+- Hearing loss
+
+CURRENT MEDICATIONS:
+1. Lisinopril 10 mg daily
+2. Ibuprofen 600 mg three times daily as needed
+3. Vitamin D 2000 IU daily
+4. Calcium 500 mg twice daily
+
+OBJECTIVE:
+
+VITAL SIGNS:
+BP: 142/78 mmHg
+HR: 72 bpm
+RR: 16/min
+Pain: 4/10 right knee
+
+RANGE OF MOTION:
+Right Knee:
+- Flexion: 85° (normal 135°)
+- Extension: 0° (normal 0°)
+- Limited by pain and stiffness
+
+Left Knee:
+- Flexion: 120°
+- Extension: -5°
+
+STRENGTH:
+Right lower extremity:
+- Hip flexors: 4/5
+- Knee extensors: 3+/5
+- Knee flexors: 3/5
+
+GAIT ANALYSIS:
+- Ambulation with walker: 50 feet with moderate assist
+- Requires moderate assistance for sit to stand transfers
+- Right knee flexion contracture noted
+- Antalgic gait pattern present
+
+BALANCE:
+- Static standing: 30 seconds with minimal assistance
+- Dynamic balance: Poor, requires assistance for turns
+- Berg Balance Scale: 38/56 (moderate fall risk)
+
+FUNCTIONAL ASSESSMENT:
+- Bed mobility: Independent
+- Transfers: Moderate assistance required
+- Ambulation: 50 feet with walker and moderate assist
+- Stairs: Unable to assess at this time
+
+ASSESSMENT:
+1. Right total knee arthroplasty - post-operative rehabilitation
+2. Impaired mobility and balance
+3. Moderate fall risk
+4. Knee flexion contracture
+5. Pain with functional activities
+
+PLAN:
+1. Therapeutic Exercise:
+   - Knee ROM exercises (flexion/extension)
+   - Quadriceps strengthening
+   - Hamstring strengthening
+   - Balance exercises
+   - Core strengthening
+
+2. Manual Therapy:
+   - Knee joint mobilizations
+   - Soft tissue massage
+   - Patellar mobilizations
+
+3. Modalities:
+   - Ice after exercise sessions
+   - Electrical stimulation for pain control
+
+4. Gait Training:
+   - Walker to cane progression
+   - Stair training when appropriate
+
+5. Patient Education:
+   - Home exercise program
+   - Joint protection techniques
+   - Fall prevention strategies
+   - Proper use of assistive devices
+
+6. Frequency/Duration: 2x/week for 6 weeks (12 visits total)
+7. Goals: Independent ambulation with cane by discharge
+
+TREATMENT PROVIDED TODAY:
+- Evaluation and assessment (45 minutes)
+- Knee ROM exercises
+- Quadriceps strengthening
+- Transfer training
+- Gait training with walker
+
+PATIENT RESPONSE:
+Patient tolerated treatment well with moderate pain increase during exercise (6/10) that resolved with rest. He demonstrated good effort and motivation for therapy. Pain decreased to baseline by end of session.
+
+RECOMMENDATIONS:
+- Continue current medication regimen
+- Use walker for all ambulation until strength improves
+- Ice right knee 15-20 minutes after exercise
+- Follow home exercise program daily
+
+NEXT VISIT: 02/12/2025 at 10:00 AM
+
+Sarah Martinez, PT, DPT
+Physical Therapist
+License #: PT-12345
+
+Electronic Signature: /es/Sarah Martinez, PT, DPT
+
+Physician Notification: Dr. Robert Kim notified of evaluation results and treatment plan via phone at 11:15 AM.

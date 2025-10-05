@@ -28,8 +28,8 @@ from typing import Dict, List, Optional
 from config.config import config as global_config
 from .models.phi_entity import PHIEntity
 from hipaa_deidentifier.phi_detection.normalizer.phi_normalizer import Stage0Normalizer
-from hipaa_deidentifier.phi_detection.identifier.presidio_deidentifier import PresidioDeidentifier
-from hipaa_deidentifier.phi_detection.identifier.hf_deidentifier import HFDeidentifier
+from hipaa_deidentifier.phi_detection.identifier.presidio_identifier import PresidioDeidentifier
+from hipaa_deidentifier.phi_detection.identifier.huggingface_model_identifier import HFDeidentifier
 # Note: spaCy functionality is now integrated into PresidioDeidentifier
 from .phi_redaction.phi_redactor import PHIRedactor
 from .utils.color_output import colorize_deidentified_text

@@ -1,0 +1,69 @@
+Silver Oaks Surgical Center
+Operative Note
+
+Date of Surgery: 04/10/2024
+Time: 09:00 AM - 11:30 AM
+
+Patient: Maria Elena Rodriguez
+DOB: 08/22/1978 (Age: 45 years)
+MRN: MR-2024-078945
+FIN: FIN-456789123
+
+Pre-operative Diagnosis: Symptomatic cholelithiasis with acute cholecystitis
+
+Post-operative Diagnosis: Acute calculous cholecystitis with gallstones
+
+Surgeon: Dr. James Wilson, MD
+Assistant Surgeon: Dr. Lisa Park, MD
+Anesthesiologist: Dr. Robert Kim, MD
+Nurse: Sarah Johnson, RN
+Surgical Assistant: Michael Chen, PA-C
+
+Procedure: Laparoscopic cholecystectomy with intraoperative cholangiogram
+
+Indications for Surgery:
+The patient is a 45-year-old female who presented with right upper quadrant abdominal pain, nausea, vomiting, and fever. Ultrasound revealed multiple gallstones with gallbladder wall thickening and positive sonographic Murphy's sign. After failed conservative management with IV antibiotics, surgical intervention was indicated.
+
+Procedure Details:
+After induction of general anesthesia and placement of endotracheal tube, the patient was positioned supine. Pneumoperitoneum was established with Veress needle insertion in the umbilicus. Four laparoscopic ports were placed:
+
+- 12mm port at umbilicus (camera)
+- 5mm port in right upper quadrant
+- 5mm port in right mid-abdomen
+- 5mm port in epigastrium
+
+The gallbladder was identified and dissected free from the liver bed using electrocautery. The cystic duct and artery were identified, clipped, and divided. Intraoperative cholangiogram was performed showing no filling defects or stones in the common bile duct.
+
+The gallbladder was removed through the umbilical port. Hemostasis was achieved. The abdomen was irrigated with warm saline. Ports were closed with absorbable sutures in the fascia and skin.
+
+Estimated Blood Loss: 50 mL
+Crystalloid Administered: 1500 mL
+Urine Output: 300 mL
+Drains: None
+
+Specimen: Gallbladder with stones sent to pathology
+
+Complications: None
+
+Post-operative Condition: Stable in recovery room, extubated, awake and alert
+
+Plan:
+- Transfer to surgical floor for overnight observation
+- Clear liquid diet this evening, advance as tolerated
+- Pain control with IV morphine PCA, transition to oral pain medications
+- Ambulate this evening
+- Discharge home tomorrow if stable
+- Follow-up in clinic in 1-2 weeks for staple removal and wound check
+- Pathology results to be reviewed at follow-up
+
+The patient tolerated the procedure well with no intraoperative complications.
+
+Dr. James Wilson, MD
+Attending Surgeon
+
+Contact Information:
+Silver Oaks Surgical Center
+1234 Oak Avenue
+Springfield, IL 62701
+Phone: (217) 555-1000
+Fax: (217) 555-1001

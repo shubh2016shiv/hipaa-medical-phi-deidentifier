@@ -1,0 +1,131 @@
+ONCOLOGY PROGRESS NOTE
+Mercy Cancer Center
+
+Patient: Barbara Helen Wilson
+DOB: 11/18/1950 (Age: 74 years)
+MRN: MR-2024-889900
+FIN: FIN-667788990
+
+Date: 03/05/2025
+Provider: Dr. Jennifer Adams, MD (Medical Oncologist)
+Fellow: Dr. Michael Lee, MD
+Nurse: Lisa Thompson, RN
+Location: Outpatient Oncology Clinic
+
+CHIEF COMPLAINT:
+Follow-up for stage III breast cancer, s/p chemotherapy and radiation therapy.
+
+HISTORY OF PRESENT ILLNESS:
+74-year-old female diagnosed with invasive ductal carcinoma of right breast (T2N1M0) in June 2024. Completed neoadjuvant chemotherapy (AC-T regimen) followed by right mastectomy and axillary lymph node dissection. Pathology showed 2/12 lymph nodes positive. Completed adjuvant radiation therapy to chest wall and regional nodes in December 2024. Currently on adjuvant endocrine therapy with tamoxifen 20 mg daily.
+
+Patient reports good energy level, no new symptoms. Denies fever, chills, night sweats, or unexplained weight loss. No bone pain, shortness of breath, or abdominal pain. Appetite good, bowel movements regular.
+
+ONCOLOGIC HISTORY:
+- Breast cancer diagnosis: 06/15/2024
+- Tumor size: 2.5 cm
+- Grade: 2
+- ER/PR positive, HER2 negative
+- Oncotype Dx score: 18 (intermediate risk)
+- Treatment: AC x 4 cycles, Taxol x 12 cycles, radiation 25 fractions
+
+CURRENT SYMPTOMS:
+- Mild fatigue (2/10)
+- Occasional hot flashes
+- Mild joint pain in hands (tamoxifen-related)
+
+REVIEW OF SYSTEMS:
+- Constitutional: No fevers, chills, or weight loss
+- Skin: Well-healed mastectomy scar, no rashes
+- HEENT: No oral lesions
+- Respiratory: No cough or shortness of breath
+- Cardiovascular: No chest pain or palpitations
+- Gastrointestinal: Regular bowel movements, no nausea
+- Genitourinary: No urinary symptoms
+- Musculoskeletal: Mild arthralgia in hands
+- Neurological: No headaches or focal symptoms
+- Psychiatric: Good mood, no depression or anxiety
+
+PHYSICAL EXAMINATION:
+
+General: Well-appearing elderly female, no acute distress
+
+Vital Signs:
+BP: 128/76 mmHg
+HR: 68 bpm
+RR: 16/min
+Temp: 98.2°F
+Weight: 145 lbs (stable)
+BMI: 24.2 kg/m²
+
+Skin: Well-healed right mastectomy scar, no erythema or drainage. Left breast normal.
+
+HEENT: Normocephalic, oral mucosa moist, no lesions.
+
+Lymph Nodes: No palpable lymphadenopathy in neck, axilla, or groin.
+
+Heart: Regular rate and rhythm, no murmurs.
+
+Lungs: Clear to auscultation bilaterally.
+
+Abdomen: Soft, non-tender, no masses.
+
+Extremities: No edema. Strength 5/5 bilateral upper and lower extremities.
+
+Neurologic: Alert and oriented x3, cranial nerves II-XII intact.
+
+PERFORMANCE STATUS: ECOG 0 (Fully active)
+
+CURRENT MEDICATIONS:
+1. Tamoxifen 20 mg daily (started 01/15/2025)
+2. Vitamin D3 2000 IU daily
+3. Calcium carbonate 500 mg twice daily
+4. Multivitamin daily
+5. Aspirin 81 mg daily
+
+RECENT LABORATORY RESULTS:
+Date: 03/01/2025
+- CBC: WBC 5.2, Hgb 12.8, Plt 285
+- CMP: Normal liver/renal function
+- CA 27-29: 15 U/mL (normal <38)
+- CEA: 1.2 ng/mL (normal <5)
+
+IMAGING:
+- Bone scan (02/15/2025): No evidence of metastatic disease
+- Chest CT (02/15/2025): No pulmonary nodules
+
+ASSESSMENT:
+1. Stage III invasive ductal carcinoma of right breast, status post curative-intent therapy
+2. Currently on adjuvant endocrine therapy
+3. No evidence of disease recurrence
+4. Excellent performance status
+
+PLAN:
+1. Continue tamoxifen 20 mg daily for 5 years total
+2. Routine surveillance:
+   - Clinic visit every 3 months for first 2 years
+   - Annual mammogram (contralateral breast)
+   - Bone scan and chest CT annually for 3 years
+   - Laboratory studies every 6 months
+
+3. Symptom management:
+   - Continue calcium and vitamin D for bone health
+   - Consider gabapentin if joint pain worsens
+   - Exercise counseling for bone health and weight maintenance
+
+4. Patient education:
+   - Signs and symptoms of recurrence
+   - Tamoxifen side effects and adherence
+   - Bone health maintenance
+   - Healthy lifestyle recommendations
+
+NEXT VISIT: 06/05/2025 at 09:00 AM
+
+PATIENT UNDERSTANDING:
+Patient verbalizes understanding of treatment plan and surveillance recommendations. She expresses satisfaction with current quality of life and reports good compliance with medications.
+
+Dr. Jennifer Adams, MD
+Medical Oncologist
+
+CC: Dr. Robert Martinez, MD (Breast Surgeon)
+Dr. Lisa Chen, MD (Radiation Oncologist)
+Patient copy provided

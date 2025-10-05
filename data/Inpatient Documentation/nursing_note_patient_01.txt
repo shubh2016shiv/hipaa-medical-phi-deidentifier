@@ -1,0 +1,93 @@
+Nursing Progress Note
+Mercy Medical Center - Medical/Surgical Unit
+Room: 512-B
+
+Date/Time: 09/05/2024 14:00 PM
+Patient: Susan Elizabeth Taylor
+DOB: 12/08/1972 (Age: 51 years)
+MRN: MR-2024-223344
+FIN: FIN-112233445
+
+Admitting Diagnosis: Acute pancreatitis
+
+Current Shift: Day Shift (07:00 AM - 19:00 PM)
+Nurse: Karen Mitchell, RN
+Previous Nurse: Lisa Thompson, RN
+
+Vital Signs:
+Time: 14:00 PM
+BP: 118/74 mmHg
+HR: 78 bpm (regular)
+RR: 16/min
+Temp: 98.4°F (oral)
+O2 Sat: 97% on room air
+Pain: 3/10 (abdominal, epigastric)
+
+Assessment:
+Patient is a 51-year-old female admitted yesterday with acute pancreatitis. She reports significant improvement in abdominal pain since admission. Pain is now well controlled with oral analgesics. Patient denies nausea, vomiting, or fever. Bowel sounds present in all quadrants. Abdomen soft, mild tenderness in epigastric region. No rebound tenderness or guarding.
+
+Patient has been NPO since admission, started on clear liquids this morning, tolerating well. IV fluids running at 100 mL/hr D5W. Foley catheter removed this morning, voiding well. Ambulating in room with assistance.
+
+Respiratory: Lungs clear to auscultation, no cough or shortness of breath.
+
+Cardiovascular: Regular rate and rhythm, no murmurs noted. Peripheral pulses 2+.
+
+Neurologic: Alert and oriented x3, follows commands appropriately. No focal deficits.
+
+Skin: Intact, no redness or breakdown. IV site clean and dry.
+
+Pain Management:
+- Oral oxycodone 5 mg every 4 hours as needed
+- IV morphine 2 mg every 2 hours as needed (last dose 12:00 PM)
+- Pain currently 3/10, patient reports good control
+- Teaching provided on pain scale and medication use
+
+Nutrition/Hydration:
+- NPO until 07:00 AM today, then clear liquids
+- Tolerating clear liquids well (broth, Jell-O, tea)
+- IV fluids at 100 mL/hr
+- Daily weights ordered, weight stable
+- Teaching provided on pancreatic diet
+
+Elimination:
+- Foley catheter removed 09:00 AM today
+- Voided 300 mL at 10:00 AM, 400 mL at 12:00 PM, 250 mL at 14:00 PM
+- Urine clear, yellow
+- No bowel movement yet, abdominal pain may be contributing
+- Stool softeners ordered
+
+Safety/Falls Risk:
+- High fall risk due to pain medication and recent surgery
+- Bed alarm on, call light within reach
+- Patient educated on fall prevention measures
+- Ambulates with assistance only
+
+Education:
+- Disease process of pancreatitis explained
+- Signs and symptoms to report
+- Pain management teaching
+- Diet teaching (low fat, small frequent meals)
+- Smoking cessation counseling (patient quit 2 days ago)
+- Medication teaching completed
+
+Family/Visitors:
+- Husband visited for 2 hours this morning
+- Patient reports good support system at home
+- Teaching provided to family on care needs
+
+Plan for Next Shift:
+- Continue clear liquid diet, advance to soft diet if tolerated
+- Wean IV fluids as oral intake increases
+- Continue pain management as ordered
+- Monitor for complications (infection, pseudocyst formation)
+- Daily labs (amylase, lipase, CBC, CMP)
+- Consider discharge planning if stable
+
+Patient Goal: Pain controlled, tolerating diet, ambulating independently
+
+Karen Mitchell, RN
+Badge #: 45678
+
+Provider Notification: Dr. Johnson notified of patient's improvement and plan to advance diet tomorrow if labs normal.
+
+Time Spent: 25 minutes

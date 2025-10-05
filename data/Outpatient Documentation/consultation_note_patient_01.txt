@@ -1,0 +1,117 @@
+Cardiology Consultation Note
+Mercy Heart Institute
+
+Consultation Date: 08/20/2024
+Consultation Time: 11:00 AM
+Location: Outpatient Cardiology Clinic, Suite 405
+
+Referring Physician: Dr. Sarah Johnson, MD (Primary Care)
+Consulting Physician: Dr. Robert Chen, MD (Cardiology)
+Fellow: Dr. Emily White, MD (Cardiology Fellow)
+Nurse: Maria Gonzalez, RN
+
+Patient: Thomas Richard Wilson
+DOB: 05/03/1945 (Age: 79 years)
+MRN: MR-2024-156789
+FIN: FIN-987654321
+
+Reason for Consultation:
+Evaluation for chest pain and possible coronary artery disease
+
+History of Present Illness:
+79-year-old male referred by primary care physician for evaluation of substernal chest pain that began 3 weeks ago. Pain is described as pressure-like, lasts 10-15 minutes, occurs with exertion (climbing stairs, walking briskly), and is relieved by rest. No radiation to arms or jaw. Associated with mild shortness of breath. No diaphoresis, nausea, or lightheadedness. Has occurred approximately 5 times in the past 3 weeks. No recent illnesses or infections. No recent changes in medications.
+
+Past Medical History:
+- Hypertension (diagnosed 2005)
+- Hyperlipidemia (diagnosed 2010)
+- Type 2 diabetes mellitus (diagnosed 2012)
+- Osteoarthritis bilateral knees (2018)
+- Cataract surgery both eyes (2020, 2022)
+- No prior cardiac history or interventions
+
+Current Medications:
+1. Lisinopril 20 mg daily
+2. Atorvastatin 40 mg daily
+3. Metformin 1000 mg twice daily
+4. Aspirin 81 mg daily
+5. Omeprazole 20 mg daily
+6. Glipizide 10 mg twice daily
+7. Ibuprofen 600 mg as needed
+
+Allergies: Penicillin (rash), Shellfish (anaphylaxis)
+
+Social History:
+Retired teacher, widower. Lives alone in assisted living facility. Former smoker (quit 1995, 40 pack-years). Occasional alcohol (1 glass wine with dinner). No recreational drug use.
+
+Family History:
+Father: Myocardial infarction age 68, deceased
+Mother: Stroke age 75, deceased
+Brother: Coronary artery bypass surgery age 70
+Sister: Hypertension
+
+Vital Signs:
+BP: 138/78 mmHg (both arms)
+HR: 68 bpm, regular
+RR: 14/min
+Temp: 98.1°F
+Weight: 175 lbs
+Height: 5'9"
+BMI: 25.8 kg/m²
+
+Physical Examination:
+
+General: Elderly male, no acute distress, well-nourished
+
+HEENT: Normocephalic, atraumatic. PERRL. EOMI. Fundi normal. Dentition good.
+
+Neck: Supple. No JVD. Carotid pulses 2+ bilaterally, no bruits.
+
+Heart: Regular rate and rhythm. Normal S1/S2. No murmurs, gallops, or rubs.
+
+Lungs: Clear to auscultation bilaterally. No wheezes, rales, or rhonchi.
+
+Abdomen: Soft, non-tender, non-distended. Normoactive bowel sounds.
+
+Extremities: No clubbing, cyanosis, or edema. Peripheral pulses 2+ bilaterally.
+
+Neurologic: Alert and oriented x3. Cranial nerves II-XII intact. No focal deficits.
+
+Laboratory Results (drawn today):
+- Troponin I: <0.01 ng/mL (normal)
+- CK-MB: 3 IU/L (normal)
+- Total CK: 85 IU/L (normal)
+- BNP: 125 pg/mL (normal)
+- Lipid Panel: Total Cholesterol 165 mg/dL, LDL 95 mg/dL, HDL 45 mg/dL, Triglycerides 140 mg/dL
+- Hemoglobin A1c: 7.1%
+- Creatinine: 1.2 mg/dL, eGFR 58 mL/min/1.73m²
+
+ECG: Normal sinus rhythm, rate 68. No ST changes. Normal intervals.
+
+Assessment:
+1. Atypical angina pectoris - likely coronary artery disease
+2. Hypertension - well controlled
+3. Hyperlipidemia - well controlled
+4. Type 2 diabetes mellitus - fair control
+5. Chronic kidney disease stage 3
+
+Recommendations:
+1. Diagnostic cardiac stress testing (nuclear stress test) to evaluate for inducible ischemia
+2. Continue current medical regimen
+3. Lifestyle modifications: Cardiac rehabilitation referral, weight management, smoking cessation (already quit)
+4. Aspirin therapy - continue
+5. Consider beta-blocker therapy for rate control and symptom management
+6. Close follow-up in 1 week after stress testing
+
+Plan:
+- Nuclear stress test scheduled for 08/27/2024 at 10:00 AM
+- Follow-up appointment in 1 week (08/27/2024) to review stress test results
+- Return to referring physician for ongoing primary care management
+- Patient to call if symptoms worsen or new symptoms develop
+
+Patient and family educated about symptoms of unstable angina and when to seek immediate medical attention.
+
+Dr. Robert Chen, MD
+Cardiology Attending Physician
+
+CC: Dr. Sarah Johnson, MD (Referring Physician)
+Patient copy provided

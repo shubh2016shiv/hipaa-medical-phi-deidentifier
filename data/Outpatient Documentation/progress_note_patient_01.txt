@@ -1,0 +1,99 @@
+Mercy River Medical Center
+Outpatient Progress Note
+
+Date: 05/15/2024
+Time: 14:30 PM
+Provider: Dr. Elizabeth Davis, MD
+Location: Family Medicine Clinic, Suite 101
+
+Patient: William James Anderson
+DOB: 11/30/1952 (Age: 71 years)
+MRN: MR-2024-032156
+SSN: 987-65-4321
+
+Chief Complaint:
+Follow-up for type 2 diabetes mellitus, hypertension, and hyperlipidemia management. Patient reports good medication adherence but concerns about recent blood pressure readings at home.
+
+History of Present Illness:
+Mr. Anderson is a 71-year-old male with well-controlled type 2 diabetes (diagnosed 2018), hypertension (diagnosed 2015), and hyperlipidemia (diagnosed 2016). He reports taking all medications as prescribed. Home blood pressure readings have been elevated over the past 2 weeks, averaging 155/85 mmHg. He denies chest pain, shortness of breath, dizziness, or vision changes. No recent infections or illnesses.
+
+Past Medical History:
+- Type 2 diabetes mellitus (2018)
+- Hypertension (2015)
+- Hyperlipidemia (2016)
+- Osteoarthritis bilateral knees (2020)
+- Cataract surgery left eye (2022)
+- Coronary artery disease s/p stent LAD (2019)
+
+Current Medications:
+1. Metformin 1000 mg twice daily
+2. Lisinopril 20 mg daily
+3. Atorvastatin 40 mg daily
+4. Aspirin 81 mg daily
+5. Vitamin D3 2000 IU daily
+6. Ibuprofen 600 mg as needed for knee pain
+
+Allergies: No known drug allergies
+
+Social History:
+Retired accountant, married, 2 adult children. Former smoker (quit 2018, 30 pack-years). Occasional alcohol (1-2 drinks/week). No recreational drug use.
+
+Family History:
+Father: Myocardial infarction age 65, deceased
+Mother: Breast cancer age 72, deceased
+Brother: Type 2 diabetes
+Sister: Hypertension
+
+Vital Signs:
+BP: 148/82 mmHg (right arm, seated)
+HR: 72 bpm
+RR: 16/min
+Temp: 98.1°F
+Weight: 185 lbs
+Height: 5'10"
+BMI: 26.5 kg/m²
+
+Physical Examination:
+
+General: Well-appearing elderly male in no acute distress
+
+HEENT: Normocephalic, atraumatic. PERRL. EOMI. Fundi normal. Oropharynx clear.
+
+Neck: No JVD. Carotid pulses 2+ bilaterally, no bruits.
+
+Heart: Regular rate and rhythm. No murmurs, gallops, or rubs.
+
+Lungs: Clear to auscultation bilaterally.
+
+Abdomen: Soft, non-tender, non-distended. Normoactive bowel sounds.
+
+Extremities: No edema. Peripheral pulses 2+ bilaterally.
+
+Neurologic: Alert and oriented x3. Cranial nerves II-XII intact. Strength 5/5 all extremities.
+
+Assessment:
+1. Type 2 diabetes mellitus - well controlled (recent A1c 6.8%)
+2. Hypertension - poorly controlled (elevated home readings)
+3. Hyperlipidemia - well controlled
+4. Osteoarthritis - stable
+
+Plan:
+1. Diabetes: Continue current regimen. Recheck A1c in 3 months.
+2. Hypertension: Increase lisinopril to 40 mg daily. Recheck BP in 2 weeks. Continue home monitoring.
+3. Hyperlipidemia: Continue atorvastatin. Recheck lipid panel in 6 months.
+4. Lifestyle: Encourage regular exercise (30 minutes walking daily), DASH diet, weight management.
+5. Follow-up: Return in 2 weeks for BP check, then 3 months for routine follow-up.
+6. Laboratory: BMP, lipid panel, A1c to be drawn today.
+
+Patient Education:
+- Medication adherence and blood pressure monitoring
+- DASH diet principles
+- Importance of regular exercise
+- Warning signs of uncontrolled diabetes and hypertension
+
+Patient verbalized understanding and agreement with plan.
+
+Dr. Elizabeth Davis, MD
+Electronic Signature: /es/Elizabeth Davis, MD
+
+Next Appointment: 05/29/2024 at 10:00 AM

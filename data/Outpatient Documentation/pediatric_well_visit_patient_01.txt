@@ -1,0 +1,151 @@
+PEDIATRIC WELL CHILD VISIT
+Mercy Children's Clinic
+
+Patient: Ethan James Miller
+DOB: 03/15/2020 (Age: 4 years 11 months)
+MRN: MR-2024-112233
+FIN: FIN-445566778
+
+Visit Date: 02/20/2025
+Time: 10:00 AM
+Provider: Dr. Emily Johnson, MD (Pediatrician)
+Nurse: Lisa Martinez, RN
+Medical Assistant: Sarah Chen, MA
+Location: Pediatric Clinic, Room 205
+
+CHIEF COMPLAINT:
+5-year well child check
+
+INTERVAL HISTORY:
+Mother reports child is doing well. No concerns with development, behavior, or health. Ethan attends preschool 3 days/week and enjoys it. He has made several friends and participates in all activities. No recent illnesses, injuries, or emergency room visits.
+
+DEVELOPMENTAL HISTORY:
+- Motor: Running, jumping, climbing playground equipment. Can ride tricycle.
+- Language: Speaks in complete sentences, follows 3-step commands, tells stories.
+- Social: Plays cooperatively with other children, shares toys, takes turns.
+- Cognitive: Counts to 20, recognizes colors and shapes, knows alphabet.
+
+PAST MEDICAL HISTORY:
+- Full term vaginal delivery, birth weight 7 lbs 8 oz
+- No neonatal complications
+- Immunizations up to date
+- No hospitalizations or surgeries
+- No chronic medical conditions
+- No allergies
+
+FAMILY HISTORY:
+- Father: Hypertension
+- Mother: Asthma (mild, well controlled)
+- Paternal grandfather: Coronary artery disease
+- No family history of genetic disorders or developmental delays
+
+SOCIAL HISTORY:
+Lives with both parents in single-family home. Parents married. Mother stays home with child, father works as accountant. Good family support system. Screen time limited to 1 hour/day. Regular bedtime routine.
+
+CURRENT MEDICATIONS:
+- Children's multivitamin daily
+- Fluoride supplement daily
+- No other medications
+
+REVIEW OF SYSTEMS:
+
+General: Healthy-appearing child, playful and interactive
+Growth: Steady growth velocity
+Nutrition: Good appetite, eats variety of foods, no feeding issues
+Sleep: Sleeps 11-12 hours/night, no sleep problems
+Elimination: Regular bowel movements, fully toilet trained day and night
+Development: Age-appropriate milestones met
+
+PHYSICAL EXAMINATION:
+
+Vital Signs:
+Temperature: 98.1°F (tympanic)
+Heart Rate: 92 bpm
+Respiratory Rate: 20/min
+Blood Pressure: 88/55 mmHg
+Weight: 42 lbs (50th percentile)
+Height: 42 inches (45th percentile)
+BMI: 15.8 kg/m² (50th percentile)
+Head Circumference: 20.5 inches (50th percentile)
+
+General: Well-nourished, well-developed male child in no distress
+
+HEENT:
+- Head: Normocephalic, atraumatic
+- Eyes: PERRL, EOMI, red reflex present bilaterally, vision grossly intact
+- Ears: TM normal bilaterally, hearing grossly intact
+- Nose: Clear, no discharge
+- Throat: Oral mucosa moist, no lesions, tonsils normal size
+
+Neck: Supple, no lymphadenopathy
+
+Heart: Regular rate and rhythm, no murmurs
+
+Lungs: Clear to auscultation, no wheezes or crackles
+
+Abdomen: Soft, non-tender, no masses, normoactive bowel sounds
+
+Genitalia: Normal male genitalia, testes descended bilaterally
+
+Extremities: Full range of motion, no deformities
+
+Neurologic: Alert, oriented, cranial nerves II-XII intact, strength 5/5, reflexes 2+
+
+Skin: Clear, no rashes or lesions
+
+Developmental Screening:
+- Denver Developmental Screening Test: All milestones met for age
+- Parent concerns addressed
+- Social-emotional development appropriate
+
+ASSESSMENT:
+1. Well child at 5 years of age
+2. Normal growth and development
+3. Up-to-date immunizations
+4. No acute issues
+
+PLAN:
+1. Anticipatory Guidance:
+   - Injury prevention (bicycle helmets, seat belts, pedestrian safety)
+   - Healthy eating habits and physical activity
+   - Oral health (brushing twice daily, flossing)
+   - Screen time limits (1 hour/day)
+   - Stranger danger and personal safety
+
+2. Immunizations:
+   - MMR, Varicella, DTaP, IPV, Hib given today
+   - Next visit: Kindergarten vaccines (if applicable)
+
+3. Laboratory Screening:
+   - Lead screening (normal)
+   - Hemoglobin/hematocrit (normal)
+   - Urinalysis (normal)
+
+4. Referrals:
+   - Dental referral for 6-month cleaning
+   - Vision screening at school
+
+5. Follow-up:
+   - Return in 1 year for 6-year well child visit
+   - Call for any concerns or illnesses
+
+PARENT EDUCATION:
+- Normal 5-year-old development and behavior
+- Healthy snack choices
+- Importance of daily physical activity
+- Car seat safety until age 8
+- Sunscreen use for outdoor play
+- Poison prevention
+
+Mother verbalized understanding of all recommendations and asked appropriate questions about developmental milestones.
+
+Dr. Emily Johnson, MD
+Pediatrician
+
+Electronic Signature: /es/Emily Johnson, MD
+
+Nurse Documentation:
+- Vaccines administered in right deltoid, no adverse reactions
+- Growth plotted on CDC charts
+- Parent education completed
+- Next appointment scheduled for 02/20/2026

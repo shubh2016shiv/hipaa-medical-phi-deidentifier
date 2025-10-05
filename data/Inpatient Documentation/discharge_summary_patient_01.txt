@@ -1,0 +1,90 @@
+Mercy Medical Center
+Discharge Summary
+Admit Date: 03/15/2024 08:30 AM
+Discharge Date: 03/22/2024 02:15 PM
+
+Patient: Robert Michael Thompson (R.M. Thompson)
+DOB: 02/18/1965 (Age: 59 years)
+MRN: MR-2024-045678
+FIN Number: FIN-789456123
+SSN: 123-45-6789
+
+Address: 1234 Elm Street, Apartment 5B, Springfield, IL 62704
+Phone: (217) 555-0123 (Home), (217) 555-0124 (Mobile)
+Email: robert.thompson@email.com
+
+Primary Care Physician: Dr. Sarah Johnson, MD
+NPI: 1234567890
+Attending Physician: Dr. Michael Chen, MD
+
+Admitting Diagnosis: Acute myocardial infarction (AMI) with ST-elevation
+
+Hospital Course Summary:
+Mr. Thompson presented to the emergency department on 03/15/2024 at 06:45 AM with acute onset of severe chest pain radiating to the left arm and jaw, associated with shortness of breath, diaphoresis, and nausea. Initial ECG showed ST-elevation in leads II, III, and aVF consistent with inferior wall myocardial infarction.
+
+Laboratory Results:
+Admission Troponin I: 12.5 ng/mL (elevated)
+CK-MB: 45 IU/L (elevated)
+Total CK: 1200 IU/L
+Lipid Panel: Total Cholesterol 245 mg/dL, LDL 165 mg/dL, HDL 35 mg/dL, Triglycerides 180 mg/dL
+Hemoglobin A1c: 7.2%
+Creatinine: 1.1 mg/dL, eGFR 65 mL/min/1.73m²
+
+Interventions:
+- Immediate cardiac catheterization in Cath Lab #2 at 08:30 AM
+- Right coronary artery occlusion identified and treated with drug-eluting stent placement
+- TIMI 3 flow restored
+- Echocardiogram showed inferior wall hypokinesis with EF 45%
+
+Medications on Discharge:
+1. Aspirin 325 mg daily
+2. Clopidogrel 75 mg daily for 12 months
+3. Atorvastatin 80 mg daily
+4. Lisinopril 10 mg daily
+5. Metoprolol XL 50 mg daily
+6. Pantoprazole 40 mg daily
+
+Discharge Instructions:
+- Cardiac rehabilitation program to begin in 2 weeks
+- Follow-up appointment with Cardiology in 2 weeks
+- No driving for 4 weeks
+- Weight management and smoking cessation counseling
+- Dietary consultation for heart-healthy eating
+- Daily aspirin therapy - continue indefinitely
+- Call 911 for chest pain, shortness of breath, or palpitations
+
+Follow-up Appointments:
+- Cardiology: 04/05/2024 at 10:00 AM, Mercy Medical Center, Suite 300
+- Primary Care: 04/12/2024 at 09:00 AM, Springfield Family Practice
+
+Insurance Information:
+Primary Insurance: Blue Cross Blue Shield of Illinois
+Member ID: BCBS-IL-123456789
+Group Number: GRP-987654
+Secondary Insurance: Medicare
+Medicare Number: 1EG4-TE5-MK72
+
+Emergency Contacts:
+Wife: Jennifer Thompson, (217) 555-0125
+Son: David Thompson, (217) 555-0126
+
+Discharge Vital Signs:
+BP: 118/72 mmHg
+HR: 68 bpm
+RR: 16/min
+Temp: 98.2°F
+O2 Sat: 98% on room air
+
+Patient Education Provided:
+- Heart attack warning signs and symptoms
+- Medication adherence and side effects
+- Lifestyle modifications for cardiovascular health
+- Daily weight monitoring
+- Low sodium diet education
+- Smoking cessation resources provided
+
+Discharge Condition: Stable, ambulating independently
+Patient expressed understanding of discharge instructions and follow-up plan.
+
+Discharged By: Dr. Michael Chen, MD
+Discharge Nurse: Emily Rodriguez, RN

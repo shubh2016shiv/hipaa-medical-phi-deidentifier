@@ -1,0 +1,70 @@
+PATHOLOGY REPORT
+Mercy Laboratory Services
+
+Patient Name: Linda Marie Garcia
+DOB: 03/28/1955 (Age: 69 years)
+MRN: MR-2024-445566
+FIN: FIN-778899112
+
+Specimen Type: Colon Biopsy
+Accession Number: ACC-2024-998877
+Collection Date: 11/12/2024
+Collection Time: 09:15 AM
+Received Date: 11/12/2024
+Received Time: 10:30 AM
+
+Ordering Physician: Dr. Robert Martinez, MD
+Location: Gastroenterology Clinic
+
+Clinical History:
+69-year-old female with iron deficiency anemia and positive fecal occult blood test. Colonoscopy performed to evaluate for colorectal neoplasia.
+
+Gross Description:
+Received in formalin are multiple fragments of tan-pink colonic mucosa measuring 2.5 x 1.5 x 0.3 cm in aggregate. The specimen is submitted entirely for microscopic examination in 4 cassettes.
+
+Microscopic Description:
+Sections show colonic mucosa with preserved crypt architecture. The lamina propria shows mild chronic inflammation with scattered lymphocytes and plasma cells. No dysplasia or malignancy is identified. The surface epithelium is intact with no ulceration or erosion. Goblet cells are present and appear normal. No granulomas or parasitic organisms are seen.
+
+Immunohistochemical stains performed:
+- Ki-67: Shows normal proliferative activity confined to the lower third of crypts
+- CDX2: Positive in surface and crypt epithelium
+- CK20: Positive in surface epithelium
+- MUC2: Positive in goblet cells
+
+Special stains:
+- PAS with diastase: Negative for fungal organisms
+- Acid fast bacillus stain: Negative
+
+Diagnosis:
+COLON, BIOPSY:
+- Colonic mucosa with mild chronic inflammation
+- No dysplasia or malignancy identified
+- Negative for Helicobacter pylori
+- Negative for dysplasia
+- Negative for malignancy
+
+Clinical Correlation:
+The findings are consistent with mild chronic colitis, possibly related to diverticular disease or irritable bowel syndrome. No evidence of inflammatory bowel disease or colorectal neoplasia. Recommend clinical correlation and follow-up as indicated by the gastroenterologist.
+
+Pathologist: Dr. Emily Rodriguez, MD
+Assistant Pathologist: Dr. James Chen, MD
+Date of Sign-out: 11/14/2024
+Time of Sign-out: 14:20 PM
+
+Electronically Signed:
+/es/Emily Rodriguez, MD
+
+Critical Value: No
+Addendum: None
+
+Distribution:
+- Ordering Physician: Dr. Robert Martinez, MD
+- Patient: Mailed to home address
+- Primary Care: Dr. Sarah Johnson, MD
+- Electronic Health Record: Uploaded to patient chart
+
+Laboratory Contact Information:
+Mercy Laboratory Services
+Phone: (217) 555-3000
+Fax: (217) 555-3001
+Email: lab@mercymedical.org

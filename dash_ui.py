@@ -44,6 +44,32 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
+# Add custom CSS for progress bar
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <style>
+            .progress-bar-custom {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+        </style>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
+
 # Synchronization is now handled by assets/sync_scroll.js
 
 # Professional healthcare color scheme
@@ -113,7 +139,7 @@ def highlight_hipaa_identifiers(text):
             return highlighted_text
             
     except Exception as e:
-        print(f"❌ Error in highlighting with backend: {e}")
+        print(f"Error in highlighting with backend: {e}")
         # Fallback to regex-based highlighting
         pass
     
@@ -180,9 +206,9 @@ def initialize_deidentifier():
                 hf_model=hf_model,
                 device=device
             )
-            print("✅ HIPAA De-identifier initialized successfully")
+            print("HIPAA De-identifier initialized successfully")
         except Exception as e:
-            print(f"❌ Error initializing de-identifier: {e}")
+            print(f"Error initializing de-identifier: {e}")
             deidentifier = None
     return deidentifier
 
@@ -205,7 +231,7 @@ def deidentify_text(text):
         return result["text"]
         
     except Exception as e:
-        print(f"❌ Error in de-identification: {e}")
+        print(f"Error in de-identification: {e}")
         # Fallback to simple regex-based de-identification
         return fallback_deidentify_text(text)
 
@@ -248,25 +274,18 @@ app.layout = html.Div([
     # Header with professional healthcare branding
     html.Div([
         html.Div([
-            html.H1("🏥 DEID Patients", 
+            html.H1("DEID Patients", 
                    style={'color': HEALTHCARE_COLORS['primary'], 'margin': '0', 'fontSize': '2.5rem'}),
-            html.P("HIPAA-Compliant Clinical Data De-identification System", 
+            html.P("Clinical Data De-identification System", 
                    style={'color': HEALTHCARE_COLORS['secondary'], 'margin': '5px 0 0 0', 'fontSize': '1.2rem'})
-        ], style={'textAlign': 'center', 'padding': '20px 0'}),
-        
-        # HIPAA compliance indicator
-        html.Div([
-            html.Span("🔒 HIPAA Compliant", 
-                     style={'backgroundColor': HEALTHCARE_COLORS['success'], 'color': 'white', 
-                            'padding': '8px 16px', 'borderRadius': '20px', 'fontWeight': 'bold'})
-        ], style={'textAlign': 'center', 'marginBottom': '20px'})
+        ], style={'textAlign': 'center', 'padding': '20px 0'})
     ], style={'backgroundColor': HEALTHCARE_COLORS['light'], 'borderRadius': '10px', 'marginBottom': '30px'}),
     
     # Main content area
     html.Div([
         # Input section
         html.Div([
-            html.H3("📝 Raw Clinical Data Input", 
+            html.H3("Raw Clinical Data Input", 
                    style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
             html.P("Enter or paste clinical data containing PHI (Protected Health Information) for de-identification:", 
                    style={'color': HEALTHCARE_COLORS['dark'], 'marginBottom': '15px'}),
@@ -287,27 +306,27 @@ app.layout = html.Div([
             ),
             
             html.Div([
-                html.Button('🚀 Process De-identification', 
+                html.Button('De-Identify', 
                            id='process-btn',
                            style={
-                               'backgroundColor': HEALTHCARE_COLORS['secondary'],
+                               'backgroundColor': HEALTHCARE_COLORS['success'],
                                'color': 'white',
                                'border': 'none',
                                'padding': '12px 24px',
-                               'borderRadius': '6px',
+                               'borderRadius': '20px',
                                'cursor': 'pointer',
                                'fontSize': '16px',
                                'fontWeight': 'bold',
                                'marginTop': '15px'
                            }),
-                html.Button('🔄 Clear All', 
+                html.Button('Clear All', 
                            id='clear-btn',
                            style={
                                'backgroundColor': HEALTHCARE_COLORS['warning'],
                                'color': 'white',
                                'border': 'none',
                                'padding': '12px 24px',
-                               'borderRadius': '6px',
+                               'borderRadius': '20px',
                                'cursor': 'pointer',
                                'fontSize': '16px',
                                'fontWeight': 'bold',
@@ -323,11 +342,41 @@ app.layout = html.Div([
             html.Div(id='processing-status', style={'textAlign': 'center', 'marginBottom': '20px'})
         ]),
         
+        # Progress bar
+        html.Div([
+            html.Div([
+                html.Div(
+                    id='progress-bar-fill',
+                    style={
+                        'width': '0%',
+                        'height': '100%',
+                        'backgroundColor': HEALTHCARE_COLORS['success'],
+                        'borderRadius': '10px',
+                        'transition': 'width 0.3s ease'
+                    }
+                )
+            ], style={
+                'width': '100%',
+                'height': '20px',
+                'backgroundColor': HEALTHCARE_COLORS['light'],
+                'borderRadius': '10px',
+                'overflow': 'hidden',
+                'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
+            }, id='progress-bar'),
+            html.Div(id='progress-text', style={'textAlign': 'center', 'marginTop': '10px', 'color': HEALTHCARE_COLORS['dark']})
+        ], style={'marginBottom': '30px', 'display': 'none'}, id='progress-container'),
+        
+        # Hidden dcc.Store components for multi-stage processing
+        dcc.Store(id='raw-text-store', data=None),
+        dcc.Store(id='highlighted-text-store', data=None),
+        dcc.Store(id='deidentified-text-store', data=None),
+        dcc.Store(id='processing-stage-store', data='idle'),  # 'idle', 'start', 'highlighting_done', 'deidentifying_done', 'complete'
+        
         # Side-by-side comparison
         html.Div([
             # Left panel - Original with HIPAA highlighting
             html.Div([
-                html.H4("🔍 Original Data (HIPAA Identifiers Highlighted)", 
+                html.H4("Original Data (HIPAA Identifiers Highlighted)", 
                        style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
                 html.Div([
                     html.Iframe(
@@ -346,7 +395,7 @@ app.layout = html.Div([
             
             # Right panel - De-identified output
             html.Div([
-                html.H4("✅ De-identified Data (HIPAA Compliant)", 
+                html.H4("De-identified Data (HIPAA Compliant)", 
                        style={'color': HEALTHCARE_COLORS['success'], 'marginBottom': '15px'}),
                 html.Div([
                     html.Iframe(
@@ -366,7 +415,7 @@ app.layout = html.Div([
         
         # HIPAA identifier legend
         html.Div([
-            html.H4("📋 HIPAA Identifier Types", 
+            html.H4("HIPAA Identifier Types", 
                    style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
             html.Div([
                 html.Div([
@@ -385,7 +434,7 @@ app.layout = html.Div([
         # Export and statistics
         html.Div([
             html.Div([
-                html.Button('📥 Export Results', 
+                html.Button('Export Results', 
                            id='export-btn',
                            style={
                                'backgroundColor': HEALTHCARE_COLORS['success'],
@@ -396,7 +445,7 @@ app.layout = html.Div([
                                'cursor': 'pointer',
                                'marginRight': '10px'
                            }),
-                html.Button('📊 View Statistics', 
+                html.Button('View Statistics', 
                            id='stats-btn',
                            style={
                                'backgroundColor': HEALTHCARE_COLORS['info'],
@@ -417,17 +466,21 @@ app.layout = html.Div([
     # Footer
     html.Hr(style={'border': f'2px solid {HEALTHCARE_COLORS["light"]}'}),
     html.Div([
-        html.P("© 2024 DEID Patients System - Enterprise HIPAA-Compliant Clinical Data De-identification Platform", 
+        html.P("© 2024 DEID Patients System - Enterprise Clinical Data De-identification Platform", 
                style={'textAlign': 'center', 'color': HEALTHCARE_COLORS['dark'], 'fontSize': '12px', 'margin': '10px 0'})
     ])
 ], style={'backgroundColor': '#ffffff', 'minHeight': '100vh'})
 
-# Combined callback for processing and clearing
-@callback(
+# Main callback for initiating processing and clearing
+@app.callback(
     [Output('raw-text-input', 'value'),
-     Output('highlighted-text-frame', 'srcDoc'),
-     Output('deidentified-text-frame', 'srcDoc'),
-     Output('processing-status', 'children')],
+     Output('highlighted-text-frame', 'srcDoc', allow_duplicate=True),
+     Output('deidentified-text-frame', 'srcDoc', allow_duplicate=True),
+     Output('progress-container', 'style'),
+     Output('progress-bar-fill', 'style', allow_duplicate=True),
+     Output('progress-text', 'children', allow_duplicate=True),
+     Output('raw-text-store', 'data'),
+     Output('processing-stage-store', 'data', allow_duplicate=True)],
     [Input('process-btn', 'n_clicks'),
      Input('clear-btn', 'n_clicks')],
     [State('raw-text-input', 'value')],
@@ -438,7 +491,7 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
     ctx = dash.callback_context
     
     if not ctx.triggered:
-        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
     
     # Get the button that was clicked
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -452,19 +505,44 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         </body>
         </html>
         """
-        return "", empty_html, empty_html, ""
+        return "", empty_html, empty_html, {'display': 'none'}, {'width': '0%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}, "", None, 'idle'
     
     elif button_id == 'process-btn' and process_clicks and raw_text:
-        # Process de-identification
-        # Show processing status
+        # Show processing status and progress bar immediately
         status = html.Div([
-            html.Span("⚙️ Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
+            html.Span("Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
         ])
         
-        # Highlight HIPAA identifiers
+        # Show progress bar with initial state
+        progress_style = {'marginBottom': '30px', 'display': 'block'}
+        progress_fill_style = {'width': '20%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_text = "Initializing de-identification process..."
+        
+        # Store raw text and trigger next stage
+        return dash.no_update, dash.no_update, dash.no_update, progress_style, progress_fill_style, progress_text, raw_text, 'start'
+    
+    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+# Callback for highlighting stage
+@app.callback(
+    [Output('highlighted-text-store', 'data'),
+     Output('processing-stage-store', 'data', allow_duplicate=True),
+     Output('progress-bar-fill', 'style', allow_duplicate=True),
+     Output('progress-text', 'children', allow_duplicate=True)],
+    [Input('raw-text-store', 'data')],
+    [State('processing-stage-store', 'data')],
+    prevent_initial_call=True
+)
+def process_highlighting(raw_text, current_stage):
+    if raw_text and current_stage == 'start':
+        # Update progress to 60%
+        progress_fill_style = {'width': '60%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_text = "Detecting HIPAA identifiers..."
+        
+        # Perform highlighting
         highlighted_html = highlight_hipaa_identifiers(raw_text)
         
-        # Create a complete HTML document for the highlighted text iframe
+        # Create complete HTML document
         highlighted_complete_html = f"""
         <html>
         <head>
@@ -484,13 +562,34 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         </html>
         """
         
-        # De-identify text
+        return highlighted_complete_html, 'highlighting_done', progress_fill_style, progress_text
+    
+    return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+# Callback for de-identification stage
+@app.callback(
+    [Output('deidentified-text-store', 'data'),
+     Output('processing-stage-store', 'data', allow_duplicate=True),
+     Output('progress-bar-fill', 'style', allow_duplicate=True),
+     Output('progress-text', 'children', allow_duplicate=True)],
+    [Input('highlighted-text-store', 'data')],
+    [State('processing-stage-store', 'data'),
+     State('raw-text-store', 'data')],
+    prevent_initial_call=True
+)
+def process_deidentification(highlighted_data, current_stage, raw_text):
+    if highlighted_data and current_stage == 'highlighting_done' and raw_text:
+        # Update progress to 80%
+        progress_fill_style = {'width': '80%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_text = "Applying de-identification rules..."
+        
+        # Perform de-identification
         deidentified_text = deidentify_text(raw_text)
         
-        # Format de-identified text to match original structure
+        # Format de-identified text
         formatted_deidentified = format_deidentified_text(raw_text, deidentified_text)
         
-        # Create a complete HTML document for the de-identified text iframe
+        # Create complete HTML document
         deidentified_complete_html = f"""
         <html>
         <head>
@@ -514,14 +613,52 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         </html>
         """
         
-        # Update status to completed
-        status = html.Div([
-            html.Span("✅ Processing Complete", style={'color': HEALTHCARE_COLORS['success'], 'fontWeight': 'bold'})
-        ])
+        # Update progress to 100%
+        progress_fill_style = {'width': '100%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_text = "Processing complete!"
         
-        return dash.no_update, highlighted_complete_html, deidentified_complete_html, status
+        return deidentified_complete_html, 'complete', progress_fill_style, progress_text
     
     return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+# Callback to update highlighted text display
+@app.callback(
+    Output('highlighted-text-frame', 'srcDoc', allow_duplicate=True),
+    [Input('highlighted-text-store', 'data')],
+    prevent_initial_call=True
+)
+def update_highlighted_display(highlighted_data):
+    if highlighted_data:
+        return highlighted_data
+    return dash.no_update
+
+# Callback to update de-identified text display
+@app.callback(
+    Output('deidentified-text-frame', 'srcDoc', allow_duplicate=True),
+    [Input('deidentified-text-store', 'data')],
+    prevent_initial_call=True
+)
+def update_deidentified_display(deidentified_data):
+    if deidentified_data:
+        return deidentified_data
+    return dash.no_update
+
+# Callback to update processing status
+@app.callback(
+    Output('processing-status', 'children'),
+    [Input('processing-stage-store', 'data')],
+    prevent_initial_call=True
+)
+def update_processing_status(stage):
+    if stage == 'complete':
+        return html.Div([
+            html.Span("Processing Complete", style={'color': HEALTHCARE_COLORS['success'], 'fontWeight': 'bold'})
+        ])
+    elif stage in ['start', 'highlighting_done', 'deidentifying_done']:
+        return html.Div([
+            html.Span("Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
+        ])
+    return dash.no_update
 
 def format_deidentified_text(original_text, deidentified_text):
     """
@@ -541,7 +678,7 @@ def format_deidentified_text(original_text, deidentified_text):
     return formatted_text
 
 # Callback for statistics
-@callback(
+@app.callback(
     Output('statistics-display', 'children'),
     [Input('stats-btn', 'n_clicks')],
     [State('raw-text-input', 'value')],
@@ -574,7 +711,7 @@ def show_statistics(n_clicks, raw_text):
         })
     
     return html.Div([
-        html.H5("📊 HIPAA Identifier Statistics", 
+        html.H5("HIPAA Identifier Statistics", 
                style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
         dash_table.DataTable(
             data=stats_data,
@@ -592,7 +729,7 @@ def show_statistics(n_clicks, raw_text):
     ])
 
 # Callback for export
-@callback(
+@app.callback(
     Output('export-btn', 'children'),
     [Input('export-btn', 'n_clicks')],
     [State('raw-text-input', 'value'),
@@ -624,13 +761,13 @@ HIPAA Compliance: ✅ Verified
 """
         
         # In a real implementation, you would create a download link here
-        return "📥 Export Complete"
+        return "Export Complete"
     
-    return "📥 Export Results"
+    return "Export Results"
 
 if __name__ == '__main__':
-    print("🏥 Starting DEID Patients Dash UI...")
-    print("🔗 Access the application at: http://localhost:8050")
-    print("👥 Target Audience: Clinicians and AI professionals")
-    print("🔒 Focus: HIPAA-compliant clinical data de-identification")
+    print("Starting DEID Patients Dash UI...")
+    print("Access the application at: http://localhost:8050")
+    print("Target Audience: Clinicians and AI professionals")
+    print("Focus: Clinical data de-identification")
     app.run_server(debug=True, host='0.0.0.0', port=8050)

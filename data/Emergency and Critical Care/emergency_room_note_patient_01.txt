@@ -1,0 +1,112 @@
+Emergency Department Visit Note
+St. Mary's Hospital Emergency Department
+
+Date/Time of Visit: 07/08/2024 21:45 PM
+Triage Time: 21:30 PM
+Room: ED-12
+Provider: Dr. Michael Rodriguez, MD
+Nurse: Jennifer Williams, RN
+
+Patient: David Christopher Lee
+DOB: 09/12/1985 (Age: 38 years)
+MRN: MR-2024-112233
+FIN: FIN-445566778
+
+Chief Complaint:
+Acute onset severe headache with photophobia and nausea
+
+History of Present Illness:
+38-year-old male presents to ED with sudden onset of severe frontal headache that began 3 hours ago while at work. Pain is described as "worst headache of my life" rated 9/10. Associated symptoms include photophobia, phonophobia, nausea, and one episode of non-bloody emesis. No recent trauma, no recent illnesses, no changes in medications. Patient reports similar but less severe headaches in the past, diagnosed as migraines.
+
+Past Medical History:
+- Migraine headaches (diagnosed 2015)
+- No significant medical history
+- No surgical history
+- No known allergies
+
+Medications:
+- Sumatriptan 100 mg as needed for migraines (taken 2 hours ago with minimal relief)
+- No other regular medications
+
+Social History:
+Works as software engineer. Married, no children. Denies tobacco, alcohol, or recreational drug use. Regular exercise routine.
+
+Family History:
+Mother: Migraine headaches
+Father: Hypertension
+No family history of aneurysms or early stroke
+
+Vital Signs:
+Triage: BP 142/88, HR 78, RR 16, Temp 98.4°F, O2 Sat 98% RA, Pain 9/10
+ED Assessment: BP 138/82, HR 72, RR 14, Temp 98.2°F
+
+Physical Examination:
+General: Alert, oriented male in moderate distress due to headache. Holding head in hands.
+
+HEENT: Normocephalic, atraumatic. Pupils equal, round, reactive to light and accommodation (PERRL). Extraocular movements intact. No papilledema. Mild photophobia present. Tympanic membranes normal.
+
+Neck: Supple, no meningismus. No carotid bruits.
+
+Neurologic: Cranial nerves II-XII intact. Motor and sensory examination normal. No focal deficits. Deep tendon reflexes 2+ symmetric.
+
+Cardiovascular: Regular rate and rhythm. No murmurs.
+
+Respiratory: Clear to auscultation bilaterally.
+
+Abdomen: Soft, non-tender.
+
+Extremities: No edema. Peripheral pulses 2+.
+
+Assessment:
+Acute migraine headache, refractory to usual therapy
+
+Differential Diagnosis:
+1. Acute migraine exacerbation
+2. Subarachnoid hemorrhage (ruled out by CT scan)
+3. Meningitis (ruled out by normal CSF studies)
+4. Cluster headache
+5. Tension headache
+
+Diagnostic Studies:
+- CT Head without contrast: Negative for acute hemorrhage, mass, or infarct
+- CBC: Normal
+- CMP: Normal
+- ESR: Normal
+- Toxicology screen: Negative
+- Lumbar puncture: Opening pressure 18 cm H2O, normal CSF studies
+
+Treatment:
+- Oxygen 2L nasal cannula for 30 minutes
+- IV fluids: Normal saline 1000 mL
+- IV prochlorperazine 10 mg
+- IV ketorolac 30 mg
+- IV metoclopramide 10 mg
+- Oral sumatriptan 100 mg (additional dose)
+
+Response to Treatment:
+Patient reported significant improvement in headache intensity to 2/10 after 45 minutes. Nausea resolved. Photophobia decreased.
+
+Disposition:
+Discharged home with prescriptions for:
+- Sumatriptan 100 mg tablets (9 tablets)
+- Prochlorperazine 10 mg tablets (20 tablets)
+- Instructions to follow up with neurology if headaches persist or worsen
+
+Discharge Instructions:
+- Rest in dark, quiet room
+- Apply cold compress to forehead
+- Avoid triggers (stress, certain foods)
+- Return to ED if headache worsens, new neurological symptoms develop, or if headache lasts >72 hours
+- Follow up with primary care physician in 1 week
+
+Patient discharged in stable condition at 23:30 PM.
+
+Dr. Michael Rodriguez, MD
+Emergency Medicine Attending
+
+ED Nurse: Jennifer Williams, RN
+
+Patient Education Provided:
+- Migraine headache management
+- Warning signs requiring immediate medical attention
+- Medication side effects and proper usage
