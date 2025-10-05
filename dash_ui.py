@@ -77,6 +77,7 @@ HEALTHCARE_COLORS = {
     'primary': '#2c3e50',      # Dark blue-gray
     'secondary': '#3498db',     # Professional blue
     'success': '#27ae60',       # Green for success
+    'success_disabled': '#7fb069',  # Lighter green for disabled success button
     'warning': '#f39c12',       # Orange for warnings
     'danger': '#e74c3c',        # Red for errors
     'light': '#ecf0f1',         # Light gray
@@ -480,7 +481,9 @@ app.layout = html.Div([
      Output('progress-bar-fill', 'style', allow_duplicate=True),
      Output('progress-text', 'children', allow_duplicate=True),
      Output('raw-text-store', 'data'),
-     Output('processing-stage-store', 'data', allow_duplicate=True)],
+     Output('processing-stage-store', 'data', allow_duplicate=True),
+     Output('process-btn', 'disabled'),
+     Output('process-btn', 'style')],
     [Input('process-btn', 'n_clicks'),
      Input('clear-btn', 'n_clicks')],
     [State('raw-text-input', 'value')],
@@ -491,13 +494,40 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
     ctx = dash.callback_context
     
     if not ctx.triggered:
-        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
     
     # Get the button that was clicked
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
     
+    # Default button style (enabled)
+    default_button_style = {
+        'backgroundColor': HEALTHCARE_COLORS['success'],
+        'color': 'white',
+        'border': 'none',
+        'padding': '12px 24px',
+        'borderRadius': '20px',
+        'cursor': 'pointer',
+        'fontSize': '16px',
+        'fontWeight': 'bold',
+        'marginTop': '15px'
+    }
+    
+    # Disabled button style (lighter green)
+    disabled_button_style = {
+        'backgroundColor': HEALTHCARE_COLORS['success_disabled'],
+        'color': 'white',
+        'border': 'none',
+        'padding': '12px 24px',
+        'borderRadius': '20px',
+        'cursor': 'not-allowed',
+        'fontSize': '16px',
+        'fontWeight': 'bold',
+        'marginTop': '15px',
+        'opacity': '0.7'
+    }
+    
     if button_id == 'clear-btn' and clear_clicks:
-        # Clear all fields
+        # Clear all fields and re-enable button
         empty_html = """
         <html>
         <body style="font-family: monospace; font-size: 14px; line-height: 1.6; padding: 15px;">
@@ -505,10 +535,11 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         </body>
         </html>
         """
-        return "", empty_html, empty_html, {'display': 'none'}, {'width': '0%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}, "", None, 'idle'
+        return "", empty_html, empty_html, {'display': 'none'}, {'width': '0%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}, "", None, 'idle', False, default_button_style
     
     elif button_id == 'process-btn' and process_clicks and raw_text:
         # Show processing status and progress bar immediately
+        # Disable the button during processing
         status = html.Div([
             html.Span("Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
         ])
@@ -518,10 +549,10 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         progress_fill_style = {'width': '20%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
         progress_text = "Initializing de-identification process..."
         
-        # Store raw text and trigger next stage
-        return dash.no_update, dash.no_update, dash.no_update, progress_style, progress_fill_style, progress_text, raw_text, 'start'
+        # Store raw text and trigger next stage, disable button
+        return dash.no_update, dash.no_update, dash.no_update, progress_style, progress_fill_style, progress_text, raw_text, 'start', True, disabled_button_style
     
-    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
 # Callback for highlighting stage
 @app.callback(
@@ -571,7 +602,9 @@ def process_highlighting(raw_text, current_stage):
     [Output('deidentified-text-store', 'data'),
      Output('processing-stage-store', 'data', allow_duplicate=True),
      Output('progress-bar-fill', 'style', allow_duplicate=True),
-     Output('progress-text', 'children', allow_duplicate=True)],
+     Output('progress-text', 'children', allow_duplicate=True),
+     Output('process-btn', 'disabled', allow_duplicate=True),
+     Output('process-btn', 'style', allow_duplicate=True)],
     [Input('highlighted-text-store', 'data')],
     [State('processing-stage-store', 'data'),
      State('raw-text-store', 'data')],
@@ -617,9 +650,22 @@ def process_deidentification(highlighted_data, current_stage, raw_text):
         progress_fill_style = {'width': '100%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
         progress_text = "Processing complete!"
         
-        return deidentified_complete_html, 'complete', progress_fill_style, progress_text
+        # Re-enable the button with default styling
+        default_button_style = {
+            'backgroundColor': HEALTHCARE_COLORS['success'],
+            'color': 'white',
+            'border': 'none',
+            'padding': '12px 24px',
+            'borderRadius': '20px',
+            'cursor': 'pointer',
+            'fontSize': '16px',
+            'fontWeight': 'bold',
+            'marginTop': '15px'
+        }
+        
+        return deidentified_complete_html, 'complete', progress_fill_style, progress_text, False, default_button_style
     
-    return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
 
 # Callback to update highlighted text display
 @app.callback(
