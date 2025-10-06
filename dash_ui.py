@@ -26,6 +26,7 @@ import base64
 import io
 import sys
 import os
+from pathlib import Path
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -270,6 +271,69 @@ def fallback_deidentify_text(text):
     
     return deidentified
 
+# Helper function to get documents from data directory
+def get_documents_structure():
+    """Get document types and names from the data directory"""
+    data_dir = Path('data')
+    documents = {}
+    
+    try:
+        if not data_dir.exists():
+            print(f"Warning: Data directory not found at {data_dir}")
+            # Try absolute path
+            current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
+            data_dir = current_dir / 'data'
+            print(f"Trying absolute path: {data_dir}")
+            if not data_dir.exists():
+                print(f"Data directory not found at {data_dir}")
+                return documents
+            
+        print(f"Reading documents from: {data_dir}")
+        for doc_type_dir in sorted(data_dir.iterdir()):
+            if doc_type_dir.is_dir():
+                doc_type = doc_type_dir.name
+                docs = []
+                
+                # List all files for debugging
+                all_files = list(doc_type_dir.glob('*.*'))
+                print(f"Found {len(all_files)} files in {doc_type}: {[f.name for f in all_files]}")
+                
+                for doc_file in sorted(doc_type_dir.glob('*.txt')):
+                    # Clean document name
+                    doc_name = doc_file.stem.replace('_', ' ').title()
+                    # Remove patient identifiers
+                    doc_name = re.sub(r'\s*Patient\s*\d+', '', doc_name, flags=re.IGNORECASE)
+                    doc_name = re.sub(r'\s*P\d+', '', doc_name, flags=re.IGNORECASE)
+                    doc_name = ' '.join(doc_name.split())
+                    
+                    docs.append({
+                        'label': doc_name,
+                        'value': str(doc_file),
+                        'original_name': doc_file.name
+                    })
+                
+                if docs:
+                    documents[doc_type] = docs
+                    print(f"Added {len(docs)} documents to category '{doc_type}'")
+        
+        print(f"Found {len(documents)} document categories with documents")
+        # Print first few documents in each category for debugging
+        for category, docs in documents.items():
+            print(f"  - {category}: {len(docs)} documents")
+            if docs:
+                print(f"    First doc: {docs[0]['label']} -> {docs[0]['value']}")
+        
+        return documents
+        
+    except Exception as e:
+        print(f"Error loading documents: {e}")
+        import traceback
+        traceback.print_exc()
+        return documents
+
+# Get documents structure
+DOCUMENTS = get_documents_structure()
+
 # Main app layout
 app.layout = html.Div([
     
@@ -304,11 +368,60 @@ app.layout = html.Div([
         'border': '1px solid #e2e8f0'
     }),
     
-    # Main content area
+    # Main content area with two-column layout
     html.Div([
-        # Input section
+        # Left panel - Document selector
         html.Div([
-            html.H3("PHI Clinical Data", 
+            html.H4("Clinical Documents", style={
+                'color': HEALTHCARE_COLORS['primary'],
+                'marginBottom': '15px',
+                'fontSize': '1.5rem',
+                'fontWeight': 'bold',
+                'textAlign': 'center'
+            }),
+            
+            # Document Type Dropdown
+            dcc.Dropdown(
+                id='doc-type-dropdown',
+                options=[{'label': doc_type, 'value': doc_type} for doc_type in sorted(DOCUMENTS.keys())],
+                placeholder="Select Document Type",
+                style={'marginBottom': '10px'},
+                clearable=True
+            ),
+            
+            # Document Name Dropdown
+            dcc.Dropdown(
+                id='doc-name-dropdown',
+                placeholder="Select Document Name",
+                style={'marginBottom': '15px'},
+                clearable=True
+            ),
+            
+            # Info text
+            html.P("Select a document to load into the input box", style={
+                'fontSize': '12px',
+                'color': HEALTHCARE_COLORS['dark'],
+                'textAlign': 'center',
+                'fontStyle': 'italic',
+                'marginTop': '10px'
+            })
+        ], style={
+            'width': '300px',
+            'padding': '15px',
+            'backgroundColor': HEALTHCARE_COLORS['light'],
+            'borderRadius': '10px',
+            'boxShadow': '0 2px 5px rgba(0,0,0,0.1)',
+            'minHeight': '350px',  # Match approximate height of input box + header
+            'display': 'flex',
+            'flexDirection': 'column',
+            'flexShrink': 0
+        }),
+        
+        # Right panel - Input and output sections
+        html.Div([
+            # Input section
+            html.Div([
+                html.H3("PHI Clinical Data", 
                    style={
                        'color': HEALTHCARE_COLORS['primary'], 
                        'marginBottom': '15px', 
@@ -496,8 +609,9 @@ app.layout = html.Div([
             # Statistics display
             html.Div(id='statistics-display', style={'textAlign': 'center'})
         ])
+        ], style={'flex': 1, 'paddingLeft': '20px'})  # Right panel takes remaining space
         
-    ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'}),
+    ], style={'display': 'flex', 'flexDirection': 'row', 'alignItems': 'flex-start', 'padding': '20px', 'width': '100%', 'minHeight': '100vh'}),
     
     # Footer
     html.Hr(style={'border': f'2px solid {HEALTHCARE_COLORS["light"]}'}),
@@ -892,9 +1006,60 @@ HIPAA Compliance: ✅ Verified
     
     return "Export Results"
 
+# Callback to populate document names based on selected document type
+@app.callback(
+    [Output('doc-name-dropdown', 'options'),
+     Output('doc-name-dropdown', 'value')],
+    Input('doc-type-dropdown', 'value')
+)
+def update_document_names(selected_type):
+    """Update document name dropdown based on selected document type"""
+    if selected_type and selected_type in DOCUMENTS:
+        # Debug print to check what's happening
+        options = [{'label': doc['label'], 'value': doc['value']} for doc in DOCUMENTS[selected_type]]
+        print(f"Generated {len(options)} document options for {selected_type}")
+        for opt in options[:3]:  # Print first few for debugging
+            print(f"  - Option: {opt['label']} -> {opt['value']}")
+        return options, None  # Reset the value when type changes
+    return [], None
+
+# Callback to load document content into textarea
+@app.callback(
+    Output('raw-text-input', 'value', allow_duplicate=True),
+    [Input('doc-name-dropdown', 'value')],
+    prevent_initial_call=True
+)
+def load_document_content(selected_file_path):
+    """Load the selected document's content into the textarea"""
+    # Get the callback context to ensure we're responding to the dropdown change
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return dash.no_update
+    
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    if 'doc-name-dropdown' not in trigger_id:
+        return dash.no_update
+    
+    if selected_file_path:
+        try:
+            print(f"Attempting to load document: {selected_file_path}")
+            # Read the file
+            file_path = Path(selected_file_path)
+            if file_path.exists():
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                print(f"Successfully loaded document: {file_path.name}")
+                return content
+            else:
+                print(f"File not found: {file_path}")
+                return dash.no_update
+        except Exception as e:
+            print(f"Error loading document: {e}")
+            import traceback
+            traceback.print_exc()
+            return dash.no_update
+    
+    return dash.no_update
+
 if __name__ == '__main__':
-    print("Starting DEID Patients Dash UI...")
-    print("Access the application at: http://localhost:8050")
-    print("Target Audience: Clinicians and AI professionals")
-    print("Focus: Clinical data de-identification")
     app.run_server(debug=True, host='0.0.0.0', port=8050)
