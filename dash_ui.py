@@ -276,25 +276,49 @@ app.layout = html.Div([
     # Header with professional healthcare branding
     html.Div([
         html.Div([
-            html.H1("DEID Patients", 
-                   style={'color': HEALTHCARE_COLORS['primary'], 'margin': '0', 'fontSize': '2.5rem'}),
-            html.P("Clinical Data De-identification System", 
-                   style={'color': HEALTHCARE_COLORS['secondary'], 'margin': '5px 0 0 0', 'fontSize': '1.2rem'})
-        ], style={'textAlign': 'center', 'padding': '20px 0'})
-    ], style={'backgroundColor': HEALTHCARE_COLORS['light'], 'borderRadius': '10px', 'marginBottom': '30px'}),
+            html.H1("Clinical Data De-identification", 
+                   style={
+                       'color': '#1a365d',  # Professional dark blue
+                       'margin': '0', 
+                       'fontSize': '2.8rem', 
+                       'fontWeight': '700',
+                       'letterSpacing': '-0.02em',
+                       'lineHeight': '1.2'
+                   }),
+            html.P("HIPAA-Compliant PHI Detection and Redaction for Clinical Data using Named Entity Recognition", 
+                   style={
+                       'color': '#2d3748',  # Professional dark gray
+                       'margin': '12px 0 0 0', 
+                       'fontSize': '1.3rem', 
+                       'fontWeight': '500',
+                       'lineHeight': '1.4',
+                       'maxWidth': '900px',
+                       'margin': '12px auto 0 auto'
+                   })
+        ], style={'textAlign': 'center', 'padding': '30px 20px'})
+    ], style={
+        'backgroundColor': '#f7fafc',  # Professional light gray background
+        'borderRadius': '12px', 
+        'marginBottom': '30px', 
+        'boxShadow': '0 4px 12px rgba(0,0,0,0.08)',
+        'border': '1px solid #e2e8f0'
+    }),
     
     # Main content area
     html.Div([
         # Input section
         html.Div([
-            html.H3("Raw Clinical Data Input", 
-                   style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
-            html.P("Enter or paste clinical data containing PHI (Protected Health Information) for de-identification:", 
-                   style={'color': HEALTHCARE_COLORS['dark'], 'marginBottom': '15px'}),
+            html.H3("PHI Clinical Data", 
+                   style={
+                       'color': HEALTHCARE_COLORS['primary'], 
+                       'marginBottom': '15px', 
+                       'fontSize': '1.8rem',
+                       'fontWeight': 'bold'
+                   }),
             
             dcc.Textarea(
                 id='raw-text-input',
-                placeholder='Enter clinical data here...\n\nExample:\nPatient: John Smith\nDOB: 01/15/1980\nSSN: 123-45-6789\nPhone: 555-123-4567\nEmail: john.smith@email.com\nMedical Record: MRN: 123456789\nAddress: 123 Main St, City, State 12345\n\nChief Complaint: Patient presents with chest pain...',
+                placeholder='Enter or Paste Clinical Data for De-Identification\n\n------------------------------------------------------\n\nPatient Name: Johnathan M. Carter\nDate of Birth: 03/12/1958\nMedical Record Number (MRN): 54782934\nEncounter ID: ENC-20250905-233\nAddress: 2456 Oakwood Drive, Springfield, IL 62704\nPhone: (217) 555-0187\nPrimary Care Provider: Dr. Linda Thompson, Mercy General Hospital\nDate of Visit: 09/05/2025\n\nChief Complaint:\nPatient presents for follow-up of type 2 diabetes mellitus and hypertension.\n\nHistory of Present Illness:\nMr. Carter is a 67-year-old male with a history of type 2 diabetes (diagnosed 2012) and hypertension (diagnosed 2010). \nHe reports adherence to metformin 1000 mg BID and lisinopril 20 mg daily. \nHe has noticed occasional dizziness in the morning and increased thirst over the past two weeks. \nNo chest pain, shortness of breath, or vision changes. \nBlood glucose logs show fasting values ranging 145–170 mg/dL, occasional post-prandial >200 mg/dL.',
                 style={
                     'width': '100%',
                     'height': '200px',
@@ -379,7 +403,12 @@ app.layout = html.Div([
             # Left panel - Original with HIPAA highlighting
             html.Div([
                 html.H4("Original Data (HIPAA Identifiers Highlighted)", 
-                       style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
+                       style={
+                           'color': '#3498db',  # Blue color
+                           'marginBottom': '15px',
+                           'fontSize': '1.8rem',
+                           'fontWeight': '500'
+                       }),
                 html.Div([
                     html.Iframe(
                         id='highlighted-text-frame',
@@ -398,7 +427,12 @@ app.layout = html.Div([
             # Right panel - De-identified output
             html.Div([
                 html.H4("De-identified Data (HIPAA Compliant)", 
-                       style={'color': HEALTHCARE_COLORS['success'], 'marginBottom': '15px'}),
+                       style={
+                           'color': HEALTHCARE_COLORS['success'], 
+                           'marginBottom': '15px',
+                           'fontSize': '1.8rem',
+                           'fontWeight': '500'
+                       }),
                 html.Div([
                     html.Iframe(
                         id='deidentified-text-frame',
