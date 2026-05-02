@@ -56,9 +56,9 @@ class SSNRecognizer(EntityRecognizer):
     """
 
     SSN_PATTERNS: List[str] = [
-        r'\b(?!000|666|9\d{2})\d{3}[- ]?(?!00)\d{2}[- ]?(?!0000)\d{4}\b',
-        r'\b(?!000|666|9\d{2})\d{3}(?!00)\d{2}(?!0000)\d{4}\b',
-        r'\b(?!000|666|9\d{2})\d{3}\.(?!00)\d{2}\.(?!0000)\d{4}\b',
+        r"\b(?!000|666|9\d{2})\d{3}[- ]?(?!00)\d{2}[- ]?(?!0000)\d{4}\b",
+        r"\b(?!000|666|9\d{2})\d{3}(?!00)\d{2}(?!0000)\d{4}\b",
+        r"\b(?!000|666|9\d{2})\d{3}\.(?!00)\d{2}\.(?!0000)\d{4}\b",
     ]
 
     def __init__(
@@ -78,13 +78,19 @@ class SSNRecognizer(EntityRecognizer):
         self.compiled_patterns = [
             re.compile(pattern, re.IGNORECASE) for pattern in self.SSN_PATTERNS
         ]
-        logger.info("SSNRecognizer initialized with %d patterns", len(self.SSN_PATTERNS))
+        logger.info(
+            "SSNRecognizer initialized with %d patterns", len(self.SSN_PATTERNS)
+        )
 
     def load(self) -> None:
         """Load the recognizer (no external resources needed)."""
 
     def analyze(
-        self, text: str, entities: List[str], nlp_artifacts: NlpArtifacts = None, **kwargs
+        self,
+        text: str,
+        entities: List[str],
+        nlp_artifacts: NlpArtifacts = None,
+        **kwargs,
     ) -> List[RecognizerResult]:
         """Analyze text for SSN patterns.
 
@@ -107,17 +113,21 @@ class SSNRecognizer(EntityRecognizer):
                 matched_text = match.group()
 
                 if self._is_identifier_suffix(text, match.start()):
-                    logger.debug("SSN-like identifier suffix rejected: %s", matched_text)
+                    logger.debug(
+                        "SSN-like identifier suffix rejected: %s", matched_text
+                    )
                     continue
 
                 if self._is_valid_ssn(matched_text):
-                    results.append(RecognizerResult(
-                        entity_type="US_SSN",
-                        start=match.start(),
-                        end=match.end(),
-                        score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
-                        analysis_explanation=f"SSN pattern {pattern_idx + 1} matched and validated",
-                    ))
+                    results.append(
+                        RecognizerResult(
+                            entity_type="US_SSN",
+                            start=match.start(),
+                            end=match.end(),
+                            score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
+                            analysis_explanation=f"SSN pattern {pattern_idx + 1} matched and validated",
+                        )
+                    )
                     logger.debug("Valid SSN at %d-%d", match.start(), match.end())
                 else:
                     logger.debug("Invalid SSN rejected: %s", matched_text)
@@ -135,12 +145,14 @@ class SSNRecognizer(EntityRecognizer):
         Returns:
             True when the candidate is attached to a known identifier prefix.
         """
-        prefix_window = text[max(0, start - 12):start]
-        return bool(re.search(
-            r"(?:FIN|ACC|ACCT|MRN|ENC|VST|ADM|PM|SN)[-#:\s]*$",
-            prefix_window,
-            re.IGNORECASE,
-        ))
+        prefix_window = text[max(0, start - 12) : start]
+        return bool(
+            re.search(
+                r"(?:FIN|ACC|ACCT|MRN|ENC|VST|ADM|PM|SN)[-#:\s]*$",
+                prefix_window,
+                re.IGNORECASE,
+            )
+        )
 
     def _is_valid_ssn(self, ssn_text: str) -> bool:
         """Validate a candidate SSN against SSA rules.
@@ -151,9 +163,9 @@ class SSNRecognizer(EntityRecognizer):
         Returns:
             True if all SSA validation rules pass.
         """
-        clean_ssn = re.sub(r'[-.\s]', '', ssn_text)
+        clean_ssn = re.sub(r"[-.\s]", "", ssn_text)
 
-        if not re.match(r'^\d{9}$', clean_ssn):
+        if not re.match(r"^\d{9}$", clean_ssn):
             return False
 
         area_number = clean_ssn[:3]

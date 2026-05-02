@@ -30,35 +30,33 @@ logger = get_logger("recognizer.fax")
 class FaxRecognizer(EntityRecognizer):
     """
     Recognizes US-format fax numbers in medical documents.
-    
+
     Key Feature: Only detects numbers explicitly labeled as fax numbers
     to avoid false positives with regular phone numbers.
-    
+
     Supported Formats:
     - Fax: (555) 123-4567
     - Fax: 555-123-4567
     - Fax: 555.123.4567
     - Facsimile: +1-555-123-4567
-    
+
     Context Requirements:
     - Must include "fax" or "facsimile" keywords in proximity
     - Prevents misclassification of regular phone numbers
     """
-    
+
     # Fax-specific pattern definitions
     FAX_PATTERNS: List[str] = [
         # Patterns with "fax" context - most common
-        r'\bfax(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*((?:\+?1\s*[-\.]?)?\(?[0-9]{3}\)?[-\.\s]?[0-9]{3}[-\.\s]?[0-9]{4})',
-        r'\bfacsimile(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*((?:\+?1\s*[-\.]?)?\(?[0-9]{3}\)?[-\.\s]?[0-9]{3}[-\.\s]?[0-9]{4})',
-        
+        r"\bfax(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*((?:\+?1\s*[-\.]?)?\(?[0-9]{3}\)?[-\.\s]?[0-9]{3}[-\.\s]?[0-9]{4})",
+        r"\bfacsimile(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*((?:\+?1\s*[-\.]?)?\(?[0-9]{3}\)?[-\.\s]?[0-9]{3}[-\.\s]?[0-9]{4})",
         # Labeled fax numbers
-        r'\b(?:fax|facsimile)(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*(.+?)(?:\s|$)',
-        
+        r"\b(?:fax|facsimile)(?:\s+(?:number|no|#|:))?\s*(?:\:|\-)?\s*(.+?)(?:\s|$)",
         # Fax in action context
-        r'(?:send|transmit|receive)(?:\s+(?:via|by))?\s+fax(?:\s+(?:to|at|:))?\s*(?:\:|\-)?\s*(.+?)(?:\s|$)',
-        r'(?:fax|facsimile)(?:\s+(?:results|records|documents))?\s+(?:to|at|:)\s*(?:\:|\-)?\s*(.+?)(?:\s|$)',
+        r"(?:send|transmit|receive)(?:\s+(?:via|by))?\s+fax(?:\s+(?:to|at|:))?\s*(?:\:|\-)?\s*(.+?)(?:\s|$)",
+        r"(?:fax|facsimile)(?:\s+(?:results|records|documents))?\s+(?:to|at|:)\s*(?:\:|\-)?\s*(.+?)(?:\s|$)",
     ]
-    
+
     def __init__(
         self,
         name: str = "FaxRecognizer",
@@ -73,32 +71,36 @@ class FaxRecognizer(EntityRecognizer):
             name=name,
             **kwargs,
         )
-        
+
         # Compile patterns for efficiency
         self.compiled_patterns = [
             re.compile(pattern, re.IGNORECASE) for pattern in self.FAX_PATTERNS
         ]
-        
+
         logger.info(f"FaxRecognizer initialized with {len(self.FAX_PATTERNS)} patterns")
-    
+
     def load(self) -> None:
         """Load the recognizer (no external resources needed)."""
         pass
-    
+
     def analyze(
-        self, text: str, entities: List[str], nlp_artifacts: NlpArtifacts = None, **kwargs
+        self,
+        text: str,
+        entities: List[str],
+        nlp_artifacts: NlpArtifacts = None,
+        **kwargs,
     ) -> List[RecognizerResult]:
         """
         Analyze text to find US-format fax numbers.
-        
+
         Args:
             text: The text to analyze for fax numbers
             entities: List of entity types to detect (must include "FAX_NUMBER")
             nlp_artifacts: NLP artifacts from spaCy (not used for pattern matching)
-            
+
         Returns:
             List of RecognizerResult objects for detected fax numbers
-            
+
         Example:
             >>> recognizer = FaxRecognizer()
             >>> results = recognizer.analyze("Fax: (555) 123-4567", ["FAX_NUMBER"], None)
@@ -106,17 +108,17 @@ class FaxRecognizer(EntityRecognizer):
             1
         """
         results = []
-        
+
         if "FAX_NUMBER" not in entities:
             logger.debug("FAX_NUMBER not in requested entities, skipping")
             return results
-        
+
         # Check each pattern
         for pattern_idx, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 # Get the full match and extract fax number
                 full_match = match.group(0)
-                
+
                 # If there's a capturing group, use it; otherwise use the full match
                 if len(match.groups()) > 0:
                     fax_number = match.group(1)
@@ -126,7 +128,7 @@ class FaxRecognizer(EntityRecognizer):
                     fax_number = full_match
                     start = match.start()
                     end = match.end()
-                
+
                 # Only consider it a fax if "fax" or "facsimile" is explicitly in context
                 if self._has_fax_context(full_match):
                     result = RecognizerResult(
@@ -134,23 +136,23 @@ class FaxRecognizer(EntityRecognizer):
                         start=start,
                         end=end,
                         score=RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
-                        analysis_explanation=f"Fax pattern {pattern_idx + 1} with explicit fax context"
+                        analysis_explanation=f"Fax pattern {pattern_idx + 1} with explicit fax context",
                     )
                     results.append(result)
                     logger.debug(f"Fax number detected at {start}-{end}: {fax_number}")
                 else:
                     logger.debug(f"Match rejected (no fax context): {full_match}")
-        
+
         logger.info(f"FaxRecognizer found {len(results)} fax numbers")
         return results
-    
+
     def _has_fax_context(self, text: str) -> bool:
         """
         Check if the matched text has fax-related context.
-        
+
         Args:
             text: The matched text to check for fax context
-            
+
         Returns:
             True if the text contains fax-related keywords, False otherwise
         """

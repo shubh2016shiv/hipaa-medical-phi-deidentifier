@@ -80,5 +80,9 @@ class HealthPlanIDRecognizer(PatternRecognizer):
                 ),
             ]
 
-        super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
-        logger.info("HealthPlanIDRecognizer initialized with %d patterns", len(patterns))
+        super().__init__(
+            supported_entity=supported_entity, patterns=patterns, name=name
+        )
+        logger.info(
+            "HealthPlanIDRecognizer initialized with %d patterns", len(patterns)
+        )

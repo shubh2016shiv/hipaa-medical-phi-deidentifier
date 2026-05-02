@@ -80,5 +80,9 @@ class AccountNumberRecognizer(PatternRecognizer):
                 ),
             ]
 
-        super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
-        logger.info("AccountNumberRecognizer initialized with %d patterns", len(patterns))
+        super().__init__(
+            supported_entity=supported_entity, patterns=patterns, name=name
+        )
+        logger.info(
+            "AccountNumberRecognizer initialized with %d patterns", len(patterns)
+        )

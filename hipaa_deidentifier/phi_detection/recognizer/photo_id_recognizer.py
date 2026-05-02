@@ -28,27 +28,27 @@ logger = get_logger("recognizer.photo")
 class PhotoIDRecognizer(PatternRecognizer):
     """
     Recognizes photo identifiers and image references.
-    
+
     Detects patterns such as:
     - face_photo_12345.jpg
     - Photo ID: patient_001.png
     - Patient photo on file
-    
+
     Features:
     - Image file extension detection
     - Photo reference contexts
     - High confidence scoring
     """
-    
+
     def __init__(
-        self, 
-        name: str = "PHOTO_ID", 
-        supported_entity: str = "PHOTO_ID", 
-        patterns: List[Pattern] = None
+        self,
+        name: str = "PHOTO_ID",
+        supported_entity: str = "PHOTO_ID",
+        patterns: List[Pattern] = None,
     ):
         """
         Initialize the photo ID recognizer.
-        
+
         Args:
             name: Recognizer name for logging
             supported_entity: Entity type this recognizer detects
@@ -60,27 +60,29 @@ class PhotoIDRecognizer(PatternRecognizer):
                 Pattern(
                     "photo_file_reference",
                     r"\b(?:face|photo|image|picture|portrait|photograph)_\w+\.(?:jpg|jpeg|png|gif|tiff|bmp)\b",
-                    RecognizerThresholds.VERY_HIGH_CONFIDENCE
+                    RecognizerThresholds.VERY_HIGH_CONFIDENCE,
                 ),
                 # Photo with explicit label - high confidence
                 Pattern(
                     "photo_labeled",
                     r"\b(?:Photo|Image|Picture|Portrait|Photograph|Face\s*Photo)\s*(?:ID|#|:)?\s*[:#=\-]?\s*([A-Za-z0-9\-_\.]{3,30})\b",
-                    RecognizerThresholds.HIGH_CONFIDENCE
+                    RecognizerThresholds.HIGH_CONFIDENCE,
                 ),
                 # Image file path or reference - high confidence
                 Pattern(
                     "image_file_path",
                     r"\b(?:Image|Photo|Picture):\s*([A-Za-z0-9\-_\.]{3,30}\.(?:jpg|jpeg|png|gif|tiff|bmp))\b",
-                    RecognizerThresholds.HIGH_CONFIDENCE
+                    RecognizerThresholds.HIGH_CONFIDENCE,
                 ),
                 # Patient photo references - medium-high confidence
                 Pattern(
                     "patient_photo",
                     r"\bPatient\s*(?:photo|image|picture)\s*(?:on\s*file|attached|included)\b",
-                    RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE
+                    RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
                 ),
             ]
-        
-        super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
+
+        super().__init__(
+            supported_entity=supported_entity, patterns=patterns, name=name
+        )
         logger.info(f"PhotoIDRecognizer initialized with {len(patterns)} patterns")

@@ -52,19 +52,19 @@ class DateRecognizer(EntityRecognizer):
     """
 
     DATE_PATTERNS: List[str] = [
-        r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
-        r'\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b',
-        r'\b\d{1,2}\.\d{1,2}\.\d{2,4}\b',
-        r'\b\d{4}\.\d{1,2}\.\d{1,2}\b',
-        r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{2,4}\b',
-        r'\b\d{1,2}(?:st|nd|rd|th)?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*,?\s+\d{2,4}\b',
-        r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?\b',
-        r'\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\s+\d{1,2}:\d{2}(?::\d{2})?\b',
-        r'\(\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*\)',
-        r'\(\s*\d{4}[/-]\d{1,2}[/-]\d{1,2}\s*\)',
-        r'\b(?:DOB|Birth|Born):\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
-        r'\b(?:DOB|Birth|Born):\s*\d{4}[/-]\d{1,2}[/-]\d{1,2}\b',
-        r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*(?:to|-)\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
+        r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",
+        r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\b",
+        r"\b\d{1,2}\.\d{1,2}\.\d{2,4}\b",
+        r"\b\d{4}\.\d{1,2}\.\d{1,2}\b",
+        r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{2,4}\b",
+        r"\b\d{1,2}(?:st|nd|rd|th)?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*,?\s+\d{2,4}\b",
+        r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s+\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?\b",
+        r"\b\d{4}[/-]\d{1,2}[/-]\d{1,2}\s+\d{1,2}:\d{2}(?::\d{2})?\b",
+        r"\(\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*\)",
+        r"\(\s*\d{4}[/-]\d{1,2}[/-]\d{1,2}\s*\)",
+        r"\b(?:DOB|Birth|Born):\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",
+        r"\b(?:DOB|Birth|Born):\s*\d{4}[/-]\d{1,2}[/-]\d{1,2}\b",
+        r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*(?:to|-)\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",
     ]
 
     def __init__(
@@ -84,13 +84,19 @@ class DateRecognizer(EntityRecognizer):
         self.compiled_patterns = [
             re.compile(pattern, re.IGNORECASE) for pattern in self.DATE_PATTERNS
         ]
-        logger.info("DateRecognizer initialized with %d patterns", len(self.DATE_PATTERNS))
+        logger.info(
+            "DateRecognizer initialized with %d patterns", len(self.DATE_PATTERNS)
+        )
 
     def load(self) -> None:
         """Load the recognizer (no external resources needed)."""
 
     def analyze(
-        self, text: str, entities: List[str], nlp_artifacts: NlpArtifacts = None, **kwargs
+        self,
+        text: str,
+        entities: List[str],
+        nlp_artifacts: NlpArtifacts = None,
+        **kwargs,
     ) -> List[RecognizerResult]:
         """Analyze text for date entities.
 
@@ -112,14 +118,18 @@ class DateRecognizer(EntityRecognizer):
             for match in pattern.finditer(text):
                 matched_text = match.group()
                 if self._is_valid_date(matched_text):
-                    results.append(RecognizerResult(
-                        entity_type="DATE",
-                        start=match.start(),
-                        end=match.end(),
-                        score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
-                        analysis_explanation=f"Date pattern {pattern_idx + 1} matched",
-                    ))
-                    logger.debug("Date at %d-%d: %s", match.start(), match.end(), matched_text)
+                    results.append(
+                        RecognizerResult(
+                            entity_type="DATE",
+                            start=match.start(),
+                            end=match.end(),
+                            score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
+                            analysis_explanation=f"Date pattern {pattern_idx + 1} matched",
+                        )
+                    )
+                    logger.debug(
+                        "Date at %d-%d: %s", match.start(), match.end(), matched_text
+                    )
 
         logger.info("DateRecognizer found %d dates", len(results))
         return results
@@ -133,11 +143,11 @@ class DateRecognizer(EntityRecognizer):
         Returns:
             True if the text passes basic date sanity checks.
         """
-        if not re.search(r'\d', date_text):
+        if not re.search(r"\d", date_text):
             return False
         if len(date_text) < 6:
             return False
-        year_match = re.search(r'\b(\d{4})\b', date_text)
+        year_match = re.search(r"\b(\d{4})\b", date_text)
         if year_match:
             year = int(year_match.group(1))
             if year < DateConfig.MIN_YEAR or year > DateConfig.MAX_YEAR:

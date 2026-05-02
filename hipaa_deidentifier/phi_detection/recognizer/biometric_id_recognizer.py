@@ -76,5 +76,7 @@ class BiometricIDRecognizer(PatternRecognizer):
                 ),
             ]
 
-        super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
+        super().__init__(
+            supported_entity=supported_entity, patterns=patterns, name=name
+        )
         logger.info("BiometricIDRecognizer initialized with %d patterns", len(patterns))

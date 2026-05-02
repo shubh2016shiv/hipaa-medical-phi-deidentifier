@@ -81,5 +81,7 @@ class VehicleIDRecognizer(PatternRecognizer):
                 ),
             ]
 
-        super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
+        super().__init__(
+            supported_entity=supported_entity, patterns=patterns, name=name
+        )
         logger.info("VehicleIDRecognizer initialized with %d patterns", len(patterns))
