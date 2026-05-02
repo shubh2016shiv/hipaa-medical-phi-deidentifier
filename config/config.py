@@ -15,16 +15,18 @@ Version: 1.0.0
 """
 
 import os
-import yaml
-import spacy
-from typing import Dict, Any, Optional, Union
 from pathlib import Path
+from typing import Any, Dict, Optional, Union
+
+import spacy
+import yaml
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import NlpEngineProvider
 
 
 class ConfigurationError(Exception):
     """Exception raised for configuration-related errors."""
+
     pass
 
 
@@ -43,9 +45,11 @@ class ConfigurationLoader:
         self._config_cache: Optional[Dict] = None
         self._config_path: Optional[Path] = None
 
-    def load_config(self,
-                   config_path: Optional[Union[str, Path]] = None,
-                   environment: Optional[str] = None) -> Dict:
+    def load_config(
+        self,
+        config_path: Optional[Union[str, Path]] = None,
+        environment: Optional[str] = None,
+    ) -> Dict:
         """
         Load configuration from YAML files.
 
@@ -63,11 +67,7 @@ class ConfigurationLoader:
             return self._config_cache
 
         # Default paths to check
-        default_paths = [
-            "config/main.yaml",
-            "config.yaml",
-            "hipaa_config.yaml"
-        ]
+        default_paths = ["config/main.yaml", "config.yaml", "hipaa_config.yaml"]
 
         paths_to_try = [config_path] if config_path else default_paths
         config_data = None
@@ -105,31 +105,37 @@ class ConfigurationLoader:
     def _load_yaml_file(self, file_path: Path) -> Dict:
         """Load a YAML file and return its contents."""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
         except Exception as e:
-            raise ConfigurationError(f"Error loading configuration from {file_path}: {e}")
+            raise ConfigurationError(
+                f"Error loading configuration from {file_path}: {e}"
+            )
 
     def _process_imports(self, config: Dict, base_dir: Path) -> Dict:
         """Process import directives in configuration."""
         result = {}
 
-        if 'imports' in config:
-            for import_path in config['imports']:
+        if "imports" in config:
+            for import_path in config["imports"]:
                 import_file = base_dir / import_path
                 if import_file.exists():
                     import_config = self._load_yaml_file(import_file)
                     # Process nested imports
-                    import_config = self._process_imports(import_config, import_file.parent)
+                    import_config = self._process_imports(
+                        import_config, import_file.parent
+                    )
                     result = self._merge_configs(result, import_config)
                 else:
                     raise ConfigurationError(f"Import file not found: {import_file}")
 
         # Merge current config (giving precedence to current config)
-        config_without_imports = {k: v for k, v in config.items() if k != 'imports'}
+        config_without_imports = {k: v for k, v in config.items() if k != "imports"}
         return self._merge_configs(result, config_without_imports)
 
-    def _load_environment_config(self, environment: str, base_dir: Path) -> Optional[Dict]:
+    def _load_environment_config(
+        self, environment: str, base_dir: Path
+    ) -> Optional[Dict]:
         """Load environment-specific configuration."""
         env_file = base_dir / "environments" / f"{environment}.yaml"
         if env_file.exists():
@@ -141,7 +147,11 @@ class ConfigurationLoader:
         result = base.copy()
 
         for key, value in override.items():
-            if isinstance(value, dict) and key in result and isinstance(result[key], dict):
+            if (
+                isinstance(value, dict)
+                and key in result
+                and isinstance(result[key], dict)
+            ):
                 result[key] = self._merge_configs(result[key], value)
             else:
                 result[key] = value
@@ -154,28 +164,36 @@ class ConfigurationLoader:
 
         for section in required_sections:
             if section not in config:
-                raise ConfigurationError(f"Configuration missing required section: {section}")
+                raise ConfigurationError(
+                    f"Configuration missing required section: {section}"
+                )
 
         # Validate transform section
         transform = config.get("transform", {})
         if "rules" not in transform:
-            raise ConfigurationError("Configuration missing 'rules' in 'transform' section")
+            raise ConfigurationError(
+                "Configuration missing 'rules' in 'transform' section"
+            )
 
         # Validate detect section
         detect = config.get("detect", {})
         required_detect_keys = ["enable_rules", "enable_ml"]
         for key in required_detect_keys:
             if key not in detect:
-                raise ConfigurationError(f"Configuration missing '{key}' in 'detect' section")
+                raise ConfigurationError(
+                    f"Configuration missing '{key}' in 'detect' section"
+                )
 
         # Validate models section
         models = config.get("models", {})
         if "spacy" not in models:
-            raise ConfigurationError("Configuration missing 'spacy' model in 'models' section")
+            raise ConfigurationError(
+                "Configuration missing 'spacy' model in 'models' section"
+            )
 
     def get_value(self, config: Dict, path: str, default: Any = None) -> Any:
         """Get a value from configuration using dot-separated path."""
-        parts = path.split('.')
+        parts = path.split(".")
         current = config
 
         for part in parts:
@@ -232,7 +250,9 @@ class ModelManager:
                 self._spacy_models[model_name] = nlp
                 return nlp
             except Exception as e:
-                raise ConfigurationError(f"Failed to load spaCy model '{model_name}': {e}")
+                raise ConfigurationError(
+                    f"Failed to load spaCy model '{model_name}': {e}"
+                )
 
     def create_analyzer(self, spacy_model_name: str) -> AnalyzerEngine:
         """
@@ -254,7 +274,7 @@ class ModelManager:
 
         try:
             # Load the spaCy model
-            nlp = self.load_spacy_model(spacy_model_name)
+            self.load_spacy_model(spacy_model_name)
 
             # Create NLP engine provider
             provider = NlpEngineProvider(
@@ -273,7 +293,9 @@ class ModelManager:
 
             return analyzer
         except Exception as e:
-            raise ConfigurationError(f"Failed to create analyzer with model '{spacy_model_name}': {e}")
+            raise ConfigurationError(
+                f"Failed to create analyzer with model '{spacy_model_name}': {e}"
+            )
 
     def get_analyzer(self, config: Dict) -> AnalyzerEngine:
         """
@@ -309,7 +331,9 @@ class Config:
 
     def __init__(self):
         if Config._instance is not None:
-            raise ConfigurationError("Config is a singleton class. Use get_instance() instead.")
+            raise ConfigurationError(
+                "Config is a singleton class. Use get_instance() instead."
+            )
 
         self._loader = ConfigurationLoader()
         self._models = ModelManager()
@@ -317,15 +341,17 @@ class Config:
         self._initialized = False
 
     @classmethod
-    def get_instance(cls) -> 'Config':
+    def get_instance(cls) -> "Config":
         """Get the singleton instance of the Config class."""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
-    def initialize(self,
-                  config_path: Optional[Union[str, Path]] = None,
-                  environment: Optional[str] = None) -> None:
+    def initialize(
+        self,
+        config_path: Optional[Union[str, Path]] = None,
+        environment: Optional[str] = None,
+    ) -> None:
         """
         Initialize the configuration system.
 
@@ -388,7 +414,9 @@ class Config:
     def get_transform_rule(self, entity_type: str) -> str:
         """Get transformation rule for a specific entity type."""
         rules = self.get_value("transform.rules", {})
-        return rules.get(entity_type, self.get_value("transform.default_action", "redact"))
+        return rules.get(
+            entity_type, self.get_value("transform.default_action", "redact")
+        )
 
     def get_pseudonym_format(self, entity_type: str) -> str:
         """Get pseudonym format for a specific entity type."""

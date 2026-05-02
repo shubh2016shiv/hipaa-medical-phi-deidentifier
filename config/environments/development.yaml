@@ -1,5 +1,5 @@
 # Development Environment Configuration
-# 
+#
 # This configuration extends the base configuration with development-specific settings.
 # It is used for local development and testing.
 
@@ -14,13 +14,13 @@ logging:
 
 # Models configuration for development
 models:
-  spacy: "en_core_web_sm"
+  spacy: "en_core_web_lg"
   huggingface: "obi/deid_bert_i2b2"
-  device: -1  # Use CPU for development
+  device: -1 # Use CPU for development
 
 # Detection thresholds for sequential pipeline
 # Higher thresholds ensure quality entities are passed to next stage
 detection_thresholds:
-  patterns: 0.7  # Threshold for pattern-based detection
-  presidio: 0.7  # Threshold for Presidio rule-based detection
-  hf: 0.9  # High threshold for HF to ensure only confident medical entities
+  patterns: 0.7 # Threshold for pattern-based detection
+  presidio: 0.7 # Threshold for Presidio rule-based detection
+  hf: 0.9 # High threshold for HF to ensure only confident medical entities

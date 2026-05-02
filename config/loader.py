@@ -6,7 +6,7 @@ It supports hierarchical configuration with imports and environment-specific ove
 """
 import os
 import yaml
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, Optional, Any, Union
 from pathlib import Path
 
 
