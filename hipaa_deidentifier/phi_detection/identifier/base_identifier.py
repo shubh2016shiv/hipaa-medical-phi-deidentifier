@@ -42,7 +42,7 @@ class BaseIdentifier(ABC):
 
     def get_supported_entities(self) -> set:
         """Return the set of entity types supported by this identifier."""
-        return getattr(self, 'SUPPORTED_IDENTIFIERS', set())
+        return getattr(self, "SUPPORTED_IDENTIFIERS", set())
 
     def get_identifier_name(self) -> str:
         """Return the name of this identifier for logging and tracking."""

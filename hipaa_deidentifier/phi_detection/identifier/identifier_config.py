@@ -68,15 +68,15 @@ class HFModelConfig:
             "high": 0.85,
             "very_high": 0.95,
             "recall_99.5": 4.656e-06,
-            "recall_99.7": 1.898e-06
+            "recall_99.7": 1.898e-06,
         },
         "obi/deid_roberta_i2b2": {
             "standard": 0.7,
             "high": 0.85,
             "very_high": 0.95,
             "recall_99.5": 2.436e-05,
-            "recall_99.7": 2.396e-06
-        }
+            "recall_99.7": 2.396e-06,
+        },
     }
 
 
@@ -139,7 +139,7 @@ class EntityMappings:
         "ID": "MRN",
         "PATORG": "ORGANIZATION",
         "EMAIL": "EMAIL_ADDRESS",
-        "OTHERPHI": "UNKNOWN"
+        "OTHERPHI": "UNKNOWN",
     }
 
 
@@ -147,30 +147,64 @@ class SupportedIdentifiers:
     """Entity types optimized for each detection method."""
 
     PRESIDIO: Set[str] = {
-        "PHONE_NUMBER", "FAX_NUMBER", "EMAIL_ADDRESS", "US_SSN",
-        "URL", "IP_ADDRESS", "LICENSE_NUMBER", "VEHICLE_ID",
-        "DEVICE_ID", "NPI", "MRN",
-        "NAME", "LOCATION", "ORGANIZATION", "DATE"
+        "PHONE_NUMBER",
+        "FAX_NUMBER",
+        "EMAIL_ADDRESS",
+        "US_SSN",
+        "URL",
+        "IP_ADDRESS",
+        "LICENSE_NUMBER",
+        "VEHICLE_ID",
+        "DEVICE_ID",
+        "NPI",
+        "MRN",
+        "NAME",
+        "LOCATION",
+        "ORGANIZATION",
+        "DATE",
     }
 
     HUGGING_FACE: Set[str] = {
-        "NAME", "ORGANIZATION", "LOCATION", "DATE",
-        "AGE_OVER_89", "MRN"
+        "NAME",
+        "ORGANIZATION",
+        "LOCATION",
+        "DATE",
+        "AGE_OVER_89",
+        "MRN",
     }
 
-    SPACY: Set[str] = {
-        "NAME", "LOCATION", "ORGANIZATION", "DATE"
-    }
+    SPACY: Set[str] = {"NAME", "LOCATION", "ORGANIZATION", "DATE"}
 
 
 class HeaderExclusions:
     """Common document headers that should not be flagged as PHI."""
 
     COMMON_HEADERS = [
-        "Outpatient Progress Note", "Discharge Summary", "After Visit Summary",
-        "Emergency Department", "Triage Note", "Radiology Report", "Operative Note",
-        "Home Health Nursing", "Patient Portal", "Referral Letter", "Chief Complaint",
-        "History of Present Illness", "HPI", "Past Medical History", "PMH",
-        "Medications", "Allergies", "Physical Exam", "Assessment", "Plan",
-        "Follow-up", "Vitals", "Labs", "Impression", "Findings", "HIPAA", "Safe Harbor"
+        "Outpatient Progress Note",
+        "Discharge Summary",
+        "After Visit Summary",
+        "Emergency Department",
+        "Triage Note",
+        "Radiology Report",
+        "Operative Note",
+        "Home Health Nursing",
+        "Patient Portal",
+        "Referral Letter",
+        "Chief Complaint",
+        "History of Present Illness",
+        "HPI",
+        "Past Medical History",
+        "PMH",
+        "Medications",
+        "Allergies",
+        "Physical Exam",
+        "Assessment",
+        "Plan",
+        "Follow-up",
+        "Vitals",
+        "Labs",
+        "Impression",
+        "Findings",
+        "HIPAA",
+        "Safe Harbor",
     ]
