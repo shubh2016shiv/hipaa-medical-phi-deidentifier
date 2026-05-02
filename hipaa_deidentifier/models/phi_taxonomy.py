@@ -10,10 +10,8 @@ HIPAA_LABELS = {
     # Person names
     "PERSON": "NAME",
     "NAME": "NAME",
-    
     # Dates
     "DATE": "DATE",
-    
     # Geographic subdivisions
     "ADDRESS": "LOCATION",
     "LOCATION": "LOCATION",
@@ -21,12 +19,10 @@ HIPAA_LABELS = {
     "STATE": "LOCATION",
     "ZIP": "LOCATION",
     "GEOGRAPHIC_SUBDIVISION": "LOCATION",
-    
     # Contact information
     "EMAIL_ADDRESS": "EMAIL_ADDRESS",
     "PHONE_NUMBER": "PHONE_NUMBER",
     "FAX_NUMBER": "FAX_NUMBER",
-    
     # Identifiers
     "US_SSN": "US_SSN",
     "SSN": "US_SSN",
@@ -41,42 +37,37 @@ HIPAA_LABELS = {
     "VIN": "VEHICLE_ID",
     "DEVICE_ID": "DEVICE_ID",
     "MEDICAL_DEVICE_ID": "DEVICE_ID",
-    
     # Web identifiers
     "URL": "URL",
     "IP_ADDRESS": "IP_ADDRESS",
-    
     # Biometric and photo identifiers
     "BIOMETRIC_ID": "BIOMETRIC_ID",
     "FULL_FACE_PHOTO": "PHOTO_ID",
     "PHOTO_ID": "PHOTO_ID",
-    
     # Age information
     "AGE_OVER_89": "AGE_OVER_89",
-    
     # Other categories
     "OTHER_ID": "OTHER_ID",
     "ORGANIZATION": "ORGANIZATION",
-    
     # Remap problematic categories
-    "IN_PAN": "OTHER_ID",      # India PAN number should be mapped to OTHER_ID
+    "IN_PAN": "OTHER_ID",  # India PAN number should be mapped to OTHER_ID
 }
 
 # Atomic entity types - these should never be partially replaced
 # They should be treated as a single indivisible token
 ATOMIC_ENTITIES = {
-    "URL", 
-    "EMAIL_ADDRESS", 
-    "IP_ADDRESS", 
+    "URL",
+    "EMAIL_ADDRESS",
+    "IP_ADDRESS",
     "SSN",
-    "VEHICLE_ID", 
-    "DEVICE_ID", 
+    "VEHICLE_ID",
+    "DEVICE_ID",
     "ACCOUNT_NUMBER",
-    "HEALTH_PLAN_ID", 
-    "LICENSE_NUMBER", 
-    "MRN", 
+    "HEALTH_PLAN_ID",
+    "LICENSE_NUMBER",
+    "MRN",
     "ENCOUNTER_ID",
-    "DATE"  # Add DATE as an atomic entity to ensure complete date redaction
+    "DATE",  # Add DATE as an atomic entity to ensure complete date redaction
 }
 
 # Entity precedence for overlap resolution
@@ -102,7 +93,7 @@ ENTITY_PRECEDENCE = [
     "GEOGRAPHIC_SUBDIVISION",
     "AGE_OVER_89",
     "OTHER_ID",
-    "ORGANIZATION"  # Moved to lowest priority to prevent false positives
+    "ORGANIZATION",  # Moved to lowest priority to prevent false positives
 ]
 
 # Convert precedence list to a dict for O(1) lookup
@@ -116,7 +107,6 @@ HEADER_WHITELIST = {
     "Identifiers",
     "Test",
     "Example",
-    
     # Common section headers in clinical notes
     "Chief Complaint",
     "History of Present Illness",
@@ -133,11 +123,27 @@ HEADER_WHITELIST = {
     "Hospital Course",
     "Principal Diagnosis",
     "Procedure",
-    
     # Common numbers that shouldn't be redacted
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-    "50", "75", "80", "81", "100", "150", "200", "250", "500", "1000",
-    
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "50",
+    "75",
+    "80",
+    "81",
+    "100",
+    "150",
+    "200",
+    "250",
+    "500",
+    "1000",
     # Medical terms that shouldn't be redacted
     "NSTEMI",
     "STEMI",
@@ -191,7 +197,6 @@ HEADER_WHITELIST = {
     "hypoglycemia",
     "hyperlipidemia",
     "suboptimal control",
-    
     # Common medications
     "metformin",
     "lisinopril",
@@ -202,50 +207,56 @@ HEADER_WHITELIST = {
     "insulin",
 }
 
+
 def normalize_category(category: str) -> str:
     """
     Normalize an entity category to the standardized HIPAA taxonomy.
-    
+
     Args:
         category: The original category name
-        
+
     Returns:
         The normalized category name according to HIPAA taxonomy
     """
     return HIPAA_LABELS.get(category, "UNKNOWN")
 
+
 def is_atomic_entity(category: str) -> bool:
     """
     Check if an entity category is considered atomic (should not be partially replaced).
-    
+
     Args:
         category: The entity category
-        
+
     Returns:
         True if the entity is atomic, False otherwise
     """
     return category in ATOMIC_ENTITIES
 
+
 def get_entity_priority(category: str) -> int:
     """
     Get the priority of an entity category for overlap resolution.
     Lower number = higher priority.
-    
+
     Args:
         category: The entity category
-        
+
     Returns:
         The priority value (lower is higher priority)
     """
-    return ENTITY_PRIORITY.get(category, len(ENTITY_PRECEDENCE))  # Default to lowest priority
+    return ENTITY_PRIORITY.get(
+        category, len(ENTITY_PRECEDENCE)
+    )  # Default to lowest priority
+
 
 def is_whitelisted_header(text: str) -> bool:
     """
     Check if text contains whitelisted header terms that should be ignored.
-    
+
     Args:
         text: The text to check
-        
+
     Returns:
         True if the text contains whitelisted header terms
     """
