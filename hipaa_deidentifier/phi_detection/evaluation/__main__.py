@@ -178,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    print(f"\n[EVAL] Starting PHI Detection Evaluation")
+    print("\n[EVAL] Starting PHI Detection Evaluation")
     print(f"   Document : {document_path.name}")
     print(f"   Detectors: {args.detectors}")
 
