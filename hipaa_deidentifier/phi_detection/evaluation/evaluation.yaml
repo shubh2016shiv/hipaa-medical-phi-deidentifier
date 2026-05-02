@@ -1,0 +1,21 @@
+eval_mode: llm
+
+lm_studio:
+  base_url: "http://localhost:1234/v1/chat/completions"
+  model: "google/gemma-3-4b"
+  timeout_seconds: 300
+  temperature: 0.1
+  max_tokens: 4096
+
+llm_judge:
+  use_response_format: true
+  coverage_pass_threshold: 0.95
+  max_expected_entities: 100
+
+reports:
+  output_dir: null
+  include_raw_detector_entities: true
+  include_llm_raw_response: false
+
+annotations:
+  annotation_dir: null
