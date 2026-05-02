@@ -51,6 +51,10 @@ detect:
     - "ACCOUNT_NUMBER"     # 10. Account numbers
     - "BIOMETRIC_ID"       # 16. Biometric identifiers
     - "PHOTO_ID"           # 17. Full-face photographs
+    - "NAME"               # 1. Names in explicit headers
+    - "LOCATION"           # 2. Geographic subdivisions with US-specific patterns
+    - "ORGANIZATION"       # Facility and organization names
+    - "DATE"               # 3. Dates with deterministic date patterns
   
   # spaCy module is now integrated into Presidio, so these are empty
   spacy_identifiers: []
@@ -68,7 +72,7 @@ detect:
 # Higher thresholds ensure quality entities are passed to next stage
 detection_thresholds:
   presidio: 0.6            # Standard threshold for Presidio (rule-based)
-  hf: 4.656e-06            # 99.5% recall threshold for obi/deid_bert_i2b2
+  hf: 4.656e-06            # 99.5% recall threshold for obi/deid_bert_i2b2 (works with masking)
 
 # Normalization settings (Stage 0)
 normalization:
@@ -97,7 +101,7 @@ transform:
     ACCOUNT_NUMBER: hash     # 10. Account numbers - Replace with hash
     LICENSE_NUMBER: hash     # 11. Certificate/license numbers - Replace with hash
     VEHICLE_ID: redact       # 12. Vehicle identifiers - Completely redact
-    MEDICAL_DEVICE_ID: hash  # 13. Device identifiers - Replace with hash
+    DEVICE_ID: hash          # 13. Device identifiers - Replace with hash
     URL: redact              # 14. Web URLs - Completely redact
     IP_ADDRESS: redact       # 15. IP addresses - Completely redact
     BIOMETRIC_ID: redact     # 16. Biometric identifiers - Completely redact
@@ -131,7 +135,7 @@ hash_formats:
   ACCOUNT_NUMBER: "ACC_{code}"
   HEALTH_PLAN_ID: "INS_{code}"
   LICENSE_NUMBER: "LIC_{code}"
-  MEDICAL_DEVICE_ID: "DEV_{code}"
+  DEVICE_ID: "DEV_{code}"
   DEFAULT: "{code}"
 
 # Date shifting settings

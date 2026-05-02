@@ -257,7 +257,12 @@ class ModelManager:
             nlp = self.load_spacy_model(spacy_model_name)
 
             # Create NLP engine provider
-            provider = NlpEngineProvider()
+            provider = NlpEngineProvider(
+                nlp_configuration={
+                    "nlp_engine_name": "spacy",
+                    "models": [{"lang_code": "en", "model_name": spacy_model_name}],
+                }
+            )
 
             # Create the NLP engine
             nlp_engine = provider.create_engine()

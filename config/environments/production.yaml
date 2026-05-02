@@ -5,9 +5,8 @@
 
 # Security settings for production environment
 security:
-  # In production, the salt should be set via environment variable
-  # This is a fallback value that should be overridden
-  salt: "CHANGE_ME_IN_PRODUCTION"
+  # In production, salt is injected from HIPAA_SECURITY_SALT at load time.
+  salt: ""
   date_shift_days: 30
 
 # Logging settings for production
@@ -24,5 +23,5 @@ models:
 # Higher thresholds ensure quality entities are passed to next stage
 detection_thresholds:
   patterns: 0.7  # Threshold for pattern-based detection
-  spacy: 0.9  # High threshold for spaCy to pass quality entities to HF
-  huggingface: 0.9  # High threshold for HF to ensure only confident medical entities
+  presidio: 0.7  # Threshold for Presidio rule-based detection
+  hf: 0.9  # High threshold for HF to ensure only confident medical entities
