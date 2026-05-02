@@ -1,20 +1,20 @@
 """
-Account Number Recognizer — Detects financial account numbers in clinical text.
+Health Plan ID Recognizer — Detects health plan beneficiary numbers.
 
 Architecture:
 -------------
     ┌─────────────────────────┐     ┌──────────────────────────────┐
-    │  PresidioIdentifier     │────▶│  AccountNumberRecognizer     │
+    │  PresidioIdentifier     │────▶│  HealthPlanIDRecognizer      │
     │  (identifier/)          │     │  (recognizer/)               │
     └─────────────────────────┘     └──────────────────────────────┘
 
     Registered with Presidio's AnalyzerEngine registry.
-    Fires on ACCOUNT_NUMBER entity type.
+    Fires on HEALTH_PLAN_ID entity type.
 
-    Covers HIPAA Safe Harbor identifier #8: account numbers.
+    Covers HIPAA Safe Harbor identifier #6: health plan beneficiary numbers.
 
 Dependencies:
-    - recognizer_config.py  — RecognizerThresholds constants
+    - recognizer_config.py  — RecognizerThresholds, IdentifierConfig constants
     - utils/logger.py       — Structured logging
 
 Author: HIPAA De-identification System
@@ -30,31 +30,31 @@ from presidio_analyzer import Pattern, PatternRecognizer
 from ...utils.logger import get_logger
 from .recognizer_config import RecognizerThresholds
 
-logger = get_logger("recognizer.account_number")
+logger = get_logger("recognizer.health_plan_id")
 
 
-class AccountNumberRecognizer(PatternRecognizer):
-    """Recognizes financial account numbers in clinical and administrative text.
+class HealthPlanIDRecognizer(PatternRecognizer):
+    """Recognizes health plan beneficiary numbers.
 
     Detects patterns such as:
-    - Account Number: ACC-123456
-    - Bank Account: 98765432101
-    - Financial ID: FIN-ABC987
+    - Health Plan ID: BCBS-ABC123456
+    - Member ID: UHC-987654
+    - Insurance ID: AETNA-XYZ789
 
     Example:
-        >>> recognizer = AccountNumberRecognizer()
-        >>> results = recognizer.analyze("Account #: ACC-123456", ["ACCOUNT_NUMBER"], None)
+        >>> recognizer = HealthPlanIDRecognizer()
+        >>> results = recognizer.analyze("Member ID: BCBS-ABC123456", ["HEALTH_PLAN_ID"], None)
         >>> print(len(results))
         1
     """
 
     def __init__(
         self,
-        name: str = "ACCOUNT_NUMBER",
-        supported_entity: str = "ACCOUNT_NUMBER",
+        name: str = "HEALTH_PLAN_ID",
+        supported_entity: str = "HEALTH_PLAN_ID",
         patterns: Optional[List[Pattern]] = None,
     ) -> None:
-        """Initialize the account number recognizer.
+        """Initialize the health plan ID recognizer.
 
         Args:
             name: Recognizer name for Presidio registry.
@@ -64,21 +64,21 @@ class AccountNumberRecognizer(PatternRecognizer):
         if patterns is None:
             patterns = [
                 Pattern(
-                    "account_number_labeled",
-                    r"\b(?:Account|Acct|Bank|Financial|Payment)\s*(?:Number|ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
+                    "health_plan_id_labeled",
+                    r"\b(?:Health\s*Plan(?:\s*ID)?|Insurance(?:\s*ID)?|Member(?:\s*ID)?)\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
                     RecognizerThresholds.HIGH_CONFIDENCE,
                 ),
                 Pattern(
-                    "account_number_acc_prefixed",
-                    r"\bACC[-#]?([A-Z0-9\-]{6,15})\b",
+                    "health_plan_id_insurer_prefixed",
+                    r"\b(?:BCBS|UHC|AETNA|CIGNA|HUMANA|ANTHEM)[\-]([A-Z0-9\-]{6,12})\b",
                     RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
                 ),
                 Pattern(
-                    "bank_account_labeled",
-                    r"\bBank\s*(?:Account|Acct|#)?\s*[:#=\-]?\s*([0-9]{8,20})\b",
+                    "member_id_labeled",
+                    r"\bMember\s*(?:ID|Number|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
                     RecognizerThresholds.MEDIUM_CONFIDENCE,
                 ),
             ]
 
         super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
-        logger.info("AccountNumberRecognizer initialized with %d patterns", len(patterns))
+        logger.info("HealthPlanIDRecognizer initialized with %d patterns", len(patterns))

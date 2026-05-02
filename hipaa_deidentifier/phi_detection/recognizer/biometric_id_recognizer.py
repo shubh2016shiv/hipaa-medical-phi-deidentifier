@@ -1,17 +1,18 @@
 """
-Account Number Recognizer — Detects financial account numbers in clinical text.
+Biometric ID Recognizer — Detects biometric identifier references.
 
 Architecture:
 -------------
     ┌─────────────────────────┐     ┌──────────────────────────────┐
-    │  PresidioIdentifier     │────▶│  AccountNumberRecognizer     │
+    │  PresidioIdentifier     │────▶│  BiometricIDRecognizer       │
     │  (identifier/)          │     │  (recognizer/)               │
     └─────────────────────────┘     └──────────────────────────────┘
 
     Registered with Presidio's AnalyzerEngine registry.
-    Fires on ACCOUNT_NUMBER entity type.
+    Fires on BIOMETRIC_ID entity type.
 
-    Covers HIPAA Safe Harbor identifier #8: account numbers.
+    Covers HIPAA Safe Harbor identifier #17: biometric identifiers
+    (fingerprints, retina scans, voice prints, etc.).
 
 Dependencies:
     - recognizer_config.py  — RecognizerThresholds constants
@@ -30,31 +31,31 @@ from presidio_analyzer import Pattern, PatternRecognizer
 from ...utils.logger import get_logger
 from .recognizer_config import RecognizerThresholds
 
-logger = get_logger("recognizer.account_number")
+logger = get_logger("recognizer.biometric_id")
 
 
-class AccountNumberRecognizer(PatternRecognizer):
-    """Recognizes financial account numbers in clinical and administrative text.
+class BiometricIDRecognizer(PatternRecognizer):
+    """Recognizes biometric identifier references in clinical text.
 
     Detects patterns such as:
-    - Account Number: ACC-123456
-    - Bank Account: 98765432101
-    - Financial ID: FIN-ABC987
+    - Fingerprint ID: FP-12345
+    - Biometric Data: BIO-ABC987
+    - Retina Scan ID: RS-XYZ001
 
     Example:
-        >>> recognizer = AccountNumberRecognizer()
-        >>> results = recognizer.analyze("Account #: ACC-123456", ["ACCOUNT_NUMBER"], None)
+        >>> recognizer = BiometricIDRecognizer()
+        >>> results = recognizer.analyze("Fingerprint ID: FP-12345", ["BIOMETRIC_ID"], None)
         >>> print(len(results))
         1
     """
 
     def __init__(
         self,
-        name: str = "ACCOUNT_NUMBER",
-        supported_entity: str = "ACCOUNT_NUMBER",
+        name: str = "BIOMETRIC_ID",
+        supported_entity: str = "BIOMETRIC_ID",
         patterns: Optional[List[Pattern]] = None,
     ) -> None:
-        """Initialize the account number recognizer.
+        """Initialize the biometric ID recognizer.
 
         Args:
             name: Recognizer name for Presidio registry.
@@ -64,21 +65,16 @@ class AccountNumberRecognizer(PatternRecognizer):
         if patterns is None:
             patterns = [
                 Pattern(
-                    "account_number_labeled",
-                    r"\b(?:Account|Acct|Bank|Financial|Payment)\s*(?:Number|ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
+                    "biometric_id_labeled",
+                    r"\b(?:Fingerprint|Retina\s*Scan|Iris\s*Scan|Voice\s*Print|Face\s*Scan|DNA|Biometric)\s*(?:ID|#|Number|Data)?\s*[:#=\-]?\s*([A-Z0-9\-]{3,20})\b",
                     RecognizerThresholds.HIGH_CONFIDENCE,
                 ),
                 Pattern(
-                    "account_number_acc_prefixed",
-                    r"\bACC[-#]?([A-Z0-9\-]{6,15})\b",
+                    "biometric_data_labeled",
+                    r"\bBiometric\s*(?:ID|Data|Information|Identifier)\s*[:#=\-]?\s*([A-Z0-9\-]{3,20})\b",
                     RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
-                ),
-                Pattern(
-                    "bank_account_labeled",
-                    r"\bBank\s*(?:Account|Acct|#)?\s*[:#=\-]?\s*([0-9]{8,20})\b",
-                    RecognizerThresholds.MEDIUM_CONFIDENCE,
                 ),
             ]
 
         super().__init__(supported_entity=supported_entity, patterns=patterns, name=name)
-        logger.info("AccountNumberRecognizer initialized with %d patterns", len(patterns))
+        logger.info("BiometricIDRecognizer initialized with %d patterns", len(patterns))
