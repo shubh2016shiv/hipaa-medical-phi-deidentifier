@@ -31,3 +31,8 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.409",
+]
