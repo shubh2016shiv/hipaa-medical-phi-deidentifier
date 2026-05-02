@@ -11,23 +11,27 @@ from typing import Dict, List, Optional, Set
 
 from presidio_analyzer import AnalyzerEngine
 
+from .base_identifier import BaseIdentifier
 from hipaa_deidentifier.models.phi_entity import PHIEntity
-from hipaa_deidentifier.phi_detection.recognizer.custom_recognizers import MedicalRecordNumberRecognizer, EncounterIdentifierRecognizer, AgeOver89Recognizer
-from hipaa_deidentifier.phi_detection.recognizer.hipaa_recognizers import HealthPlanIDRecognizer, VehicleIDRecognizer, BiometricIDRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.account_number_recognizer import AccountNumberRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.device_id_recognizer import DeviceIDRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.mrn_recognizer import MRNRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.encounter_id_recognizer import EncounterIDRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.age_over_89_recognizer import AgeOver89Recognizer
+from hipaa_deidentifier.phi_detection.recognizer.ssn_recognizer import SSNRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.date_recognizer import DateRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.fax_recognizer import FaxRecognizer
 from hipaa_deidentifier.phi_detection.recognizer.photo_id_recognizer import PhotoIDRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.fax_recognizer import EnhancedFaxRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.custom_ssn_recognizer import CustomSSNRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.custom_date_recognizer import CustomDateRecognizer
-from hipaa_deidentifier.phi_detection.recognizer.mrn_recognizer import EnhancedMRNRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.device_id_recognizer import DeviceIDRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.account_number_recognizer import AccountNumberRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.health_plan_id_recognizer import HealthPlanIDRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.vehicle_id_recognizer import VehicleIDRecognizer
+from hipaa_deidentifier.phi_detection.recognizer.biometric_id_recognizer import BiometricIDRecognizer
 from hipaa_deidentifier.phi_detection.recognizer.us_location_recognizer import USLocationRecognizer
 from config.config import config as global_config
 from hipaa_deidentifier.phi_detection.clinical_patterns import detect_initials_and_nicknames, detect_facility_names, detect_relatives_and_contacts
 from hipaa_deidentifier.phi_detection.normalizer.phi_normalizer import Stage0Normalizer
 
 
-class PresidioDeidentifier:
+class PresidioIdentifier(BaseIdentifier):
     """
     Specialized de-identifier that uses Microsoft Presidio for structured PHI detection.
     
@@ -63,12 +67,12 @@ class PresidioDeidentifier:
         "NPI": "LICENSE_NUMBER",
         "DOMAIN_NAME": "URL",
         "LOCATION": "LOCATION",
-        "GEOGRAPHIC_SUBDIVISION": "LOCATION",  # Map Presidio's geographic subdivision to LOCATION
-        "GEOGRAPHY": "LOCATION",  # Map Presidio's GEOGRAPHY to LOCATION
+        "GEOGRAPHIC_SUBDIVISION": "LOCATION",
+        "GEOGRAPHY": "LOCATION",
         "PERSON": "NAME",
         "DATE_TIME": "DATE",
         "ORGANIZATION": "ORGANIZATION",
-        "MRN": "MRN",  # Add MRN mapping
+        "MRN": "MRN",
         "HEALTH_PLAN_ID": "HEALTH_PLAN_ID",
         "ACCOUNT_NUMBER": "ACCOUNT_NUMBER",
         "VEHICLE_ID": "VEHICLE_ID",
@@ -76,8 +80,6 @@ class PresidioDeidentifier:
         "DEVICE_ID": "DEVICE_ID",
         "BIOMETRIC_ID": "BIOMETRIC_ID",
         "PHOTO_ID": "PHOTO_ID",
-        # OTHER_ID removed as per user request
-        "SSN": "US_SSN"  # Map SSN to US_SSN for consistency
     }
     
     # Identifiers that Presidio is best suited for (now includes spaCy entities)
@@ -97,8 +99,8 @@ class PresidioDeidentifier:
         Args:
             config: Configuration dictionary
         """
-        self.config = config or {}
-        
+        super().__init__(config)
+
         # Initialize Presidio analyzer engine
         self.analyzer = self._create_analyzer_engine()
         
@@ -132,32 +134,24 @@ class PresidioDeidentifier:
         # Get the registry and add custom healthcare recognizers
         registry = analyzer.registry
         
-        # Add basic medical recognizers
-        # Add enhanced MRN recognizer first (higher priority)
-        registry.add_recognizer(EnhancedMRNRecognizer())
-        
-        registry.add_recognizer(MedicalRecordNumberRecognizer())
-        registry.add_recognizer(EncounterIdentifierRecognizer())
+        # Clinical identifiers
+        registry.add_recognizer(MRNRecognizer())
+        registry.add_recognizer(EncounterIDRecognizer())
         registry.add_recognizer(AgeOver89Recognizer())
-        
-        # Add custom SSN recognizer (replace Presidio's default)
-        registry.add_recognizer(CustomSSNRecognizer())
-        
-        # Add custom date recognizer (replace Presidio's default)
-        registry.add_recognizer(CustomDateRecognizer())
-        
-        # Add HIPAA-specific recognizers for all 18 identifiers
-        # Add HIPAA-specific recognizers for all identifiers
+
+        # Structured identifiers — override Presidio's built-in recognizers
+        registry.add_recognizer(SSNRecognizer())
+        registry.add_recognizer(DateRecognizer())
+        registry.add_recognizer(FaxRecognizer())
+
+        # HIPAA Safe Harbor identifiers
         registry.add_recognizer(HealthPlanIDRecognizer())
         registry.add_recognizer(VehicleIDRecognizer())
         registry.add_recognizer(BiometricIDRecognizer())
         registry.add_recognizer(PhotoIDRecognizer())
         registry.add_recognizer(AccountNumberRecognizer())
         registry.add_recognizer(DeviceIDRecognizer())
-        registry.add_recognizer(EnhancedFaxRecognizer())
-        # Add US-specific location recognizer
         registry.add_recognizer(USLocationRecognizer())
-        # OtherIDRecognizer removed as per user request
         
         # Add custom phone number recognizer with higher confidence
         from presidio_analyzer import Pattern, PatternRecognizer
@@ -215,7 +209,8 @@ class PresidioDeidentifier:
         
         # Convert our identifier categories to Presidio entity types
         presidio_entity_types = self._map_to_presidio_types(self.target_identifiers)
-        
+        presidio_entity_types = self._filter_supported_presidio_types(presidio_entity_types)
+
         # Run Presidio analyzer on normalized text
         results = self.analyzer.analyze(
             text=normalized_text,
@@ -289,8 +284,6 @@ class PresidioDeidentifier:
         
         for pattern in fax_patterns:
             for match in re.finditer(pattern, normalized_text):
-                # Get the phone number part (group 1)
-                phone_number = match.group(1)
                 start, end = match.span(1)
                 
                 # Project span back to original text
@@ -338,74 +331,6 @@ class PresidioDeidentifier:
         
         return filtered_entities
     
-    def detect_with_header_patterns(self, text: str) -> List[PHIEntity]:
-        """
-        Detect PHI entities in header patterns.
-        
-        This reuses the sophisticated header pattern detection from pattern_detector.py
-        
-        Args:
-            text: The text to analyze
-            
-        Returns:
-            List of detected PHI entities
-        """
-        # Stage 0: Normalize text while maintaining character mapping
-        stage0_result = self.text_normalizer.stage0_normalize_and_candidates(text)
-        normalized_text = stage0_result["normalized_text"]
-        project_fn = stage0_result["project_fn"]
-        
-        entities = []
-        
-        # Patient name in header
-        for match in re.finditer(r"(?i)\bPatient\s*(?:Name)?\s*:\s*([A-Z][a-zA-Z\-\s']{1,60})", normalized_text):
-            start, end = match.span(1)
-            confidence = 0.85
-            if confidence >= self.threshold:  # Apply threshold filtering
-                # Project span back to original text
-                original_start, original_end = project_fn(start, end)
-                entities.append(PHIEntity(
-                    start=original_start,
-                    end=original_end,
-                    category="NAME",
-                    confidence=confidence,
-                    text=text[original_start:original_end],
-                ))
-        
-        # Doctor name in header
-        for match in re.finditer(r"(?i)\b(?:Doctor|Dr|Physician|Provider)\s*(?:Name)?\s*:\s*([A-Z][a-zA-Z\-\s']{1,60})", normalized_text):
-            start, end = match.span(1)
-            confidence = 0.85
-            if confidence >= self.threshold:  # Apply threshold filtering
-                # Project span back to original text
-                original_start, original_end = project_fn(start, end)
-                entities.append(PHIEntity(
-                    start=original_start,
-                    end=original_end,
-                    category="NAME",
-                    confidence=confidence,
-                    text=text[original_start:original_end],
-                ))
-        
-        # Skip common section headers
-        common_headers = [
-            "Outpatient Progress Note", "Discharge Summary", "After Visit Summary",
-            "Emergency Department", "Triage Note", "Radiology Report", "Operative Note",
-            "Home Health Nursing", "Patient Portal", "Referral Letter", "Chief Complaint",
-            "History of Present Illness", "HPI", "Past Medical History", "PMH",
-            "Medications", "Allergies", "Physical Exam", "Assessment", "Plan",
-            "Follow-up", "Vitals", "Labs", "Impression", "Findings", "HIPAA", "Safe Harbor"
-        ]
-        
-        # Remove entities that match common headers
-        filtered_entities = []
-        for entity in entities:
-            entity_text = text[entity.start:entity.end]
-            if entity_text not in common_headers and entity_text.strip() not in common_headers:
-                filtered_entities.append(entity)
-                
-        return filtered_entities
-    
     def _map_to_presidio_types(self, our_identifiers: Set[str]) -> List[str]:
         """
         Map our identifier categories to Presidio entity types.
@@ -430,105 +355,33 @@ class PresidioDeidentifier:
                 presidio_types.extend(reverse_mapping[identifier])
         
         return presidio_types
-    
-    def _detect_with_spacy(self, text: str) -> List[PHIEntity]:
+
+    def _filter_supported_presidio_types(self, entity_types: List[str]) -> List[str]:
+        """Keep only entity names supported by the configured analyzer.
+
+        EntityMappings includes normalization aliases for interoperability, but
+        AnalyzerEngine.analyze() logs warnings when asked for entity names that
+        no registered recognizer supports. Filtering here preserves detection
+        while keeping evaluation output readable.
         """
-        Detect entities using spaCy (integrated from spacy_deidentifier.py).
-        
-        Args:
-            text: The text to analyze
-            
-        Returns:
-            List of detected PHI entities
-        """
-        # Stage 0: Normalize text while maintaining character mapping
-        stage0_result = self.text_normalizer.stage0_normalize_and_candidates(text)
-        normalized_text = stage0_result["normalized_text"]
-        project_fn = stage0_result["project_fn"]
-        
-        entities = []
-        
-        # Get the spaCy model from the analyzer's NLP engine
-        nlp = self.analyzer.nlp_engine.nlp['en']
-        
-        # Process the normalized text with spaCy
-        doc = nlp(normalized_text)
-        
-        # spaCy entity mapping (from spacy_deidentifier.py)
-        spacy_mapping = {
-            "PERSON": "NAME",
-            "GPE": "LOCATION",
-            "LOC": "LOCATION",
-            "FAC": "LOCATION",
-            "GEOGRAPHIC_SUBDIVISION": "LOCATION",  # Add this mapping
-            "ORG": "ORGANIZATION",
-            "DATE": "DATE",
-            "TIME": "DATE",
-        }
-        
-        # Convert spaCy entities to PHI entities
-        for ent in doc.ents:
-            # Map spaCy entity type to our category
-            category = spacy_mapping.get(ent.label_, None)
-            
-            # Debug: Print the mapping
-            if ent.label_ == "GPE":
-                print(f"DEBUG spaCy: Mapping {ent.label_} -> {category}")
-            
-            # Skip if not mapped or not in target identifiers
-            if category is None or category not in self.target_identifiers:
-                continue
-            
-            # Calculate confidence using the same logic as spacy_deidentifier.py
-            confidence = self._get_spacy_confidence(ent)
-            
-            # Skip if confidence is below threshold
-            if confidence < self.threshold:
-                continue
-            
-            # Project span back to original text
-            original_start, original_end = project_fn(ent.start_char, ent.end_char)
-            
-            entity = PHIEntity(
-                start=original_start,
-                end=original_end,
-                category=category,
-                confidence=confidence,
-                text=text[original_start:original_end]
+        try:
+            supported = set(self.analyzer.get_supported_entities(language="en"))
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).debug(
+                "Could not inspect Presidio supported entities; using mapped list: %s", exc
             )
-            entities.append(entity)
-        
-        return entities
-    
-    def _get_spacy_confidence(self, ent) -> float:
-        """
-        Calculate confidence score for spaCy entity (from spacy_deidentifier.py).
-        
-        Args:
-            ent: spaCy entity
-            
-        Returns:
-            Confidence score between 0 and 1
-        """
-        # Use entity-specific base confidence
-        base_confidence = {
-            "PERSON": 0.9,    # High confidence for person names
-            "GPE": 0.85,      # Good confidence for geo-political entities
-            "LOC": 0.8,       # Good confidence for locations
-            "FAC": 0.75,      # Moderate confidence for facilities
-            "ORG": 0.85,      # Good confidence for organizations
-            "DATE": 0.85,     # Good confidence for dates
-            "TIME": 0.8       # Good confidence for times
-        }.get(ent.label_, 0.7)  # Default confidence
-        
-        # Add dynamic adjustments based on entity length
-        length_factor = min(0.2, (len(ent.text.strip()) - 3) * 0.02)
-        
-        # Calculate final confidence
-        confidence = min(0.95, base_confidence + length_factor)
-        
-        return confidence
-    
+            return entity_types
+
+        filtered = [t for t in entity_types if t in supported]
+        unsupported = sorted(set(entity_types) - supported)
+        if unsupported:
+            import logging
+            logging.getLogger(__name__).debug(
+                "Skipping unsupported Presidio entity aliases: %s", unsupported
+            )
+        return filtered
+
     def _detect_clinical_patterns(self, text: str) -> List[PHIEntity]:
         """
         Detect entities using clinical patterns (from spacy_deidentifier.py).
@@ -637,5 +490,3 @@ class PresidioDeidentifier:
         return entities
 
 
-# Create a singleton instance for easy import
-presidio_deidentifier = PresidioDeidentifier()

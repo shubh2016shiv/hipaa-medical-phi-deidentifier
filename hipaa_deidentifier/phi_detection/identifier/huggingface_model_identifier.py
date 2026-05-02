@@ -13,14 +13,19 @@ It focuses on identifiers that require medical domain knowledge:
 - Medical-specific identifiers
 """
 
+import logging
 from typing import Dict, List, Optional
 
+from .base_identifier import BaseIdentifier
+from .identifier_config import TextProcessing, HFModelConfig
 from hipaa_deidentifier.models.phi_entity import PHIEntity
 from hipaa_deidentifier.utils.model_cache import model_cache
 from hipaa_deidentifier.phi_detection.clinical_patterns import detect_ages_over_89
 
+logger = logging.getLogger(__name__)
 
-class HFDeidentifier:
+
+class HFIdentifier(BaseIdentifier):
     """
     Specialized de-identifier that uses Hugging Face transformer models for medical PHI detection.
     
@@ -82,29 +87,33 @@ class HFDeidentifier:
         }
     }
     
-    def __init__(self, 
-                 hf_model: str = "obi/deid_bert_i2b2", 
+    def __init__(self,
+                 hf_model: str = HFModelConfig.DEFAULT_MODEL,
                  device: int = -1,
                  config: Optional[Dict] = None,
                  threshold_level: str = "standard"):
         """
         Initialize the Hugging Face transformer-based de-identifier.
-        
+
         Args:
             hf_model: Name or path of the Hugging Face model to use
             device: Device to run inference on (-1 for CPU, 0+ for specific GPU)
             config: Configuration dictionary
             threshold_level: Confidence threshold level (standard, high, very_high, recall_99.5, recall_99.7)
         """
-        self.config = config or {}
-        
+        super().__init__(config)
+
         # Set device
         self.device = device
         self.device_name = "cpu" if device < 0 else f"cuda:{device}"
-        
+
         # Load Hugging Face model and pipeline using model_cache
         self.hf_model_name = hf_model
         self.hf_pipeline = model_cache.get_hf_pipeline(hf_model, device)
+        if self.hf_pipeline is None:
+            raise RuntimeError(
+                f"Hugging Face model '{hf_model}' is not available in the local cache"
+            )
         
         # Get targeted identifiers from config or use default
         # Check in detect.hf_identifiers first, then fall back to root hf_identifiers
@@ -139,61 +148,45 @@ class HFDeidentifier:
         entities = []
         
         # Use the HF pipeline from model_cache
+        chunk_size = TextProcessing.HF_CHUNK_SIZE
+        overlap = TextProcessing.HF_CHUNK_OVERLAP
+
         try:
-            # Handle long texts by chunking them to avoid tensor size issues
-            if len(text) > 500:
-                # Improved chunking with overlap to handle entities at boundaries
-                chunk_size = 500
-                overlap = 100
+            if len(text) > chunk_size:
                 offset = 0
-                
-                # Split by newlines first to preserve document structure
                 paragraphs = text.split('\n')
                 for paragraph in paragraphs:
-                    # Skip empty paragraphs
                     if not paragraph.strip():
-                        offset += len(paragraph) + 1  # +1 for the newline
+                        offset += len(paragraph) + 1
                         continue
-                    
-                    # If paragraph is short, process it directly
+
                     if len(paragraph) <= chunk_size:
                         hf_results = self.hf_pipeline(paragraph)
-                        hf_entities = self._process_hf_results(hf_results, offset)
-                        entities.extend(hf_entities)
-                        offset += len(paragraph) + 1  # +1 for the newline
+                        entities.extend(self._process_hf_results(hf_results, offset))
+                        offset += len(paragraph) + 1
                     else:
-                        # Process long paragraph with overlapping chunks
                         para_offset = 0
                         while para_offset < len(paragraph):
                             end = min(para_offset + chunk_size, len(paragraph))
                             chunk = paragraph[para_offset:end]
-                            
-                            # Process the chunk
                             hf_results = self.hf_pipeline(chunk)
-                            
-                            # For overlapping regions, only keep entities fully within the non-overlapping part
-                            # except for the last chunk
+
                             if para_offset > 0 and end < len(paragraph):
                                 filtered_results = [
-                                    r for r in hf_results 
+                                    r for r in hf_results
                                     if r["start"] >= overlap and r["end"] <= len(chunk)
                                 ]
-                                hf_entities = self._process_hf_results(filtered_results, offset + para_offset)
+                                entities.extend(self._process_hf_results(filtered_results, offset + para_offset))
                             else:
-                                hf_entities = self._process_hf_results(hf_results, offset + para_offset)
-                                
-                            entities.extend(hf_entities)
-                            
-                            # Move to next chunk with overlap
+                                entities.extend(self._process_hf_results(hf_results, offset + para_offset))
+
                             para_offset = end - overlap if end < len(paragraph) else len(paragraph)
-                        
-                        offset += len(paragraph) + 1  # +1 for the newline
+
+                        offset += len(paragraph) + 1
             else:
-                # Process short text directly
-                hf_results = self.hf_pipeline(text)
-                entities = self._process_hf_results(hf_results)
+                entities = self._process_hf_results(self.hf_pipeline(text))
         except Exception as e:
-            print(f"Warning: Error in Hugging Face detection: {e}")
+            logger.warning(f"Error in Hugging Face detection: {e}")
             
         # Add specialized detection for ages over 89
         if "AGE_OVER_89" in self.target_identifiers:
@@ -306,6 +299,3 @@ class HFDeidentifier:
         
         return category in self.target_identifiers
 
-
-# Don't create a singleton instance - this should be initialized with proper parameters
-# hf_deidentifier = HFDeidentifier()
