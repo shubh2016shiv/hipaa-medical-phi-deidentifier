@@ -88,18 +88,21 @@ The framework provides a clean command-line interface for triggering evaluations
 ### Running Evaluations
 
 ```powershell
+# One-time: install/sync project dependencies
+uv sync --extra evaluation
+
 # Evaluate the full pipeline against a test document (Standard run)
-python -m hipaa_deidentifier.phi_detection.evaluation \
+uv run --extra evaluation python -m hipaa_deidentifier.phi_detection.evaluation \
     --document "data/Long-term and Supportive Care/home_health_assessment_patient_01.txt"
 
 # Run specific detectors without the LLM judge (Fast diagnostic run)
-python -m hipaa_deidentifier.phi_detection.evaluation \
+uv run --extra evaluation python -m hipaa_deidentifier.phi_detection.evaluation \
     --document "data/Outpatient Documentation/consultation_note_patient_01.txt" \
     --detectors hf,presidio \
     --no-judge
 
 # Export results to a specific JSON directory for tracking
-python -m hipaa_deidentifier.phi_detection.evaluation \
+uv run --extra evaluation python -m hipaa_deidentifier.phi_detection.evaluation \
     --document "data/Outpatient Documentation/consultation_note_patient_01.txt" \
     --output-json ./metrics/history/
 ```

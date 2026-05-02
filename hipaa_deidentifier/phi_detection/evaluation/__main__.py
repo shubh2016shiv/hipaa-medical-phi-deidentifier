@@ -181,7 +181,6 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\n[EVAL] Starting PHI Detection Evaluation")
     print(f"   Document : {document_path.name}")
     print(f"   Detectors: {args.detectors}")
-    print(f"   Judge    : {'LM Studio (deepseek-r1)' if use_judge else 'disabled (--no-judge)'}")
 
     try:
         from .evaluation_config import load_evaluation_config
@@ -193,6 +192,12 @@ def main(argv: list[str] | None = None) -> int:
             eval_config.eval_mode = args.eval_mode
         if args.annotation_dir:
             eval_config.annotations.annotation_dir = args.annotation_dir
+
+        judge_label = (
+            f"LM Studio ({eval_config.lm_studio.model})"
+            if use_judge else "disabled (--no-judge)"
+        )
+        print(f"   Judge    : {judge_label}")
 
         mode = eval_config.eval_mode
         if mode == "auto":
