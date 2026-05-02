@@ -83,8 +83,8 @@ class LMStudioJudge(DeepEvalBaseLLM):
     _BASE_URL: str = "http://localhost:1234/v1/chat/completions"
     _MODEL: str = "deepseek/deepseek-r1-0528-qwen3-8b"
     _TIMEOUT_SECONDS: float = 60.0  # Reasoning models need more time than standard LLMs
-    _MAX_TOKENS: int = 512           # Enough for 3-section structured response
-    _TEMPERATURE: float = 0.1        # Near-deterministic for compliance judgments
+    _MAX_TOKENS: int = 512  # Enough for 3-section structured response
+    _TEMPERATURE: float = 0.1  # Near-deterministic for compliance judgments
 
     def __init__(
         self,
@@ -170,7 +170,9 @@ class LMStudioJudge(DeepEvalBaseLLM):
                 "**RECOMMENDATION**: Start LM Studio and re-run with --judge lm_studio."
             )
         except httpx.TimeoutException:
-            logger.warning("LM Studio judge timed out after %.0fs.", self._TIMEOUT_SECONDS)
+            logger.warning(
+                "LM Studio judge timed out after %.0fs.", self._TIMEOUT_SECONDS
+            )
             return (
                 "**WHY MISSED**: LM Studio judge timed out.\n"
                 "**HIPAA RISK**: UNKNOWN\n"
@@ -215,7 +217,9 @@ class LMStudioJudge(DeepEvalBaseLLM):
         timeout = timeout_seconds or self._TIMEOUT_SECONDS
 
         try:
-            logger.debug("Calling LM Studio JSON judge for prompt (len=%d)", len(prompt))
+            logger.debug(
+                "Calling LM Studio JSON judge for prompt (len=%d)", len(prompt)
+            )
             with httpx.Client(timeout=timeout) as client:
                 response = client.post(endpoint, json=payload)
                 response.raise_for_status()
@@ -335,9 +339,7 @@ class LMStudioJudge(DeepEvalBaseLLM):
                 {"role": "user", "content": prompt},
             ],
             "max_tokens": max_tokens or self._MAX_TOKENS,
-            "temperature": (
-                self._TEMPERATURE if temperature is None else temperature
-            ),
+            "temperature": (self._TEMPERATURE if temperature is None else temperature),
             "stream": False,
         }
 

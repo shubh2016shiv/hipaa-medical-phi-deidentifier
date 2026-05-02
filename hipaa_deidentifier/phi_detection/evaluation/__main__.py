@@ -138,7 +138,8 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
         default=False,
         help="Enable DEBUG-level logging.",
@@ -187,29 +188,25 @@ def main(argv: list[str] | None = None) -> int:
         from .reports.report_generator import ReportGenerator
         from .runners.llm_evaluator import LLMEvaluator
 
+        from .evaluation_config import EvaluationMode
+        from typing import cast
+
         eval_config = load_evaluation_config(args.eval_config)
         if args.eval_mode:
-            eval_config.eval_mode = args.eval_mode
+            eval_config.eval_mode = cast(EvaluationMode, args.eval_mode)
         if args.annotation_dir:
             eval_config.annotations.annotation_dir = args.annotation_dir
 
         judge_label = (
             f"LM Studio ({eval_config.lm_studio.model})"
-            if use_judge else "disabled (--no-judge)"
+            if use_judge
+            else "disabled (--no-judge)"
         )
         print(f"   Judge    : {judge_label}")
 
         mode = eval_config.eval_mode
         if mode == "auto":
-            try:
-                from .ground_truth.annotation_schema import AnnotatedDocument
-                AnnotatedDocument.find_annotation_for_document(
-                    document_path=document_path,
-                    annotation_dir=eval_config.annotations.annotation_dir,
-                )
-                mode = "annotations"
-            except FileNotFoundError:
-                mode = "llm"
+            mode = "llm"
 
         print(f"   Mode     : {mode}")
 
@@ -240,7 +237,6 @@ def main(argv: list[str] | None = None) -> int:
             document_path=str(document_path),
             detectors=args.detectors,
             use_judge=use_judge,
-            annotation_dir=eval_config.annotations.annotation_dir,
         )
         results.update(detector_ev.run())
 
@@ -250,10 +246,11 @@ def main(argv: list[str] | None = None) -> int:
             pipeline_ev = PipelineEvaluator(
                 document_path=str(document_path),
                 use_judge=use_judge,
-                annotation_dir=eval_config.annotations.annotation_dir,
             )
             pipeline_metrics = pipeline_ev.run()
-            results["Full Pipeline (HF + Presidio + Heuristics, merged)"] = pipeline_metrics
+            results["Full Pipeline (HF + Presidio + Heuristics, merged)"] = (
+                pipeline_metrics
+            )
 
         # --- Render report ---
         generator.render_console(results, document_name=document_path.stem)

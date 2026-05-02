@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Literal, Sequence
+from typing import Dict, Iterable, List, Literal, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,8 @@ class DetectorMetrics:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _gold_to_token_set(gold_spans: Sequence) -> set[int]:
+
+def _gold_to_token_set(gold_spans: Iterable) -> set[int]:
     """Convert a list of AnnotatedSpan objects into a set of character positions.
 
     Args:
@@ -157,7 +158,7 @@ def _gold_to_token_set(gold_spans: Sequence) -> set[int]:
     return positions
 
 
-def _pred_to_token_set(pred_entities: Sequence) -> set[int]:
+def _pred_to_token_set(pred_entities: Iterable) -> set[int]:
     """Convert a list of PHIEntity objects into a set of character positions.
 
     Args:
@@ -207,6 +208,7 @@ def _count_true_negatives(
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def compute_token_level_metrics(
     predicted_entities: Sequence,
@@ -280,27 +282,25 @@ def compute_token_level_metrics(
 
     # Track which gold spans were entirely missed (for LLM judge)
     missed_gold_indices = [
-        idx for idx, span in enumerate(gold_spans)
-        if not any(
-            pos in all_pred_positions
-            for pos in range(span.start, span.end)
-        )
+        idx
+        for idx, span in enumerate(gold_spans)
+        if not any(pos in all_pred_positions for pos in range(span.start, span.end))
     ]
 
     # Track false positive predicted entities (entirely outside gold)
     fp_predicted_indices = [
-        idx for idx, entity in enumerate(predicted_entities)
-        if not any(
-            pos in all_gold_positions
-            for pos in range(entity.start, entity.end)
-        )
+        idx
+        for idx, entity in enumerate(predicted_entities)
+        if not any(pos in all_gold_positions for pos in range(entity.start, entity.end))
     ]
 
     logger.debug(
-        "Token-level metrics: TP=%.0f FP=%.0f FN=%.0f | "
-        "missed=%d FP_entities=%d",
-        overall_tp, overall_fp, overall_fn,
-        len(missed_gold_indices), len(fp_predicted_indices),
+        "Token-level metrics: TP=%.0f FP=%.0f FN=%.0f | missed=%d FP_entities=%d",
+        overall_tp,
+        overall_fp,
+        overall_fn,
+        len(missed_gold_indices),
+        len(fp_predicted_indices),
     )
 
     return DetectorMetrics(
@@ -433,8 +433,11 @@ def compute_span_level_metrics(
 
     logger.debug(
         "Span-level metrics: TP=%.0f FP=%.0f FN=%.0f | missed=%d FP=%d",
-        overall_tp, overall_fp, overall_fn,
-        len(missed_gold_indices), len(fp_predicted_indices),
+        overall_tp,
+        overall_fp,
+        overall_fn,
+        len(missed_gold_indices),
+        len(fp_predicted_indices),
     )
 
     return DetectorMetrics(

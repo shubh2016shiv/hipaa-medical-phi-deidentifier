@@ -16,7 +16,7 @@ Architecture:
     ┌──────────▼──────────────────────────────────────┐
     │  HFIdentifier.detect()         → hf_entities    │
     │  PresidioIdentifier.detect()   → presidio_ent.  │
-    │  detect_section_headers()  \                    │
+    │  detect_section_headers()  \\                   │
     │  detect_ages_over_89()      }  → heuristic_ent. │
     │  detect_long_numeric_ids() /                    │
     └──────────┬──────────────────────────────────────┘
@@ -46,16 +46,12 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from deepeval.test_case import LLMTestCase
-
 from hipaa_deidentifier.models.phi_entity import PHIEntity
 from hipaa_deidentifier.phi_detection.clinical_patterns import (
     detect_clinical_phi,
 )
 
-from ..ground_truth.annotation_schema import AnnotatedDocument
-from ..metrics.hipaa_coverage_metric import HIPAACoverageMetric
-from ..metrics.span_metrics import DetectorMetrics, compute_per_detector_metrics
+from ..metrics.span_metrics import DetectorMetrics
 
 if TYPE_CHECKING:
     from ..judges.lm_studio_judge import LMStudioJudge
@@ -98,7 +94,6 @@ class DetectorEvaluator:
         document_path: str,
         detectors: str = "all",
         use_judge: bool = True,
-        annotation_dir: Optional[str] = None,
     ) -> None:
         """Initialise the detector evaluator.
 
@@ -106,21 +101,19 @@ class DetectorEvaluator:
             document_path: Path to the clinical note file.
             detectors: Comma-separated detector names or 'all'.
             use_judge: If True, call LM Studio judge on failures.
-            annotation_dir: Override directory for annotation JSON files.
 
         Example:
             >>> ev = DetectorEvaluator("data/.../note.txt", detectors="hf,presidio")
         """
         self.document_path = Path(document_path)
         self.use_judge = use_judge
-        self.annotation_dir = annotation_dir
 
         self._requested_detectors = self._parse_detectors(detectors)
         self._text: str = ""
-        self._annotated_doc: Optional[AnnotatedDocument] = None
         self._judge: Optional["LMStudioJudge"] = None
         if use_judge:
             from ..judges.lm_studio_judge import LMStudioJudge
+
             self._judge = LMStudioJudge()
 
         logger.info(
@@ -147,7 +140,7 @@ class DetectorEvaluator:
             >>> results = evaluator.run()
             >>> print(results["HFIdentifier (obi/deid_bert_i2b2)"].recall)
         """
-        self._load_document_and_annotations()
+        self._load_document()
         results: Dict[str, DetectorMetrics] = {}
 
         if "hf" in self._requested_detectors:
@@ -159,20 +152,18 @@ class DetectorEvaluator:
         if "heuristics" in self._requested_detectors:
             results[_DETECTOR_LABELS["heuristics"]] = self._run_heuristics_detector()
 
-        logger.info(
-            "DetectorEvaluator complete: %d detectors evaluated", len(results)
-        )
+        logger.info("DetectorEvaluator complete: %d detectors evaluated", len(results))
         return results
 
     # -----------------------------------------------------------------------
     # Document loading
     # -----------------------------------------------------------------------
 
-    def _load_document_and_annotations(self) -> None:
-        """Load the document text and find the matching annotation file.
+    def _load_document(self) -> None:
+        """Load the document text from disk.
 
         Raises:
-            FileNotFoundError: If the document or annotation is not found.
+            FileNotFoundError: If the document is not found.
         """
         if not self.document_path.exists():
             raise FileNotFoundError(
@@ -183,14 +174,6 @@ class DetectorEvaluator:
         self._text = self.document_path.read_text(encoding="utf-8")
         logger.info(
             "Loaded document: %s (%d chars)", self.document_path.name, len(self._text)
-        )
-
-        self._annotated_doc = AnnotatedDocument.find_annotation_for_document(
-            document_path=self.document_path,
-            annotation_dir=self.annotation_dir,
-        )
-        logger.info(
-            "Loaded annotation: %d PHI spans", len(self._annotated_doc.annotations)
         )
 
     # -----------------------------------------------------------------------
@@ -208,7 +191,10 @@ class DetectorEvaluator:
 
         try:
             from config.config import config as global_config
-            from hipaa_deidentifier.phi_detection.identifier.huggingface_model_identifier import HFIdentifier
+            from hipaa_deidentifier.phi_detection.identifier.huggingface_model_identifier import (
+                HFIdentifier,
+            )
+
             cfg = global_config.get_settings()
             hf_model = cfg.get("models", {}).get("huggingface", "obi/deid_bert_i2b2")
             device = cfg.get("models", {}).get("device", -1)
@@ -234,7 +220,10 @@ class DetectorEvaluator:
 
         try:
             from config.config import config as global_config
-            from hipaa_deidentifier.phi_detection.identifier.presidio_identifier import PresidioIdentifier
+            from hipaa_deidentifier.phi_detection.identifier.presidio_identifier import (
+                PresidioIdentifier,
+            )
+
             cfg = global_config.get_settings()
 
             identifier = PresidioIdentifier(config=cfg)
@@ -257,12 +246,12 @@ class DetectorEvaluator:
     def _run_heuristics_detector(self) -> DetectorMetrics:
         """Run clinical heuristic detectors in isolation and compute metrics.
 
-    Includes the same clinical heuristic suite used by the broader heuristic
-        module: section headers, initials/nicknames, facility names,
-        relatives/contacts, ages over 89, and long numeric IDs.
+        Includes the same clinical heuristic suite used by the broader heuristic
+            module: section headers, initials/nicknames, facility names,
+            relatives/contacts, ages over 89, and long numeric IDs.
 
-        Returns:
-            DetectorMetrics for clinical heuristics alone.
+            Returns:
+                DetectorMetrics for clinical heuristics alone.
         """
         logger.info("Running clinical heuristics...")
         label = _DETECTOR_LABELS["heuristics"]
@@ -286,66 +275,22 @@ class DetectorEvaluator:
         detector_name: str,
         entities: List[PHIEntity],
     ) -> DetectorMetrics:
-        """Score predicted entities against ground truth, then run coverage metric.
+        """Return a DetectorMetrics summarising the detector's detected entities.
 
         Args:
             detector_name: Human-readable detector label.
             entities: Predicted PHIEntity list from the detector.
 
         Returns:
-            DetectorMetrics with optional judge analysis attached to reason.
+            DetectorMetrics with status and entity count (no ground truth scoring).
         """
-        assert self._annotated_doc is not None, "_load_document_and_annotations must run first"
-
-        # Primary: token-level metrics
-        token_metrics = compute_per_detector_metrics(
+        metrics = DetectorMetrics(
             detector_name=detector_name,
-            predicted_entities=entities,
-            gold_spans=self._annotated_doc.annotations,
-            text=self._text,
             mode="token",
+            status="ok",
         )
-
-        # Secondary: span-level metrics (stored in per_type as "_span" suffix)
-        span_metrics = compute_per_detector_metrics(
-            detector_name=detector_name,
-            predicted_entities=entities,
-            gold_spans=self._annotated_doc.annotations,
-            text=self._text,
-            mode="span",
-        )
-
-        # Attach span-level per_type alongside token-level
-        for etype, sm in span_metrics.per_type.items():
-            token_metrics.per_type[f"{etype}_span"] = sm
-        token_metrics.per_type["_ALL_span"] = span_metrics.overall
-
-        # HIPAA coverage metric (calls judge if enabled)
-        coverage_metric = HIPAACoverageMetric(
-            threshold=0.95, judge=self._judge
-        )
-        dummy_test_case = LLMTestCase(
-            input=self.document_path.name,
-            actual_output=f"detected {len(entities)} entities",
-        )
-        coverage_metric.measure(dummy_test_case, token_metrics, self._annotated_doc)
-
-        logger.info(
-            "[%s] Recall=%.2f%% Precision=%.2f%% F1=%.2f%% | "
-            "HIPAA Coverage: %s",
-            detector_name,
-            token_metrics.recall * 100,
-            token_metrics.precision * 100,
-            token_metrics.f1 * 100,
-            "PASS" if coverage_metric.is_successful() else "FAIL",
-        )
-
-        # Attach coverage metric result to metrics object as metadata
-        token_metrics.hipaa_coverage_score = coverage_metric.score      # type: ignore[attr-defined]
-        token_metrics.hipaa_coverage_pass = coverage_metric.is_successful()  # type: ignore[attr-defined]
-        token_metrics.hipaa_coverage_reason = coverage_metric.reason    # type: ignore[attr-defined]
-
-        return token_metrics
+        logger.info("[%s] Detected %d entities", detector_name, len(entities))
+        return metrics
 
     # -----------------------------------------------------------------------
     # Helpers
@@ -379,8 +324,6 @@ class DetectorEvaluator:
         unknown = set(requested) - valid
 
         if unknown:
-            logger.warning(
-                "Unknown detectors ignored: %s. Valid: %s", unknown, valid
-            )
+            logger.warning("Unknown detectors ignored: %s. Valid: %s", unknown, valid)
 
         return [d for d in requested if d in valid]

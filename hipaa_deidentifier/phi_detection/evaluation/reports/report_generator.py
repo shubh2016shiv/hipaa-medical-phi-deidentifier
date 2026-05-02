@@ -36,15 +36,22 @@ from ..metrics.span_metrics import DetectorMetrics
 logger = logging.getLogger(__name__)
 
 # Directory for JSON output files (relative to project root)
-_DEFAULT_RESULTS_DIR: Path = (
-    Path(__file__).resolve().parent.parent / "results"
-)
+_DEFAULT_RESULTS_DIR: Path = Path(__file__).resolve().parent.parent / "results"
 
 # Entity types to show in the per-type breakdown table (display order)
 _DISPLAY_ENTITY_TYPES: list[str] = [
-    "NAME", "MRN", "DATE", "AGE_OVER_89", "LOCATION",
-    "ACCOUNT_NUMBER", "ORGANIZATION", "PHONE_NUMBER",
-    "FAX_NUMBER", "EMAIL_ADDRESS", "US_SSN", "LICENSE_NUMBER",
+    "NAME",
+    "MRN",
+    "DATE",
+    "AGE_OVER_89",
+    "LOCATION",
+    "ACCOUNT_NUMBER",
+    "ORGANIZATION",
+    "PHONE_NUMBER",
+    "FAX_NUMBER",
+    "EMAIL_ADDRESS",
+    "US_SSN",
+    "LICENSE_NUMBER",
 ]
 
 
@@ -79,15 +86,23 @@ class ReportGenerator:
         table = tabulate(
             rows,
             headers=[
-                "Detector", "Entity Type",
-                "Precision", "Recall", "F1",
-                "FNR", "FPR",
-                "Token-Recall", "Span-Recall", "Status",
+                "Detector",
+                "Entity Type",
+                "Precision",
+                "Recall",
+                "F1",
+                "FNR",
+                "FPR",
+                "Token-Recall",
+                "Span-Recall",
+                "Status",
             ],
             tablefmt="pipe",
             floatfmt=".3f",
         )
-        print("\n[METRICS] Per-Detector x Per-Entity-Type Metrics (Token-Level Primary)\n")
+        print(
+            "\n[METRICS] Per-Detector x Per-Entity-Type Metrics (Token-Level Primary)\n"
+        )
         print(table)
 
         # --- Overall summary table ---
@@ -95,8 +110,13 @@ class ReportGenerator:
         summary_table = tabulate(
             summary_rows,
             headers=[
-                "Detector", "Overall Precision", "Overall Recall", "Overall F1",
-                "FNR", "HIPAA Coverage", "Status",
+                "Detector",
+                "Overall Precision",
+                "Overall Recall",
+                "Overall F1",
+                "FNR",
+                "HIPAA Coverage",
+                "Status",
             ],
             tablefmt="pipe",
             floatfmt=".3f",
@@ -149,20 +169,26 @@ class ReportGenerator:
         print(self._build_header(result.get("document")))
 
         detector_rows = []
-        for detector_name, detector_result in result.get("detector_entities", {}).items():
-            detector_rows.append([
-                _shorten_detector_name(detector_name),
-                detector_result.get("status", "unknown"),
-                len(detector_result.get("entities", [])),
-                detector_result.get("error_message") or "",
-            ])
+        for detector_name, detector_result in result.get(
+            "detector_entities", {}
+        ).items():
+            detector_rows.append(
+                [
+                    _shorten_detector_name(detector_name),
+                    detector_result.get("status", "unknown"),
+                    len(detector_result.get("entities", [])),
+                    detector_result.get("error_message") or "",
+                ]
+            )
 
         print("\n[DETECTORS] Detector Output Summary\n")
-        print(tabulate(
-            detector_rows,
-            headers=["Detector", "Status", "Entities", "Error"],
-            tablefmt="pipe",
-        ))
+        print(
+            tabulate(
+                detector_rows,
+                headers=["Detector", "Status", "Entities", "Error"],
+                tablefmt="pipe",
+            )
+        )
 
         status = result.get("llm_status", "unknown")
         judgment = result.get("llm_judgment") or {}
@@ -170,12 +196,16 @@ class ReportGenerator:
 
         print("\n[LLM JUDGE] HIPAA Safe Harbor Coverage\n")
         if status != "ok":
-            print(f"[ERROR] {result.get('llm_error_message') or 'LLM evaluation failed'}")
+            print(
+                f"[ERROR] {result.get('llm_error_message') or 'LLM evaluation failed'}"
+            )
             return
 
         coverage_score = judgment.get("coverage_score")
         coverage_display = (
-            f"{coverage_score:.1%}" if isinstance(coverage_score, (int, float)) else "N/A"
+            f"{coverage_score:.1%}"
+            if isinstance(coverage_score, (int, float))
+            else "N/A"
         )
         pass_display = "[PASS]" if judgment.get("overall_pass") else "[FAIL]"
         print(f"Status          : {pass_display}")
@@ -211,9 +241,7 @@ class ReportGenerator:
     ) -> Path:
         """Write an annotation-free LLM evaluation report to JSON."""
         configured_output = (
-            result.get("evaluation_config", {})
-            .get("reports", {})
-            .get("output_dir")
+            result.get("evaluation_config", {}).get("reports", {}).get("output_dir")
         )
         results_dir = Path(output_dir or configured_output or _DEFAULT_RESULTS_DIR)
         results_dir.mkdir(parents=True, exist_ok=True)
@@ -245,8 +273,7 @@ class ReportGenerator:
             f"  PHI DETECTION EVALUATION REPORT\n"
             f"  Document : {doc_label}\n"
             f"  Timestamp: {timestamp}\n"
-            f"  Standard : HIPAA Safe Harbor (45 CFR section 164.514(b))\n"
-            + "=" * 80
+            f"  Standard : HIPAA Safe Harbor (45 CFR section 164.514(b))\n" + "=" * 80
         )
 
     @staticmethod
@@ -266,32 +293,52 @@ class ReportGenerator:
             short_name = _shorten_detector_name(detector_name)
 
             if metrics.status == "error":
-                rows.append([
-                    short_name,
-                    "ERROR",
-                    "-", "-", "-", "-", "-", "-", "-",
-                    metrics.error_message or "Detector failed",
-                ])
-                rows.append([
-                    "-" * 30, "-" * 20, "-" * 9, "-" * 6, "-" * 6,
-                    "-" * 6, "-" * 6, "-" * 12, "-" * 11, "-" * 20,
-                ])
+                rows.append(
+                    [
+                        short_name,
+                        "ERROR",
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        metrics.error_message or "Detector failed",
+                    ]
+                )
+                rows.append(
+                    [
+                        "-" * 30,
+                        "-" * 20,
+                        "-" * 9,
+                        "-" * 6,
+                        "-" * 6,
+                        "-" * 6,
+                        "-" * 6,
+                        "-" * 12,
+                        "-" * 11,
+                        "-" * 20,
+                    ]
+                )
                 continue
 
             # Overall row first
             span_overall = metrics.per_type.get("_ALL_span")
-            rows.append([
-                short_name,
-                "ALL (overall)",
-                f"{metrics.precision:.3f}",
-                f"{metrics.recall:.3f}",
-                f"{metrics.f1:.3f}",
-                f"{metrics.false_negative_rate:.3f}",
-                f"{metrics.overall.false_positive_rate:.3f}",
-                f"{metrics.recall:.3f}",
-                f"{span_overall.recall:.3f}" if span_overall else "-",
-                "ok",
-            ])
+            rows.append(
+                [
+                    short_name,
+                    "ALL (overall)",
+                    f"{metrics.precision:.3f}",
+                    f"{metrics.recall:.3f}",
+                    f"{metrics.f1:.3f}",
+                    f"{metrics.false_negative_rate:.3f}",
+                    f"{metrics.overall.false_positive_rate:.3f}",
+                    f"{metrics.recall:.3f}",
+                    f"{span_overall.recall:.3f}" if span_overall else "-",
+                    "ok",
+                ]
+            )
 
             # Per-type rows (only types in our display list)
             for entity_type in _DISPLAY_ENTITY_TYPES:
@@ -302,23 +349,42 @@ class ReportGenerator:
                     continue
 
                 # Skip types where nothing was detected AND no gold
-                if tm.true_positives == 0 and tm.false_negatives == 0 and tm.false_positives == 0:
+                if (
+                    tm.true_positives == 0
+                    and tm.false_negatives == 0
+                    and tm.false_positives == 0
+                ):
                     continue
 
-                rows.append([
-                    "",  # No detector name repeat — visual grouping
-                    f"  {entity_type}",
-                    f"{tm.precision:.3f}",
-                    f"{tm.recall:.3f}",
-                    f"{tm.f1:.3f}",
-                    f"{tm.false_negative_rate:.3f}",
-                    f"{tm.false_positive_rate:.3f}",
-                    f"{tm.recall:.3f}",
-                    f"{sm.recall:.3f}" if sm else "-",
-                    "ok",
-                ])
+                rows.append(
+                    [
+                        "",  # No detector name repeat — visual grouping
+                        f"  {entity_type}",
+                        f"{tm.precision:.3f}",
+                        f"{tm.recall:.3f}",
+                        f"{tm.f1:.3f}",
+                        f"{tm.false_negative_rate:.3f}",
+                        f"{tm.false_positive_rate:.3f}",
+                        f"{tm.recall:.3f}",
+                        f"{sm.recall:.3f}" if sm else "-",
+                        "ok",
+                    ]
+                )
 
-            rows.append(["-" * 30, "-" * 20, "-" * 9, "-" * 6, "-" * 6, "-" * 6, "-" * 6, "-" * 12, "-" * 11, "-" * 6])
+            rows.append(
+                [
+                    "-" * 30,
+                    "-" * 20,
+                    "-" * 9,
+                    "-" * 6,
+                    "-" * 6,
+                    "-" * 6,
+                    "-" * 6,
+                    "-" * 12,
+                    "-" * 11,
+                    "-" * 6,
+                ]
+            )
 
         return rows
 
@@ -336,25 +402,33 @@ class ReportGenerator:
         for detector_name, metrics in results.items():
             short_name = _shorten_detector_name(detector_name)
             if metrics.status == "error":
-                rows.append([
-                    short_name,
-                    "-", "-", "-", "-", "-",
-                    f"[ERROR] {metrics.error_message or 'Detector failed'}",
-                ])
+                rows.append(
+                    [
+                        short_name,
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        "-",
+                        f"[ERROR] {metrics.error_message or 'Detector failed'}",
+                    ]
+                )
                 continue
 
             coverage_score = getattr(metrics, "hipaa_coverage_score", None)
             coverage_pass = getattr(metrics, "hipaa_coverage_pass", None)
 
-            rows.append([
-                short_name,
-                f"{metrics.precision:.3f}",
-                f"{metrics.recall:.3f}",
-                f"{metrics.f1:.3f}",
-                f"{metrics.false_negative_rate:.3f}",
-                f"{coverage_score:.3f}" if coverage_score is not None else "-",
-                "[PASS]" if coverage_pass else "[FAIL]",
-            ])
+            rows.append(
+                [
+                    short_name,
+                    f"{metrics.precision:.3f}",
+                    f"{metrics.recall:.3f}",
+                    f"{metrics.f1:.3f}",
+                    f"{metrics.false_negative_rate:.3f}",
+                    f"{coverage_score:.3f}" if coverage_score is not None else "-",
+                    "[PASS]" if coverage_pass else "[FAIL]",
+                ]
+            )
 
         return rows
 
@@ -438,7 +512,9 @@ class ReportGenerator:
                 },
                 "hipaa_coverage_score": getattr(metrics, "hipaa_coverage_score", None),
                 "hipaa_coverage_pass": getattr(metrics, "hipaa_coverage_pass", None),
-                "hipaa_coverage_reason": getattr(metrics, "hipaa_coverage_reason", None),
+                "hipaa_coverage_reason": getattr(
+                    metrics, "hipaa_coverage_reason", None
+                ),
                 "per_type": per_type_serialized,
                 "missed_gold_indices": metrics.missed_gold_indices,
                 "fp_predicted_indices": metrics.fp_predicted_indices,
@@ -450,6 +526,7 @@ class ReportGenerator:
 # ---------------------------------------------------------------------------
 # Module-level utility
 # ---------------------------------------------------------------------------
+
 
 def _shorten_detector_name(name: str) -> str:
     """Shorten long detector names for table display.

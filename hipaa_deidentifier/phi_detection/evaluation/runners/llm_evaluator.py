@@ -53,6 +53,7 @@ class LLMEvaluator:
         self._judge: Optional["LMStudioJudge"] = None
         if use_judge:
             from ..judges.lm_studio_judge import LMStudioJudge
+
             self._judge = LMStudioJudge(
                 base_url=config.lm_studio.base_url,
                 model=config.lm_studio.model,
@@ -141,16 +142,22 @@ class LLMEvaluator:
 
     def _run_hf_detector(self) -> List[PHIEntity]:
         from config.config import config as global_config
-        from hipaa_deidentifier.phi_detection.identifier.huggingface_model_identifier import HFIdentifier
+        from hipaa_deidentifier.phi_detection.identifier.huggingface_model_identifier import (
+            HFIdentifier,
+        )
 
         cfg = global_config.get_settings()
         hf_model = cfg.get("models", {}).get("huggingface", "obi/deid_bert_i2b2")
         device = cfg.get("models", {}).get("device", -1)
-        return HFIdentifier(hf_model=hf_model, device=device, config=cfg).detect(self._text)
+        return HFIdentifier(hf_model=hf_model, device=device, config=cfg).detect(
+            self._text
+        )
 
     def _run_presidio_detector(self) -> List[PHIEntity]:
         from config.config import config as global_config
-        from hipaa_deidentifier.phi_detection.identifier.presidio_identifier import PresidioIdentifier
+        from hipaa_deidentifier.phi_detection.identifier.presidio_identifier import (
+            PresidioIdentifier,
+        )
 
         cfg = global_config.get_settings()
         identifier = PresidioIdentifier(config=cfg)
@@ -221,7 +228,10 @@ class LLMEvaluator:
                 "text": {"type": "string"},
                 "category": {"type": "string"},
                 "evidence": {"type": "string"},
-                "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                "severity": {
+                    "type": "string",
+                    "enum": ["critical", "high", "medium", "low"],
+                },
                 "rationale": {"type": "string"},
             },
             "required": ["text", "category", "evidence", "severity", "rationale"],
@@ -245,7 +255,10 @@ class LLMEvaluator:
                         "properties": {
                             "overall_pass": {"type": "boolean"},
                             "coverage_score": {"type": "number"},
-                            "missed_entities": {"type": "array", "items": entity_schema},
+                            "missed_entities": {
+                                "type": "array",
+                                "items": entity_schema,
+                            },
                             "false_positives": {
                                 "type": "array",
                                 "items": {
@@ -257,7 +270,12 @@ class LLMEvaluator:
                                         "detector": {"type": "string"},
                                         "rationale": {"type": "string"},
                                     },
-                                    "required": ["text", "category", "detector", "rationale"],
+                                    "required": [
+                                        "text",
+                                        "category",
+                                        "detector",
+                                        "rationale",
+                                    ],
                                 },
                             },
                             "category_mismatches": {

@@ -40,6 +40,8 @@ Last Updated: 2026-05-02
 
 from __future__ import annotations
 
+from .evaluation_config import EvaluationMode
+
 __all__ = [
     "run_evaluation",
 ]
@@ -49,7 +51,7 @@ def run_evaluation(
     document_path: str,
     detectors: str = "all",
     use_judge: bool = True,
-    eval_mode: str | None = None,
+    eval_mode: EvaluationMode | None = None,
     eval_config_path: str | None = None,
 ) -> dict:
     """Run the full PHI detection evaluation on a single document.
@@ -86,15 +88,7 @@ def run_evaluation(
 
     mode = config.eval_mode
     if mode == "auto":
-        try:
-            from .ground_truth.annotation_schema import AnnotatedDocument
-            AnnotatedDocument.find_annotation_for_document(
-                document_path=document_path,
-                annotation_dir=config.annotations.annotation_dir,
-            )
-            mode = "annotations"
-        except FileNotFoundError:
-            mode = "llm"
+        mode = "llm"
 
     if mode == "llm":
         result = LLMEvaluator(
@@ -113,7 +107,6 @@ def run_evaluation(
         document_path=document_path,
         detectors=detectors,
         use_judge=use_judge,
-        annotation_dir=config.annotations.annotation_dir,
     )
     results = evaluator.run()
 
@@ -121,7 +114,6 @@ def run_evaluation(
         pipeline_ev = PipelineEvaluator(
             document_path=document_path,
             use_judge=use_judge,
-            annotation_dir=config.annotations.annotation_dir,
         )
         results["pipeline"] = pipeline_ev.run()
 

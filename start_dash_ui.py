@@ -16,7 +16,7 @@ Requirements:
 import sys
 import subprocess
 import importlib.util
-import os
+
 
 def check_python_version():
     """Check if Python version is compatible"""
@@ -26,16 +26,17 @@ def check_python_version():
         return False
     return True
 
+
 def check_dependencies():
     """Check if required packages are installed"""
-    required_packages = ['dash', 'plotly', 'pandas']
+    required_packages = ["dash", "plotly", "pandas"]
     missing_packages = []
-    
+
     for package in required_packages:
         spec = importlib.util.find_spec(package)
         if spec is None:
             missing_packages.append(package)
-    
+
     if missing_packages:
         print("❌ Missing required packages:")
         for package in missing_packages:
@@ -43,19 +44,23 @@ def check_dependencies():
         print("\n💡 Install missing packages with:")
         print("   pip install -r requirements_dash.txt")
         return False
-    
+
     return True
+
 
 def install_dependencies():
     """Install required dependencies"""
     try:
         print("📦 Installing required dependencies...")
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements_dash.txt'])
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "-r", "requirements_dash.txt"]
+        )
         print("✅ Dependencies installed successfully")
         return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install dependencies: {e}")
         return False
+
 
 def start_dash_ui():
     """Start the Dash UI application"""
@@ -69,11 +74,12 @@ def start_dash_ui():
         print("🔗 Application will be available at: http://localhost:8050")
         print("⏹️  Press Ctrl+C to stop the application")
         print("=" * 50)
-        
+
         # Import and run the Dash app
         from dash_ui import app
-        app.run_server(debug=False, host='0.0.0.0', port=8050)
-        
+
+        app.run_server(debug=False, host="0.0.0.0", port=8050)
+
     except ImportError as e:
         print(f"❌ Failed to import dash_ui module: {e}")
         print("   Make sure dash_ui.py is in the current directory")
@@ -85,21 +91,22 @@ def start_dash_ui():
         print(f"❌ Error starting application: {e}")
         return False
 
+
 def main():
     """Main launcher function"""
     print("🏥 DEID Patients - Dash UI Launcher")
     print("=" * 40)
-    
+
     # Check Python version
     if not check_python_version():
         sys.exit(1)
-    
+
     # Check dependencies
     if not check_dependencies():
         print("\n🤔 Would you like to install missing dependencies? (y/n): ", end="")
         try:
             response = input().lower().strip()
-            if response in ['y', 'yes']:
+            if response in ["y", "yes"]:
                 if not install_dependencies():
                     sys.exit(1)
             else:
@@ -108,12 +115,11 @@ def main():
         except KeyboardInterrupt:
             print("\n👋 Installation cancelled by user")
             sys.exit(1)
-    
+
     # Start the application
     if not start_dash_ui():
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
-
-

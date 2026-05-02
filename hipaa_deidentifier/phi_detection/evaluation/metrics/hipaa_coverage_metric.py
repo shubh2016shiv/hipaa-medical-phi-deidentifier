@@ -25,28 +25,29 @@ Last Updated: 2026-05-02
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from deepeval.metrics import BaseMetric
 from deepeval.test_case import LLMTestCase
 
 if TYPE_CHECKING:
-    from ..ground_truth.annotation_schema import AnnotatedDocument, AnnotatedSpan
     from ..judges.lm_studio_judge import LMStudioJudge
     from .span_metrics import DetectorMetrics
 
 logger = logging.getLogger(__name__)
 
 # HIPAA Safe Harbor categories that are most critical for patient re-identification
-_CRITICAL_ENTITY_TYPES: frozenset[str] = frozenset({
-    "NAME",
-    "MRN",
-    "DATE",
-    "AGE_OVER_89",
-    "LOCATION",
-    "ACCOUNT_NUMBER",
-    "US_SSN",
-})
+_CRITICAL_ENTITY_TYPES: frozenset[str] = frozenset(
+    {
+        "NAME",
+        "MRN",
+        "DATE",
+        "AGE_OVER_89",
+        "LOCATION",
+        "ACCOUNT_NUMBER",
+        "US_SSN",
+    }
+)
 
 # Recall threshold — 95% on critical identifiers (HIPAA audit standard)
 _HIPAA_RECALL_THRESHOLD: float = 0.95
@@ -100,15 +101,15 @@ class HIPAACoverageMetric(BaseMetric):
         self.judge = judge
         self.critical_types = critical_types
         # deepeval requires these attributes
-        self.score: float = 0.0
-        self.reason: str = ""
-        self.success: bool = False
+        self.score: float | None = 0.0
+        self.reason: str | None = ""
+        self.success: bool | None = False
 
     def measure(
         self,
         test_case: LLMTestCase,
         detector_metrics: "DetectorMetrics",
-        annotated_doc: "AnnotatedDocument",
+        annotated_doc: Any,
     ) -> float:
         """Compute the HIPAA coverage score and optionally invoke the judge.
 
@@ -175,7 +176,7 @@ class HIPAACoverageMetric(BaseMetric):
         self,
         test_case: LLMTestCase,
         detector_metrics: "DetectorMetrics",
-        annotated_doc: "AnnotatedDocument",
+        annotated_doc: Any,
     ) -> float:
         """Async version of measure — delegates to synchronous implementation.
 
@@ -196,7 +197,7 @@ class HIPAACoverageMetric(BaseMetric):
         Returns:
             Boolean pass/fail from most recent evaluation.
         """
-        return self.success
+        return bool(self.success)
 
     # -----------------------------------------------------------------------
     # Private helpers
@@ -227,8 +228,8 @@ class HIPAACoverageMetric(BaseMetric):
     def _find_missed_critical_spans(
         self,
         metrics: "DetectorMetrics",
-        annotated_doc: "AnnotatedDocument",
-    ) -> List["AnnotatedSpan"]:
+        annotated_doc: Any,
+    ) -> List[Any]:
         """Return gold spans that were missed and are of a critical type.
 
         Args:
@@ -248,8 +249,8 @@ class HIPAACoverageMetric(BaseMetric):
 
     def _run_judge_on_missed_entities(
         self,
-        missed_spans: List["AnnotatedSpan"],
-        annotated_doc: "AnnotatedDocument",
+        missed_spans: List[Any],
+        annotated_doc: Any,
         detector_name: str,
     ) -> str:
         """Call the LM Studio judge for each missed critical entity.
@@ -275,7 +276,10 @@ class HIPAACoverageMetric(BaseMetric):
                 hipaa_rule=span.hipaa_rule,
             )
 
-            logger.debug("Calling judge for missed: %r (%s)", span.value, span.entity_type)
+            logger.debug(
+                "Calling judge for missed: %r (%s)", span.value, span.entity_type
+            )
+            assert self.judge is not None
             verdict = self.judge.generate(prompt)
 
             analyses.append(
