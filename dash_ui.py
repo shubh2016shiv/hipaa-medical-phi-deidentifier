@@ -1,7 +1,7 @@
 """
 DEID Patients - Professional Dash UI for HIPAA-Compliant Clinical Data De-identification
 
-This module provides a professional web interface for showcasing clinical data 
+This module provides a professional web interface for showcasing clinical data
 de-identification capabilities to clinicians and AI professionals. The UI emphasizes
 HIPAA compliance, real-time processing, and clear before/after comparisons.
 
@@ -16,37 +16,33 @@ Target Audience: Clinicians and AI professionals
 Focus: Clinical Data De-Identification as per HIPAA Compliance
 """
 
-import dash
-from dash import dcc, html, Input, Output, State, callback, dash_table
-import plotly.graph_objs as go
-import re
-import json
-from datetime import datetime
-import base64
-import io
-import sys
 import os
+import re
+import sys
 from pathlib import Path
+
+import dash
+from dash import Input, Output, State, dash_table, dcc, html
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import the real backend functionality
-from hipaa_deidentifier.deidentifier_modular import HIPAADeidentifierModular
 from config.config import config as global_config
+from hipaa_deidentifier.pipeline_orchestrator import HIPAAPipelineOrchestrator
 
 # Initialize Dash app with professional healthcare styling
 app = dash.Dash(
-    __name__, 
+    __name__,
     external_stylesheets=[
-        'https://codepen.io/chriddyp/pen/bWLwgP.css',
-        'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css'
+        "https://codepen.io/chriddyp/pen/bWLwgP.css",
+        "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css",
     ],
-    suppress_callback_exceptions=True
+    suppress_callback_exceptions=True,
 )
 
 # Add custom CSS for progress bar
-app.index_string = '''
+app.index_string = """
 <!DOCTYPE html>
 <html>
     <head>
@@ -69,35 +65,36 @@ app.index_string = '''
         </footer>
     </body>
 </html>
-'''
+"""
 
 # Synchronization is now handled by assets/sync_scroll.js
 
 # Professional healthcare color scheme
 HEALTHCARE_COLORS = {
-    'primary': '#2c3e50',      # Dark blue-gray
-    'secondary': '#3498db',     # Professional blue
-    'success': '#27ae60',       # Green for success
-    'success_disabled': '#7fb069',  # Lighter green for disabled success button
-    'warning': '#f39c12',       # Orange for warnings
-    'warning_disabled': '#f7b731',  # Light orange for disabled warning button
-    'danger': '#e74c3c',        # Red for errors
-    'light': '#ecf0f1',         # Light gray
-    'dark': '#34495e',          # Dark gray
-    'info': '#17a2b8'           # Info blue
+    "primary": "#2c3e50",  # Dark blue-gray
+    "secondary": "#3498db",  # Professional blue
+    "success": "#27ae60",  # Green for success
+    "success_disabled": "#7fb069",  # Lighter green for disabled success button
+    "warning": "#f39c12",  # Orange for warnings
+    "warning_disabled": "#f7b731",  # Light orange for disabled warning button
+    "danger": "#e74c3c",  # Red for errors
+    "light": "#ecf0f1",  # Light gray
+    "dark": "#34495e",  # Dark gray
+    "info": "#17a2b8",  # Info blue
 }
 
 # HIPAA identifier patterns for highlighting
 HIPAA_PATTERNS = {
-    'names': r'\b[A-Z][a-z]+ [A-Z][a-z]+\b',
-    'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
-    'phone': r'\b\d{3}-\d{3}-\d{4}\b',
-    'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-    'address': r'\b\d+\s+[A-Za-z0-9\s,.-]+\b',
-    'dates': r'\b\d{1,2}/\d{1,2}/\d{4}\b',
-    'medical_record': r'\bMRN\s*:?\s*\d+\b',
-    'insurance': r'\bPolicy\s*:?\s*\d+\b'
+    "names": r"\b[A-Z][a-z]+ [A-Z][a-z]+\b",
+    "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
+    "phone": r"\b\d{3}-\d{3}-\d{4}\b",
+    "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+    "address": r"\b\d+\s+[A-Za-z0-9\s,.-]+\b",
+    "dates": r"\b\d{1,2}/\d{1,2}/\d{4}\b",
+    "medical_record": r"\bMRN\s*:?\s*\d+\b",
+    "insurance": r"\bPolicy\s*:?\s*\d+\b",
 }
+
 
 def highlight_hipaa_identifiers(text):
     """
@@ -106,88 +103,117 @@ def highlight_hipaa_identifiers(text):
     """
     if not text:
         return ""
-    
+
     try:
         # Try to use the real backend for more accurate detection
         deid = initialize_deidentifier()
         if deid is not None:
             result = deid.deidentify(text)
             entities = result.get("entities", [])
-            
+
             # Create highlighted text using real entity detection
             highlighted_text = text
-            colors = ['#ffeb3b', '#ff9800', '#f44336', '#9c27b0', '#2196f3', '#4caf50', '#ff5722', '#795548']
-            
+            colors = [
+                "#ffeb3b",
+                "#ff9800",
+                "#f44336",
+                "#9c27b0",
+                "#2196f3",
+                "#4caf50",
+                "#ff5722",
+                "#795548",
+            ]
+
             # Sort entities by start position (descending) to avoid offset issues
-            entities_sorted = sorted(entities, key=lambda x: x.get('start', 0), reverse=True)
-            
+            entities_sorted = sorted(
+                entities, key=lambda x: x.get("start", 0), reverse=True
+            )
+
             for entity in entities_sorted:
-                start = entity.get('start', 0)
-                end = entity.get('end', 0)
-                entity_type = entity.get('category', 'UNKNOWN')
-                
+                start = entity.get("start", 0)
+                end = entity.get("end", 0)
+                entity_type = entity.get("category", "UNKNOWN")
+
                 if start < end and start >= 0 and end <= len(text):
                     # Get color based on entity type
                     color = get_entity_color(entity_type, colors)
-                    
+
                     # Extract the text to highlight
                     entity_text = text[start:end]
-                    
+
                     # Create markdown-style highlighting
                     highlighted_span = f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px; font-weight: bold; color: black;">{entity_text}</span>'
-                    
+
                     # Replace in highlighted text
-                    highlighted_text = highlighted_text[:start] + highlighted_span + highlighted_text[end:]
-            
+                    highlighted_text = (
+                        highlighted_text[:start]
+                        + highlighted_span
+                        + highlighted_text[end:]
+                    )
+
             return highlighted_text
-            
+
     except Exception as e:
         print(f"Error in highlighting with backend: {e}")
         # Fallback to regex-based highlighting
         pass
-    
+
     # Fallback to regex-based highlighting
     highlighted_text = text
-    colors = ['#ffeb3b', '#ff9800', '#f44336', '#9c27b0', '#2196f3', '#4caf50', '#ff5722', '#795548']
-    
+    colors = [
+        "#ffeb3b",
+        "#ff9800",
+        "#f44336",
+        "#9c27b0",
+        "#2196f3",
+        "#4caf50",
+        "#ff5722",
+        "#795548",
+    ]
+
     for i, (pattern_name, pattern) in enumerate(HIPAA_PATTERNS.items()):
         color = colors[i % len(colors)]
         matches = re.finditer(pattern, highlighted_text, re.IGNORECASE)
-        
+
         # Replace matches with highlighted spans
         offset = 0
         for match in matches:
             start, end = match.span()
             start += offset
             end += offset
-            
+
             highlighted_span = f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px; font-weight: bold; color: black;">{match.group()}</span>'
-            highlighted_text = highlighted_text[:start] + highlighted_span + highlighted_text[end:]
-            
+            highlighted_text = (
+                highlighted_text[:start] + highlighted_span + highlighted_text[end:]
+            )
+
             # Adjust offset for HTML insertion
             offset += len(highlighted_span) - (end - start)
-    
+
     return highlighted_text
+
 
 def get_entity_color(entity_type, colors):
     """Get color for entity type"""
     color_map = {
-        'PERSON': colors[0],      # Yellow
-        'SSN': colors[1],         # Orange
-        'PHONE_NUMBER': colors[2], # Red
-        'EMAIL_ADDRESS': colors[3], # Purple
-        'LOCATION': colors[4],    # Blue
-        'DATE_TIME': colors[5],   # Green
-        'MEDICAL_RECORD_NUMBER': colors[6], # Orange-red
-        'HEALTH_PLAN_ID': colors[7], # Brown
-        'NAME': colors[0],        # Yellow
-        'ADDRESS': colors[4],     # Blue
-        'DATE': colors[5],        # Green
+        "PERSON": colors[0],  # Yellow
+        "SSN": colors[1],  # Orange
+        "PHONE_NUMBER": colors[2],  # Red
+        "EMAIL_ADDRESS": colors[3],  # Purple
+        "LOCATION": colors[4],  # Blue
+        "DATE_TIME": colors[5],  # Green
+        "MEDICAL_RECORD_NUMBER": colors[6],  # Orange-red
+        "HEALTH_PLAN_ID": colors[7],  # Brown
+        "NAME": colors[0],  # Yellow
+        "ADDRESS": colors[4],  # Blue
+        "DATE": colors[5],  # Green
     }
     return color_map.get(entity_type, colors[0])
 
+
 # Global de-identifier instance (initialized once)
 deidentifier = None
+
 
 def initialize_deidentifier():
     """Initialize the HIPAA de-identifier with configuration"""
@@ -196,18 +222,18 @@ def initialize_deidentifier():
         try:
             # Get configuration
             config_dict = global_config.get_settings()
-            
+
             # Get model names from configuration
             spacy_model = config_dict.get("models", {}).get("spacy")
             hf_model = config_dict.get("models", {}).get("huggingface")
             device = config_dict.get("models", {}).get("device", -1)
-            
+
             # Initialize the deidentifier
-            deidentifier = HIPAADeidentifierModular(
+            deidentifier = HIPAAPipelineOrchestrator(
                 config_path="config/main.yaml",
                 spacy_model=spacy_model,
                 hf_model=hf_model,
-                device=device
+                device=device,
             )
             print("HIPAA De-identifier initialized successfully")
         except Exception as e:
@@ -215,28 +241,30 @@ def initialize_deidentifier():
             deidentifier = None
     return deidentifier
 
+
 def deidentify_text(text):
     """
     Real de-identification function using the HIPAA backend
     """
     if not text:
         return ""
-    
+
     try:
         # Initialize de-identifier if not already done
         deid = initialize_deidentifier()
         if deid is None:
             # Fallback to simple regex-based de-identification
             return fallback_deidentify_text(text)
-        
+
         # Use the real HIPAA de-identifier
         result = deid.deidentify(text)
         return result["text"]
-        
+
     except Exception as e:
         print(f"Error in de-identification: {e}")
         # Fallback to simple regex-based de-identification
         return fallback_deidentify_text(text)
+
 
 def fallback_deidentify_text(text):
     """
@@ -244,469 +272,693 @@ def fallback_deidentify_text(text):
     """
     if not text:
         return ""
-    
+
     # Simple regex-based de-identification as fallback
     deidentified = text
-    
+
     # Replace names with [PATIENT NAME]
-    deidentified = re.sub(HIPAA_PATTERNS['names'], '[PATIENT NAME]', deidentified)
-    
+    deidentified = re.sub(HIPAA_PATTERNS["names"], "[PATIENT NAME]", deidentified)
+
     # Replace SSN with [SSN]
-    deidentified = re.sub(HIPAA_PATTERNS['ssn'], '[SSN]', deidentified)
-    
+    deidentified = re.sub(HIPAA_PATTERNS["ssn"], "[SSN]", deidentified)
+
     # Replace phone with [PHONE]
-    deidentified = re.sub(HIPAA_PATTERNS['phone'], '[PHONE]', deidentified)
-    
+    deidentified = re.sub(HIPAA_PATTERNS["phone"], "[PHONE]", deidentified)
+
     # Replace email with [EMAIL]
-    deidentified = re.sub(HIPAA_PATTERNS['email'], '[EMAIL]', deidentified)
-    
+    deidentified = re.sub(HIPAA_PATTERNS["email"], "[EMAIL]", deidentified)
+
     # Replace dates with [DATE]
-    deidentified = re.sub(HIPAA_PATTERNS['dates'], '[DATE]', deidentified)
-    
+    deidentified = re.sub(HIPAA_PATTERNS["dates"], "[DATE]", deidentified)
+
     # Replace medical record numbers
-    deidentified = re.sub(HIPAA_PATTERNS['medical_record'], 'MRN: [REDACTED]', deidentified)
-    
+    deidentified = re.sub(
+        HIPAA_PATTERNS["medical_record"], "MRN: [REDACTED]", deidentified
+    )
+
     # Replace insurance policy numbers
-    deidentified = re.sub(HIPAA_PATTERNS['insurance'], 'Policy: [REDACTED]', deidentified)
-    
+    deidentified = re.sub(
+        HIPAA_PATTERNS["insurance"], "Policy: [REDACTED]", deidentified
+    )
+
     return deidentified
+
 
 # Helper function to get documents from data directory
 def get_documents_structure():
     """Get document types and names from the data directory"""
-    data_dir = Path('data')
+    data_dir = Path("data")
     documents = {}
-    
+
     try:
         if not data_dir.exists():
             print(f"Warning: Data directory not found at {data_dir}")
             # Try absolute path
             current_dir = Path(os.path.dirname(os.path.abspath(__file__)))
-            data_dir = current_dir / 'data'
+            data_dir = current_dir / "data"
             print(f"Trying absolute path: {data_dir}")
             if not data_dir.exists():
                 print(f"Data directory not found at {data_dir}")
                 return documents
-            
+
         print(f"Reading documents from: {data_dir}")
         for doc_type_dir in sorted(data_dir.iterdir()):
             if doc_type_dir.is_dir():
                 doc_type = doc_type_dir.name
                 docs = []
-                
+
                 # List all files for debugging
-                all_files = list(doc_type_dir.glob('*.*'))
-                print(f"Found {len(all_files)} files in {doc_type}: {[f.name for f in all_files]}")
-                
-                for doc_file in sorted(doc_type_dir.glob('*.txt')):
+                all_files = list(doc_type_dir.glob("*.*"))
+                print(
+                    f"Found {len(all_files)} files in {doc_type}: {[f.name for f in all_files]}"
+                )
+
+                for doc_file in sorted(doc_type_dir.glob("*.txt")):
                     # Clean document name
-                    doc_name = doc_file.stem.replace('_', ' ').title()
+                    doc_name = doc_file.stem.replace("_", " ").title()
                     # Remove patient identifiers
-                    doc_name = re.sub(r'\s*Patient\s*\d+', '', doc_name, flags=re.IGNORECASE)
-                    doc_name = re.sub(r'\s*P\d+', '', doc_name, flags=re.IGNORECASE)
-                    doc_name = ' '.join(doc_name.split())
-                    
-                    docs.append({
-                        'label': doc_name,
-                        'value': str(doc_file),
-                        'original_name': doc_file.name
-                    })
-                
+                    doc_name = re.sub(
+                        r"\s*Patient\s*\d+", "", doc_name, flags=re.IGNORECASE
+                    )
+                    doc_name = re.sub(r"\s*P\d+", "", doc_name, flags=re.IGNORECASE)
+                    doc_name = " ".join(doc_name.split())
+
+                    docs.append(
+                        {
+                            "label": doc_name,
+                            "value": str(doc_file),
+                            "original_name": doc_file.name,
+                        }
+                    )
+
                 if docs:
                     documents[doc_type] = docs
                     print(f"Added {len(docs)} documents to category '{doc_type}'")
-        
+
         print(f"Found {len(documents)} document categories with documents")
         # Print first few documents in each category for debugging
         for category, docs in documents.items():
             print(f"  - {category}: {len(docs)} documents")
             if docs:
                 print(f"    First doc: {docs[0]['label']} -> {docs[0]['value']}")
-        
+
         return documents
-        
+
     except Exception as e:
         print(f"Error loading documents: {e}")
         import traceback
+
         traceback.print_exc()
         return documents
+
 
 # Get documents structure
 DOCUMENTS = get_documents_structure()
 
 # Main app layout
-app.layout = html.Div([
-    
-    # Header with professional healthcare branding
-    html.Div([
-        html.Div([
-            html.H1("Clinical Data De-identification", 
-                   style={
-                       'color': '#1a365d',  # Professional dark blue
-                       'margin': '0', 
-                       'fontSize': '2.8rem', 
-                       'fontWeight': '700',
-                       'letterSpacing': '-0.02em',
-                       'lineHeight': '1.2'
-                   }),
-            html.P("HIPAA-Compliant PHI Detection and Redaction for Clinical Data using Named Entity Recognition", 
-                   style={
-                       'color': '#2d3748',  # Professional dark gray
-                       'margin': '12px 0 0 0', 
-                       'fontSize': '1.3rem', 
-                       'fontWeight': '500',
-                       'lineHeight': '1.4',
-                       'maxWidth': '900px',
-                       'margin': '12px auto 0 auto'
-                   })
-        ], style={'textAlign': 'center', 'padding': '30px 20px'})
-    ], style={
-        'backgroundColor': '#f7fafc',  # Professional light gray background
-        'borderRadius': '12px', 
-        'marginBottom': '30px', 
-        'boxShadow': '0 4px 12px rgba(0,0,0,0.08)',
-        'border': '1px solid #e2e8f0'
-    }),
-    
-    # Main content area with two-column layout
-    html.Div([
-        # Left panel - Document selector
-        html.Div([
-            html.H4("Clinical Documents", style={
-                'color': HEALTHCARE_COLORS['primary'],
-                'marginBottom': '15px',
-                'fontSize': '1.5rem',
-                'fontWeight': 'bold',
-                'textAlign': 'center'
-            }),
-            
-            # Document Type Dropdown
-            dcc.Dropdown(
-                id='doc-type-dropdown',
-                options=[{'label': doc_type, 'value': doc_type} for doc_type in sorted(DOCUMENTS.keys())],
-                placeholder="Select Document Type",
-                style={'marginBottom': '10px'},
-                clearable=True
-            ),
-            
-            # Document Name Dropdown
-            dcc.Dropdown(
-                id='doc-name-dropdown',
-                placeholder="Select Document Name",
-                style={'marginBottom': '15px'},
-                clearable=True
-            ),
-            
-            # Info text
-            html.P("Select a document to load into the input box", style={
-                'fontSize': '12px',
-                'color': HEALTHCARE_COLORS['dark'],
-                'textAlign': 'center',
-                'fontStyle': 'italic',
-                'marginTop': '10px'
-            })
-        ], style={
-            'width': '300px',
-            'padding': '15px',
-            'backgroundColor': HEALTHCARE_COLORS['light'],
-            'borderRadius': '10px',
-            'boxShadow': '0 2px 5px rgba(0,0,0,0.1)',
-            'minHeight': '350px',  # Match approximate height of input box + header
-            'display': 'flex',
-            'flexDirection': 'column',
-            'flexShrink': 0
-        }),
-        
-        # Right panel - Input and output sections
-        html.Div([
-            # Input section
-            html.Div([
-                html.H3("PHI Clinical Data", 
-                   style={
-                       'color': HEALTHCARE_COLORS['primary'], 
-                       'marginBottom': '15px', 
-                       'fontSize': '1.8rem',
-                       'fontWeight': 'bold'
-                   }),
-            
-            dcc.Textarea(
-                id='raw-text-input',
-                placeholder='Enter or Paste Clinical Data for De-Identification\n\n------------------------------------------------------\n\nPatient Name: Johnathan M. Carter\nDate of Birth: 03/12/1958\nMedical Record Number (MRN): 54782934\nEncounter ID: ENC-20250905-233\nAddress: 2456 Oakwood Drive, Springfield, IL 62704\nPhone: (217) 555-0187\nPrimary Care Provider: Dr. Linda Thompson, Mercy General Hospital\nDate of Visit: 09/05/2025\n\nChief Complaint:\nPatient presents for follow-up of type 2 diabetes mellitus and hypertension.\n\nHistory of Present Illness:\nMr. Carter is a 67-year-old male with a history of type 2 diabetes (diagnosed 2012) and hypertension (diagnosed 2010). \nHe reports adherence to metformin 1000 mg BID and lisinopril 20 mg daily. \nHe has noticed occasional dizziness in the morning and increased thirst over the past two weeks. \nNo chest pain, shortness of breath, or vision changes. \nBlood glucose logs show fasting values ranging 145–170 mg/dL, occasional post-prandial >200 mg/dL.',
-                style={
-                    'width': '100%',
-                    'height': '200px',
-                    'padding': '15px',
-                    'border': f'2px solid {HEALTHCARE_COLORS["secondary"]}',
-                    'borderRadius': '8px',
-                    'fontSize': '14px',
-                    'fontFamily': 'monospace',
-                    'resize': 'vertical'
-                }
-            ),
-            
-            html.Div([
-                html.Button('De-Identify', 
-                           id='process-btn',
-                           style={
-                               'backgroundColor': HEALTHCARE_COLORS['success'],
-                               'color': 'white',
-                               'border': 'none',
-                               'padding': '12px 24px',
-                               'borderRadius': '20px',
-                               'cursor': 'pointer',
-                               'fontSize': '16px',
-                               'fontWeight': 'bold',
-                               'marginTop': '15px'
-                           }),
-                html.Button('Clear All', 
-                           id='clear-btn',
-                           style={
-                               'backgroundColor': HEALTHCARE_COLORS['warning'],
-                               'color': 'white',
-                               'border': 'none',
-                               'padding': '12px 24px',
-                               'borderRadius': '20px',
-                               'cursor': 'pointer',
-                               'fontSize': '16px',
-                               'fontWeight': 'bold',
-                               'marginTop': '15px',
-                               'marginLeft': '10px'
-                           })
-            ], style={'textAlign': 'center'})
-            
-        ], style={'marginBottom': '30px'}),
-        
-        # Processing status
-        html.Div([
-            html.Div(id='processing-status', style={'textAlign': 'center', 'marginBottom': '20px'})
-        ]),
-        
-        # Progress bar
-        html.Div([
-            html.Div([
+app.layout = html.Div(
+    [
+        # Header with professional healthcare branding
+        html.Div(
+            [
                 html.Div(
-                    id='progress-bar-fill',
-                    style={
-                        'width': '0%',
-                        'height': '100%',
-                        'backgroundColor': HEALTHCARE_COLORS['success'],
-                        'borderRadius': '10px',
-                        'transition': 'width 0.3s ease'
-                    }
+                    [
+                        html.H1(
+                            "Clinical Data De-identification",
+                            style={
+                                "color": "#1a365d",  # Professional dark blue
+                                "margin": "0",
+                                "fontSize": "2.8rem",
+                                "fontWeight": "700",
+                                "letterSpacing": "-0.02em",
+                                "lineHeight": "1.2",
+                            },
+                        ),
+                        html.P(
+                            "HIPAA-Compliant PHI Detection and Redaction for Clinical Data using Named Entity Recognition",
+                            style={
+                                "color": "#2d3748",  # Professional dark gray
+                                "fontSize": "1.3rem",
+                                "fontWeight": "500",
+                                "lineHeight": "1.4",
+                                "maxWidth": "900px",
+                                "margin": "12px auto 0 auto",
+                            },
+                        ),
+                    ],
+                    style={"textAlign": "center", "padding": "30px 20px"},
                 )
-            ], style={
-                'width': '100%',
-                'height': '20px',
-                'backgroundColor': HEALTHCARE_COLORS['light'],
-                'borderRadius': '10px',
-                'overflow': 'hidden',
-                'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'
-            }, id='progress-bar'),
-            html.Div(id='progress-text', style={'textAlign': 'center', 'marginTop': '10px', 'color': HEALTHCARE_COLORS['dark']})
-        ], style={'marginBottom': '30px', 'display': 'none'}, id='progress-container'),
-        
-        # Hidden dcc.Store components for multi-stage processing
-        dcc.Store(id='raw-text-store', data=None),
-        dcc.Store(id='highlighted-text-store', data=None),
-        dcc.Store(id='deidentified-text-store', data=None),
-        dcc.Store(id='processing-stage-store', data='idle'),  # 'idle', 'start', 'highlighting_done', 'deidentifying_done', 'complete'
-        
-        # Side-by-side comparison
-        html.Div([
-            # Left panel - Original with HIPAA highlighting
-            html.Div([
-                html.H4("Original Data (HIPAA Identifiers Highlighted)", 
-                       style={
-                           'color': '#3498db',  # Blue color
-                           'marginBottom': '15px',
-                           'fontSize': '1.8rem',
-                           'fontWeight': '500'
-                       }),
-                html.Div([
-                    html.Iframe(
-                        id='highlighted-text-frame',
-                        srcDoc='',
-                        style={
-                            'width': '100%',
-                            'height': '500px',
-                            'border': f'2px solid {HEALTHCARE_COLORS["info"]}',
-                            'borderRadius': '8px',
-                            'backgroundColor': '#f8f9fa',
-                        }
-                    )
-                ])
-            ], style={'width': '48%', 'display': 'inline-block', 'verticalAlign': 'top', 'marginRight': '2%'}),
-            
-            # Right panel - De-identified output
-            html.Div([
-                html.H4("De-identified Data (HIPAA Compliant)", 
-                       style={
-                           'color': HEALTHCARE_COLORS['success'], 
-                           'marginBottom': '15px',
-                           'fontSize': '1.8rem',
-                           'fontWeight': '500'
-                       }),
-                html.Div([
-                    html.Iframe(
-                        id='deidentified-text-frame',
-                        srcDoc='',
-                        style={
-                            'width': '100%',
-                            'height': '500px',  # Same height as left panel
-                            'border': f'2px solid {HEALTHCARE_COLORS["success"]}',
-                            'borderRadius': '8px',
-                            'backgroundColor': '#e8f5e8',
-                        }
-                    )
-                ])
-            ], style={'width': '48%', 'display': 'inline-block', 'verticalAlign': 'top'})
-        ], style={'marginBottom': '30px'}),
-        
-        # HIPAA identifier legend
-        html.Div([
-            html.H4("HIPAA Identifier Types", 
-                   style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
-            html.Div([
-                html.Div([
-                    html.Span("Names", style={'backgroundColor': '#ffeb3b', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("SSN", style={'backgroundColor': '#ff9800', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Phone", style={'backgroundColor': '#f44336', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Email", style={'backgroundColor': '#9c27b0', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Address", style={'backgroundColor': '#2196f3', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Dates", style={'backgroundColor': '#4caf50', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Medical Records", style={'backgroundColor': '#ff5722', 'padding': '4px 8px', 'borderRadius': '3px', 'marginRight': '10px'}),
-                    html.Span("Insurance", style={'backgroundColor': '#795548', 'padding': '4px 8px', 'borderRadius': '3px'})
-                ], style={'textAlign': 'center'})
-            ], style={'backgroundColor': '#f8f9fa', 'padding': '15px', 'borderRadius': '8px'})
-        ], style={'marginBottom': '30px'}),
-        
-        # Export and statistics
-        html.Div([
-            html.Div([
-                html.Button('Export Results', 
-                           id='export-btn',
-                           style={
-                               'backgroundColor': HEALTHCARE_COLORS['success'],
-                               'color': 'white',
-                               'border': 'none',
-                               'padding': '10px 20px',
-                               'borderRadius': '5px',
-                               'cursor': 'pointer',
-                               'marginRight': '10px'
-                           }),
-                html.Button('View Statistics', 
-                           id='stats-btn',
-                           style={
-                               'backgroundColor': HEALTHCARE_COLORS['info'],
-                               'color': 'white',
-                               'border': 'none',
-                               'padding': '10px 20px',
-                               'borderRadius': '5px',
-                               'cursor': 'pointer'
-                           })
-            ], style={'textAlign': 'center', 'marginBottom': '20px'}),
-            
-            # Statistics display
-            html.Div(id='statistics-display', style={'textAlign': 'center'})
-        ])
-        ], style={'flex': 1, 'paddingLeft': '20px'})  # Right panel takes remaining space
-        
-    ], style={'display': 'flex', 'flexDirection': 'row', 'alignItems': 'flex-start', 'padding': '20px', 'width': '100%', 'minHeight': '100vh'}),
-    
-    # Footer
-    html.Hr(style={'border': f'2px solid {HEALTHCARE_COLORS["light"]}'}),
-    html.Div([
-        html.P("© 2024 DEID Patients System - Enterprise Clinical Data De-identification Platform", 
-               style={'textAlign': 'center', 'color': HEALTHCARE_COLORS['dark'], 'fontSize': '12px', 'margin': '10px 0'})
-    ])
-], style={'backgroundColor': '#ffffff', 'minHeight': '100vh'})
+            ],
+            style={
+                "backgroundColor": "#f7fafc",  # Professional light gray background
+                "borderRadius": "12px",
+                "marginBottom": "30px",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.08)",
+                "border": "1px solid #e2e8f0",
+            },
+        ),
+        # Main content area with two-column layout
+        html.Div(
+            [
+                # Left panel - Document selector
+                html.Div(
+                    [
+                        html.H4(
+                            "Clinical Documents",
+                            style={
+                                "color": HEALTHCARE_COLORS["primary"],
+                                "marginBottom": "15px",
+                                "fontSize": "1.5rem",
+                                "fontWeight": "bold",
+                                "textAlign": "center",
+                            },
+                        ),
+                        # Document Type Dropdown
+                        dcc.Dropdown(
+                            id="doc-type-dropdown",
+                            options=[
+                                {"label": doc_type, "value": doc_type}
+                                for doc_type in sorted(DOCUMENTS.keys())
+                            ],
+                            placeholder="Select Document Type",
+                            style={"marginBottom": "10px"},
+                            clearable=True,
+                        ),
+                        # Document Name Dropdown
+                        dcc.Dropdown(
+                            id="doc-name-dropdown",
+                            placeholder="Select Document Name",
+                            style={"marginBottom": "15px"},
+                            clearable=True,
+                        ),
+                        # Info text
+                        html.P(
+                            "Select a document to load into the input box",
+                            style={
+                                "fontSize": "12px",
+                                "color": HEALTHCARE_COLORS["dark"],
+                                "textAlign": "center",
+                                "fontStyle": "italic",
+                                "marginTop": "10px",
+                            },
+                        ),
+                    ],
+                    style={
+                        "width": "300px",
+                        "padding": "15px",
+                        "backgroundColor": HEALTHCARE_COLORS["light"],
+                        "borderRadius": "10px",
+                        "boxShadow": "0 2px 5px rgba(0,0,0,0.1)",
+                        "minHeight": "350px",  # Match approximate height of input box + header
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "flexShrink": 0,
+                    },
+                ),
+                # Right panel - Input and output sections
+                html.Div(
+                    [
+                        # Input section
+                        html.Div(
+                            [
+                                html.H3(
+                                    "PHI Clinical Data",
+                                    style={
+                                        "color": HEALTHCARE_COLORS["primary"],
+                                        "marginBottom": "15px",
+                                        "fontSize": "1.8rem",
+                                        "fontWeight": "bold",
+                                    },
+                                ),
+                                dcc.Textarea(
+                                    id="raw-text-input",
+                                    placeholder="Enter or Paste Clinical Data for De-Identification\n\n------------------------------------------------------\n\nPatient Name: Johnathan M. Carter\nDate of Birth: 03/12/1958\nMedical Record Number (MRN): 54782934\nEncounter ID: ENC-20250905-233\nAddress: 2456 Oakwood Drive, Springfield, IL 62704\nPhone: (217) 555-0187\nPrimary Care Provider: Dr. Linda Thompson, Mercy General Hospital\nDate of Visit: 09/05/2025\n\nChief Complaint:\nPatient presents for follow-up of type 2 diabetes mellitus and hypertension.\n\nHistory of Present Illness:\nMr. Carter is a 67-year-old male with a history of type 2 diabetes (diagnosed 2012) and hypertension (diagnosed 2010). \nHe reports adherence to metformin 1000 mg BID and lisinopril 20 mg daily. \nHe has noticed occasional dizziness in the morning and increased thirst over the past two weeks. \nNo chest pain, shortness of breath, or vision changes. \nBlood glucose logs show fasting values ranging 145–170 mg/dL, occasional post-prandial >200 mg/dL.",
+                                    style={
+                                        "width": "100%",
+                                        "height": "200px",
+                                        "padding": "15px",
+                                        "border": f"2px solid {HEALTHCARE_COLORS['secondary']}",
+                                        "borderRadius": "8px",
+                                        "fontSize": "14px",
+                                        "fontFamily": "monospace",
+                                        "resize": "vertical",
+                                    },
+                                ),
+                                html.Div(
+                                    [
+                                        html.Button(
+                                            "De-Identify",
+                                            id="process-btn",
+                                            style={
+                                                "backgroundColor": HEALTHCARE_COLORS[
+                                                    "success"
+                                                ],
+                                                "color": "white",
+                                                "border": "none",
+                                                "padding": "12px 24px",
+                                                "borderRadius": "20px",
+                                                "cursor": "pointer",
+                                                "fontSize": "16px",
+                                                "fontWeight": "bold",
+                                                "marginTop": "15px",
+                                            },
+                                        ),
+                                        html.Button(
+                                            "Clear All",
+                                            id="clear-btn",
+                                            style={
+                                                "backgroundColor": HEALTHCARE_COLORS[
+                                                    "warning"
+                                                ],
+                                                "color": "white",
+                                                "border": "none",
+                                                "padding": "12px 24px",
+                                                "borderRadius": "20px",
+                                                "cursor": "pointer",
+                                                "fontSize": "16px",
+                                                "fontWeight": "bold",
+                                                "marginTop": "15px",
+                                                "marginLeft": "10px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"textAlign": "center"},
+                                ),
+                            ],
+                            style={"marginBottom": "30px"},
+                        ),
+                        # Processing status
+                        html.Div(
+                            [
+                                html.Div(
+                                    id="processing-status",
+                                    style={
+                                        "textAlign": "center",
+                                        "marginBottom": "20px",
+                                    },
+                                )
+                            ]
+                        ),
+                        # Progress bar
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            id="progress-bar-fill",
+                                            style={
+                                                "width": "0%",
+                                                "height": "100%",
+                                                "backgroundColor": HEALTHCARE_COLORS[
+                                                    "success"
+                                                ],
+                                                "borderRadius": "10px",
+                                                "transition": "width 0.3s ease",
+                                            },
+                                        )
+                                    ],
+                                    style={
+                                        "width": "100%",
+                                        "height": "20px",
+                                        "backgroundColor": HEALTHCARE_COLORS["light"],
+                                        "borderRadius": "10px",
+                                        "overflow": "hidden",
+                                        "boxShadow": "0 2px 4px rgba(0,0,0,0.1)",
+                                    },
+                                    id="progress-bar",
+                                ),
+                                html.Div(
+                                    id="progress-text",
+                                    style={
+                                        "textAlign": "center",
+                                        "marginTop": "10px",
+                                        "color": HEALTHCARE_COLORS["dark"],
+                                    },
+                                ),
+                            ],
+                            style={"marginBottom": "30px", "display": "none"},
+                            id="progress-container",
+                        ),
+                        # Hidden dcc.Store components for multi-stage processing
+                        dcc.Store(id="raw-text-store", data=None),
+                        dcc.Store(id="highlighted-text-store", data=None),
+                        dcc.Store(id="deidentified-text-store", data=None),
+                        dcc.Store(
+                            id="processing-stage-store", data="idle"
+                        ),  # 'idle', 'start', 'highlighting_done', 'deidentifying_done', 'complete'
+                        # Side-by-side comparison
+                        html.Div(
+                            [
+                                # Left panel - Original with HIPAA highlighting
+                                html.Div(
+                                    [
+                                        html.H4(
+                                            "Original Data (HIPAA Identifiers Highlighted)",
+                                            style={
+                                                "color": "#3498db",  # Blue color
+                                                "marginBottom": "15px",
+                                                "fontSize": "1.8rem",
+                                                "fontWeight": "500",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Iframe(
+                                                    id="highlighted-text-frame",
+                                                    srcDoc="",
+                                                    style={
+                                                        "width": "100%",
+                                                        "height": "500px",
+                                                        "border": f"2px solid {HEALTHCARE_COLORS['info']}",
+                                                        "borderRadius": "8px",
+                                                        "backgroundColor": "#f8f9fa",
+                                                    },
+                                                )
+                                            ]
+                                        ),
+                                    ],
+                                    style={
+                                        "width": "48%",
+                                        "display": "inline-block",
+                                        "verticalAlign": "top",
+                                        "marginRight": "2%",
+                                    },
+                                ),
+                                # Right panel - De-identified output
+                                html.Div(
+                                    [
+                                        html.H4(
+                                            "De-identified Data (HIPAA Compliant)",
+                                            style={
+                                                "color": HEALTHCARE_COLORS["success"],
+                                                "marginBottom": "15px",
+                                                "fontSize": "1.8rem",
+                                                "fontWeight": "500",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Iframe(
+                                                    id="deidentified-text-frame",
+                                                    srcDoc="",
+                                                    style={
+                                                        "width": "100%",
+                                                        "height": "500px",  # Same height as left panel
+                                                        "border": f"2px solid {HEALTHCARE_COLORS['success']}",
+                                                        "borderRadius": "8px",
+                                                        "backgroundColor": "#e8f5e8",
+                                                    },
+                                                )
+                                            ]
+                                        ),
+                                    ],
+                                    style={
+                                        "width": "48%",
+                                        "display": "inline-block",
+                                        "verticalAlign": "top",
+                                    },
+                                ),
+                            ],
+                            style={"marginBottom": "30px"},
+                        ),
+                        # HIPAA identifier legend
+                        html.Div(
+                            [
+                                html.H4(
+                                    "HIPAA Identifier Types",
+                                    style={
+                                        "color": HEALTHCARE_COLORS["primary"],
+                                        "marginBottom": "15px",
+                                    },
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.Span(
+                                                    "Names",
+                                                    style={
+                                                        "backgroundColor": "#ffeb3b",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "SSN",
+                                                    style={
+                                                        "backgroundColor": "#ff9800",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Phone",
+                                                    style={
+                                                        "backgroundColor": "#f44336",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Email",
+                                                    style={
+                                                        "backgroundColor": "#9c27b0",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Address",
+                                                    style={
+                                                        "backgroundColor": "#2196f3",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Dates",
+                                                    style={
+                                                        "backgroundColor": "#4caf50",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Medical Records",
+                                                    style={
+                                                        "backgroundColor": "#ff5722",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                        "marginRight": "10px",
+                                                    },
+                                                ),
+                                                html.Span(
+                                                    "Insurance",
+                                                    style={
+                                                        "backgroundColor": "#795548",
+                                                        "padding": "4px 8px",
+                                                        "borderRadius": "3px",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"textAlign": "center"},
+                                        )
+                                    ],
+                                    style={
+                                        "backgroundColor": "#f8f9fa",
+                                        "padding": "15px",
+                                        "borderRadius": "8px",
+                                    },
+                                ),
+                            ],
+                            style={"marginBottom": "30px"},
+                        ),
+                        # Export and statistics
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Button(
+                                            "Export Results",
+                                            id="export-btn",
+                                            style={
+                                                "backgroundColor": HEALTHCARE_COLORS[
+                                                    "success"
+                                                ],
+                                                "color": "white",
+                                                "border": "none",
+                                                "padding": "10px 20px",
+                                                "borderRadius": "5px",
+                                                "cursor": "pointer",
+                                                "marginRight": "10px",
+                                            },
+                                        ),
+                                        html.Button(
+                                            "View Statistics",
+                                            id="stats-btn",
+                                            style={
+                                                "backgroundColor": HEALTHCARE_COLORS[
+                                                    "info"
+                                                ],
+                                                "color": "white",
+                                                "border": "none",
+                                                "padding": "10px 20px",
+                                                "borderRadius": "5px",
+                                                "cursor": "pointer",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "textAlign": "center",
+                                        "marginBottom": "20px",
+                                    },
+                                ),
+                                # Statistics display
+                                html.Div(
+                                    id="statistics-display",
+                                    style={"textAlign": "center"},
+                                ),
+                            ]
+                        ),
+                    ],
+                    style={"flex": 1, "paddingLeft": "20px"},
+                ),  # Right panel takes remaining space
+            ],
+            style={
+                "display": "flex",
+                "flexDirection": "row",
+                "alignItems": "flex-start",
+                "padding": "20px",
+                "width": "100%",
+                "minHeight": "100vh",
+            },
+        ),
+        # Footer
+        html.Hr(style={"border": f"2px solid {HEALTHCARE_COLORS['light']}"}),
+        html.Div(
+            [
+                html.P(
+                    "© 2024 DEID Patients System - Enterprise Clinical Data De-identification Platform",
+                    style={
+                        "textAlign": "center",
+                        "color": HEALTHCARE_COLORS["dark"],
+                        "fontSize": "12px",
+                        "margin": "10px 0",
+                    },
+                )
+            ]
+        ),
+    ],
+    style={"backgroundColor": "#ffffff", "minHeight": "100vh"},
+)
+
 
 # Main callback for initiating processing and clearing
 @app.callback(
-    [Output('raw-text-input', 'value'),
-     Output('highlighted-text-frame', 'srcDoc', allow_duplicate=True),
-     Output('deidentified-text-frame', 'srcDoc', allow_duplicate=True),
-     Output('progress-container', 'style'),
-     Output('progress-bar-fill', 'style', allow_duplicate=True),
-     Output('progress-text', 'children', allow_duplicate=True),
-     Output('raw-text-store', 'data'),
-     Output('processing-stage-store', 'data', allow_duplicate=True),
-     Output('process-btn', 'disabled'),
-     Output('process-btn', 'style'),
-     Output('clear-btn', 'disabled'),
-     Output('clear-btn', 'style')],
-    [Input('process-btn', 'n_clicks'),
-     Input('clear-btn', 'n_clicks')],
-    [State('raw-text-input', 'value')],
-    prevent_initial_call=True
+    [
+        Output("raw-text-input", "value"),
+        Output("highlighted-text-frame", "srcDoc", allow_duplicate=True),
+        Output("deidentified-text-frame", "srcDoc", allow_duplicate=True),
+        Output("progress-container", "style"),
+        Output("progress-bar-fill", "style", allow_duplicate=True),
+        Output("progress-text", "children", allow_duplicate=True),
+        Output("raw-text-store", "data"),
+        Output("processing-stage-store", "data", allow_duplicate=True),
+        Output("process-btn", "disabled"),
+        Output("process-btn", "style"),
+        Output("clear-btn", "disabled"),
+        Output("clear-btn", "style"),
+    ],
+    [Input("process-btn", "n_clicks"), Input("clear-btn", "n_clicks")],
+    [State("raw-text-input", "value")],
+    prevent_initial_call=True,
 )
 def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
     # Get the callback context to determine which button was clicked
     ctx = dash.callback_context
-    
+
     if not ctx.triggered:
-        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
-    
+        return (
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+        )
+
     # Get the button that was clicked
-    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
     # Default De-Identify button style (enabled)
     default_process_button_style = {
-        'backgroundColor': HEALTHCARE_COLORS['success'],
-        'color': 'white',
-        'border': 'none',
-        'padding': '12px 24px',
-        'borderRadius': '20px',
-        'cursor': 'pointer',
-        'fontSize': '16px',
-        'fontWeight': 'bold',
-        'marginTop': '15px'
+        "backgroundColor": HEALTHCARE_COLORS["success"],
+        "color": "white",
+        "border": "none",
+        "padding": "12px 24px",
+        "borderRadius": "20px",
+        "cursor": "pointer",
+        "fontSize": "16px",
+        "fontWeight": "bold",
+        "marginTop": "15px",
     }
-    
+
     # Disabled De-Identify button style (lighter green)
     disabled_process_button_style = {
-        'backgroundColor': HEALTHCARE_COLORS['success_disabled'],
-        'color': 'white',
-        'border': 'none',
-        'padding': '12px 24px',
-        'borderRadius': '20px',
-        'cursor': 'not-allowed',
-        'fontSize': '16px',
-        'fontWeight': 'bold',
-        'marginTop': '15px',
-        'opacity': '0.7'
+        "backgroundColor": HEALTHCARE_COLORS["success_disabled"],
+        "color": "white",
+        "border": "none",
+        "padding": "12px 24px",
+        "borderRadius": "20px",
+        "cursor": "not-allowed",
+        "fontSize": "16px",
+        "fontWeight": "bold",
+        "marginTop": "15px",
+        "opacity": "0.7",
     }
-    
+
     # Default Clear All button style (enabled)
     default_clear_button_style = {
-        'backgroundColor': HEALTHCARE_COLORS['warning'],
-        'color': 'white',
-        'border': 'none',
-        'padding': '12px 24px',
-        'borderRadius': '20px',
-        'cursor': 'pointer',
-        'fontSize': '16px',
-        'fontWeight': 'bold',
-        'marginTop': '15px',
-        'marginLeft': '10px'
+        "backgroundColor": HEALTHCARE_COLORS["warning"],
+        "color": "white",
+        "border": "none",
+        "padding": "12px 24px",
+        "borderRadius": "20px",
+        "cursor": "pointer",
+        "fontSize": "16px",
+        "fontWeight": "bold",
+        "marginTop": "15px",
+        "marginLeft": "10px",
     }
-    
+
     # Disabled Clear All button style (light orange)
     disabled_clear_button_style = {
-        'backgroundColor': HEALTHCARE_COLORS['warning_disabled'],
-        'color': 'white',
-        'border': 'none',
-        'padding': '12px 24px',
-        'borderRadius': '20px',
-        'cursor': 'not-allowed',
-        'fontSize': '16px',
-        'fontWeight': 'bold',
-        'marginTop': '15px',
-        'marginLeft': '10px',
-        'opacity': '0.7'
+        "backgroundColor": HEALTHCARE_COLORS["warning_disabled"],
+        "color": "white",
+        "border": "none",
+        "padding": "12px 24px",
+        "borderRadius": "20px",
+        "cursor": "not-allowed",
+        "fontSize": "16px",
+        "fontWeight": "bold",
+        "marginTop": "15px",
+        "marginLeft": "10px",
+        "opacity": "0.7",
     }
-    
-    if button_id == 'clear-btn' and clear_clicks:
+
+    if button_id == "clear-btn" and clear_clicks:
         # Clear all fields and re-enable both buttons
         empty_html = """
         <html>
@@ -715,44 +967,101 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         </body>
         </html>
         """
-        return "", empty_html, empty_html, {'display': 'none'}, {'width': '0%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}, "", None, 'idle', False, default_process_button_style, False, default_clear_button_style
-    
-    elif button_id == 'process-btn' and process_clicks and raw_text:
+        return (
+            "",
+            empty_html,
+            empty_html,
+            {"display": "none"},
+            {
+                "width": "0%",
+                "height": "100%",
+                "backgroundColor": HEALTHCARE_COLORS["success"],
+                "borderRadius": "10px",
+                "transition": "width 0.3s ease",
+            },
+            "",
+            None,
+            "idle",
+            False,
+            default_process_button_style,
+            False,
+            default_clear_button_style,
+        )
+
+    elif button_id == "process-btn" and process_clicks and raw_text:
         # Show processing status and progress bar immediately
         # Disable both buttons during processing
-        status = html.Div([
-            html.Span("Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
-        ])
-        
+
         # Show progress bar with initial state
-        progress_style = {'marginBottom': '30px', 'display': 'block'}
-        progress_fill_style = {'width': '20%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_style = {"marginBottom": "30px", "display": "block"}
+        progress_fill_style = {
+            "width": "20%",
+            "height": "100%",
+            "backgroundColor": HEALTHCARE_COLORS["success"],
+            "borderRadius": "10px",
+            "transition": "width 0.3s ease",
+        }
         progress_text = "Initializing de-identification process..."
-        
+
         # Store raw text and trigger next stage, disable both buttons
-        return dash.no_update, dash.no_update, dash.no_update, progress_style, progress_fill_style, progress_text, raw_text, 'start', True, disabled_process_button_style, True, disabled_clear_button_style
-    
-    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+        return (
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            progress_style,
+            progress_fill_style,
+            progress_text,
+            raw_text,
+            "start",
+            True,
+            disabled_process_button_style,
+            True,
+            disabled_clear_button_style,
+        )
+
+    return (
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+    )
+
 
 # Callback for highlighting stage
 @app.callback(
-    [Output('highlighted-text-store', 'data'),
-     Output('processing-stage-store', 'data', allow_duplicate=True),
-     Output('progress-bar-fill', 'style', allow_duplicate=True),
-     Output('progress-text', 'children', allow_duplicate=True)],
-    [Input('raw-text-store', 'data')],
-    [State('processing-stage-store', 'data')],
-    prevent_initial_call=True
+    [
+        Output("highlighted-text-store", "data"),
+        Output("processing-stage-store", "data", allow_duplicate=True),
+        Output("progress-bar-fill", "style", allow_duplicate=True),
+        Output("progress-text", "children", allow_duplicate=True),
+    ],
+    [Input("raw-text-store", "data")],
+    [State("processing-stage-store", "data")],
+    prevent_initial_call=True,
 )
 def process_highlighting(raw_text, current_stage):
-    if raw_text and current_stage == 'start':
+    if raw_text and current_stage == "start":
         # Update progress to 60%
-        progress_fill_style = {'width': '60%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_fill_style = {
+            "width": "60%",
+            "height": "100%",
+            "backgroundColor": HEALTHCARE_COLORS["success"],
+            "borderRadius": "10px",
+            "transition": "width 0.3s ease",
+        }
         progress_text = "Detecting HIPAA identifiers..."
-        
+
         # Perform highlighting
         highlighted_html = highlight_hipaa_identifiers(raw_text)
-        
+
         # Create complete HTML document
         highlighted_complete_html = f"""
         <html>
@@ -772,38 +1081,51 @@ def process_highlighting(raw_text, current_stage):
         </body>
         </html>
         """
-        
-        return highlighted_complete_html, 'highlighting_done', progress_fill_style, progress_text
-    
+
+        return (
+            highlighted_complete_html,
+            "highlighting_done",
+            progress_fill_style,
+            progress_text,
+        )
+
     return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
 
 # Callback for de-identification stage
 @app.callback(
-    [Output('deidentified-text-store', 'data'),
-     Output('processing-stage-store', 'data', allow_duplicate=True),
-     Output('progress-bar-fill', 'style', allow_duplicate=True),
-     Output('progress-text', 'children', allow_duplicate=True),
-     Output('process-btn', 'disabled', allow_duplicate=True),
-     Output('process-btn', 'style', allow_duplicate=True),
-     Output('clear-btn', 'disabled', allow_duplicate=True),
-     Output('clear-btn', 'style', allow_duplicate=True)],
-    [Input('highlighted-text-store', 'data')],
-    [State('processing-stage-store', 'data'),
-     State('raw-text-store', 'data')],
-    prevent_initial_call=True
+    [
+        Output("deidentified-text-store", "data"),
+        Output("processing-stage-store", "data", allow_duplicate=True),
+        Output("progress-bar-fill", "style", allow_duplicate=True),
+        Output("progress-text", "children", allow_duplicate=True),
+        Output("process-btn", "disabled", allow_duplicate=True),
+        Output("process-btn", "style", allow_duplicate=True),
+        Output("clear-btn", "disabled", allow_duplicate=True),
+        Output("clear-btn", "style", allow_duplicate=True),
+    ],
+    [Input("highlighted-text-store", "data")],
+    [State("processing-stage-store", "data"), State("raw-text-store", "data")],
+    prevent_initial_call=True,
 )
 def process_deidentification(highlighted_data, current_stage, raw_text):
-    if highlighted_data and current_stage == 'highlighting_done' and raw_text:
+    if highlighted_data and current_stage == "highlighting_done" and raw_text:
         # Update progress to 80%
-        progress_fill_style = {'width': '80%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_fill_style = {
+            "width": "80%",
+            "height": "100%",
+            "backgroundColor": HEALTHCARE_COLORS["success"],
+            "borderRadius": "10px",
+            "transition": "width 0.3s ease",
+        }
         progress_text = "Applying de-identification rules..."
-        
+
         # Perform de-identification
         deidentified_text = deidentify_text(raw_text)
-        
+
         # Format de-identified text
         formatted_deidentified = format_deidentified_text(raw_text, deidentified_text)
-        
+
         # Create complete HTML document
         deidentified_complete_html = f"""
         <html>
@@ -827,79 +1149,117 @@ def process_deidentification(highlighted_data, current_stage, raw_text):
         </body>
         </html>
         """
-        
+
         # Update progress to 100%
-        progress_fill_style = {'width': '100%', 'height': '100%', 'backgroundColor': HEALTHCARE_COLORS['success'], 'borderRadius': '10px', 'transition': 'width 0.3s ease'}
+        progress_fill_style = {
+            "width": "100%",
+            "height": "100%",
+            "backgroundColor": HEALTHCARE_COLORS["success"],
+            "borderRadius": "10px",
+            "transition": "width 0.3s ease",
+        }
         progress_text = "Processing complete!"
-        
+
         # Re-enable both buttons with default styling
         default_process_button_style = {
-            'backgroundColor': HEALTHCARE_COLORS['success'],
-            'color': 'white',
-            'border': 'none',
-            'padding': '12px 24px',
-            'borderRadius': '20px',
-            'cursor': 'pointer',
-            'fontSize': '16px',
-            'fontWeight': 'bold',
-            'marginTop': '15px'
+            "backgroundColor": HEALTHCARE_COLORS["success"],
+            "color": "white",
+            "border": "none",
+            "padding": "12px 24px",
+            "borderRadius": "20px",
+            "cursor": "pointer",
+            "fontSize": "16px",
+            "fontWeight": "bold",
+            "marginTop": "15px",
         }
-        
+
         default_clear_button_style = {
-            'backgroundColor': HEALTHCARE_COLORS['warning'],
-            'color': 'white',
-            'border': 'none',
-            'padding': '12px 24px',
-            'borderRadius': '20px',
-            'cursor': 'pointer',
-            'fontSize': '16px',
-            'fontWeight': 'bold',
-            'marginTop': '15px',
-            'marginLeft': '10px'
+            "backgroundColor": HEALTHCARE_COLORS["warning"],
+            "color": "white",
+            "border": "none",
+            "padding": "12px 24px",
+            "borderRadius": "20px",
+            "cursor": "pointer",
+            "fontSize": "16px",
+            "fontWeight": "bold",
+            "marginTop": "15px",
+            "marginLeft": "10px",
         }
-        
-        return deidentified_complete_html, 'complete', progress_fill_style, progress_text, False, default_process_button_style, False, default_clear_button_style
-    
-    return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+        return (
+            deidentified_complete_html,
+            "complete",
+            progress_fill_style,
+            progress_text,
+            False,
+            default_process_button_style,
+            False,
+            default_clear_button_style,
+        )
+
+    return (
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+        dash.no_update,
+    )
+
 
 # Callback to update highlighted text display
 @app.callback(
-    Output('highlighted-text-frame', 'srcDoc', allow_duplicate=True),
-    [Input('highlighted-text-store', 'data')],
-    prevent_initial_call=True
+    Output("highlighted-text-frame", "srcDoc", allow_duplicate=True),
+    [Input("highlighted-text-store", "data")],
+    prevent_initial_call=True,
 )
 def update_highlighted_display(highlighted_data):
     if highlighted_data:
         return highlighted_data
     return dash.no_update
 
+
 # Callback to update de-identified text display
 @app.callback(
-    Output('deidentified-text-frame', 'srcDoc', allow_duplicate=True),
-    [Input('deidentified-text-store', 'data')],
-    prevent_initial_call=True
+    Output("deidentified-text-frame", "srcDoc", allow_duplicate=True),
+    [Input("deidentified-text-store", "data")],
+    prevent_initial_call=True,
 )
 def update_deidentified_display(deidentified_data):
     if deidentified_data:
         return deidentified_data
     return dash.no_update
 
+
 # Callback to update processing status
 @app.callback(
-    Output('processing-status', 'children'),
-    [Input('processing-stage-store', 'data')],
-    prevent_initial_call=True
+    Output("processing-status", "children"),
+    [Input("processing-stage-store", "data")],
+    prevent_initial_call=True,
 )
 def update_processing_status(stage):
-    if stage == 'complete':
-        return html.Div([
-            html.Span("Processing Complete", style={'color': HEALTHCARE_COLORS['success'], 'fontWeight': 'bold'})
-        ])
-    elif stage in ['start', 'highlighting_done', 'deidentifying_done']:
-        return html.Div([
-            html.Span("Processing...", style={'color': HEALTHCARE_COLORS['warning'], 'fontWeight': 'bold'})
-        ])
+    if stage == "complete":
+        return html.Div(
+            [
+                html.Span(
+                    "Processing Complete",
+                    style={"color": HEALTHCARE_COLORS["success"], "fontWeight": "bold"},
+                )
+            ]
+        )
+    elif stage in ["start", "highlighting_done", "deidentifying_done"]:
+        return html.Div(
+            [
+                html.Span(
+                    "Processing...",
+                    style={"color": HEALTHCARE_COLORS["warning"], "fontWeight": "bold"},
+                )
+            ]
+        )
     return dash.no_update
+
 
 def format_deidentified_text(original_text, deidentified_text):
     """
@@ -907,127 +1267,124 @@ def format_deidentified_text(original_text, deidentified_text):
     and highlight the redacted parts in bold
     """
     # Find all redacted patterns like [REDACTED:TYPE]
-    redacted_pattern = r'\[REDACTED:[A-Z_]+\]|\[DATE\]|\[PATIENT NAME\]|\[SSN\]|\[PHONE\]|\[EMAIL\]|PERSON_[a-z0-9]+'
-    
+    redacted_pattern = r"\[REDACTED:[A-Z_]+\]|\[DATE\]|\[PATIENT NAME\]|\[SSN\]|\[PHONE\]|\[EMAIL\]|PERSON_[a-z0-9]+"
+
     # Bold all redacted text
     formatted_text = re.sub(
-        redacted_pattern,
-        r'<span class="redacted">\g<0></span>',
-        deidentified_text
+        redacted_pattern, r'<span class="redacted">\g<0></span>', deidentified_text
     )
-    
+
     return formatted_text
+
 
 # Callback for statistics
 @app.callback(
-    Output('statistics-display', 'children'),
-    [Input('stats-btn', 'n_clicks')],
-    [State('raw-text-input', 'value')],
-    prevent_initial_call=True
+    Output("statistics-display", "children"),
+    [Input("stats-btn", "n_clicks")],
+    [State("raw-text-input", "value")],
+    prevent_initial_call=True,
 )
 def show_statistics(n_clicks, raw_text):
     if not n_clicks or not raw_text:
         return ""
-    
+
     # Count HIPAA identifiers
     stats = {}
     for pattern_name, pattern in HIPAA_PATTERNS.items():
         matches = len(re.findall(pattern, raw_text, re.IGNORECASE))
         if matches > 0:
             stats[pattern_name] = matches
-    
+
     if not stats:
-        return html.Div([
-            html.P("No HIPAA identifiers detected in the input text.", 
-                   style={'color': HEALTHCARE_COLORS['info']})
-        ])
-    
+        return html.Div(
+            [
+                html.P(
+                    "No HIPAA identifiers detected in the input text.",
+                    style={"color": HEALTHCARE_COLORS["info"]},
+                )
+            ]
+        )
+
     # Create statistics table
     stats_data = []
     for identifier, count in stats.items():
-        stats_data.append({
-            'Identifier Type': identifier.replace('_', ' ').title(),
-            'Count': count,
-            'Status': 'Detected' if count > 0 else 'Not Found'
-        })
-    
-    return html.Div([
-        html.H5("HIPAA Identifier Statistics", 
-               style={'color': HEALTHCARE_COLORS['primary'], 'marginBottom': '15px'}),
-        dash_table.DataTable(
-            data=stats_data,
-            columns=[{'name': col, 'id': col} for col in ['Identifier Type', 'Count', 'Status']],
-            style_cell={'textAlign': 'left', 'padding': '10px'},
-            style_header={'backgroundColor': HEALTHCARE_COLORS['light'], 'fontWeight': 'bold'},
-            style_data_conditional=[
-                {
-                    'if': {'filter_query': '{Status} = Detected'},
-                    'backgroundColor': '#e8f5e8',
-                    'color': HEALTHCARE_COLORS['success']
-                }
-            ]
+        stats_data.append(
+            {
+                "Identifier Type": identifier.replace("_", " ").title(),
+                "Count": count,
+                "Status": "Detected" if count > 0 else "Not Found",
+            }
         )
-    ])
+
+    return html.Div(
+        [
+            html.H5(
+                "HIPAA Identifier Statistics",
+                style={"color": HEALTHCARE_COLORS["primary"], "marginBottom": "15px"},
+            ),
+            dash_table.DataTable(
+                data=stats_data,
+                columns=[
+                    {"name": col, "id": col}
+                    for col in ["Identifier Type", "Count", "Status"]
+                ],
+                style_cell={"textAlign": "left", "padding": "10px"},
+                style_header={
+                    "backgroundColor": HEALTHCARE_COLORS["light"],
+                    "fontWeight": "bold",
+                },
+                style_data_conditional=[
+                    {
+                        "if": {"filter_query": "{Status} = Detected"},
+                        "backgroundColor": "#e8f5e8",
+                        "color": HEALTHCARE_COLORS["success"],
+                    }
+                ],
+            ),
+        ]
+    )
+
 
 # Callback for export
 @app.callback(
-    Output('export-btn', 'children'),
-    [Input('export-btn', 'n_clicks')],
-    [State('raw-text-input', 'value'),
-     State('deidentified-text-frame', 'srcDoc')],
-    prevent_initial_call=True
+    Output("export-btn", "children"),
+    [Input("export-btn", "n_clicks")],
+    [State("raw-text-input", "value"), State("deidentified-text-frame", "srcDoc")],
+    prevent_initial_call=True,
 )
 def export_results(n_clicks, raw_text, deidentified_text):
     if n_clicks and raw_text and deidentified_text:
-        # Create downloadable content
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"deid_results_{timestamp}.txt"
-        
-        # Extract text content from HTML
-        import re
-        # Remove HTML tags to get clean text
-        clean_text = re.sub(r'<[^>]+>', '', deidentified_text)
-        
-        content = f"""
-DEID Patients - De-identification Results
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-ORIGINAL DATA:
-{raw_text}
-
-DE-IDENTIFIED DATA:
-{clean_text}
-
-HIPAA Compliance: ✅ Verified
-"""
-        
         # In a real implementation, you would create a download link here
         return "Export Complete"
-    
+
     return "Export Results"
+
 
 # Callback to populate document names based on selected document type
 @app.callback(
-    [Output('doc-name-dropdown', 'options'),
-     Output('doc-name-dropdown', 'value')],
-    Input('doc-type-dropdown', 'value')
+    [Output("doc-name-dropdown", "options"), Output("doc-name-dropdown", "value")],
+    Input("doc-type-dropdown", "value"),
 )
 def update_document_names(selected_type):
     """Update document name dropdown based on selected document type"""
     if selected_type and selected_type in DOCUMENTS:
         # Debug print to check what's happening
-        options = [{'label': doc['label'], 'value': doc['value']} for doc in DOCUMENTS[selected_type]]
+        options = [
+            {"label": doc["label"], "value": doc["value"]}
+            for doc in DOCUMENTS[selected_type]
+        ]
         print(f"Generated {len(options)} document options for {selected_type}")
         for opt in options[:3]:  # Print first few for debugging
             print(f"  - Option: {opt['label']} -> {opt['value']}")
         return options, None  # Reset the value when type changes
     return [], None
 
+
 # Callback to load document content into textarea
 @app.callback(
-    Output('raw-text-input', 'value', allow_duplicate=True),
-    [Input('doc-name-dropdown', 'value')],
-    prevent_initial_call=True
+    Output("raw-text-input", "value", allow_duplicate=True),
+    [Input("doc-name-dropdown", "value")],
+    prevent_initial_call=True,
 )
 def load_document_content(selected_file_path):
     """Load the selected document's content into the textarea"""
@@ -1035,18 +1392,18 @@ def load_document_content(selected_file_path):
     ctx = dash.callback_context
     if not ctx.triggered:
         return dash.no_update
-    
-    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
-    if 'doc-name-dropdown' not in trigger_id:
+
+    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    if "doc-name-dropdown" not in trigger_id:
         return dash.no_update
-    
+
     if selected_file_path:
         try:
             print(f"Attempting to load document: {selected_file_path}")
             # Read the file
             file_path = Path(selected_file_path)
             if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as file:
+                with open(file_path, "r", encoding="utf-8") as file:
                     content = file.read()
                 print(f"Successfully loaded document: {file_path.name}")
                 return content
@@ -1056,10 +1413,12 @@ def load_document_content(selected_file_path):
         except Exception as e:
             print(f"Error loading document: {e}")
             import traceback
+
             traceback.print_exc()
             return dash.no_update
-    
+
     return dash.no_update
 
-if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0', port=8050)
+
+if __name__ == "__main__":
+    app.run_server(debug=True, host="0.0.0.0", port=8050)
