@@ -40,6 +40,7 @@ HIPAA_LABELS = {
     "VEHICLE_ID": "VEHICLE_ID",
     "VIN": "VEHICLE_ID",
     "DEVICE_ID": "DEVICE_ID",
+    "MEDICAL_DEVICE_ID": "DEVICE_ID",
     
     # Web identifiers
     "URL": "URL",

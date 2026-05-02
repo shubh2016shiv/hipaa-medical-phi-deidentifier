@@ -26,12 +26,14 @@ class PHIEntity:
         category: Category of PHI (e.g., NAME, MRN, SSN)
         confidence: Confidence score of the detection (0.0 to 1.0)
         text: The actual text content of the entity
+        source: The detector that found the entity (e.g., "presidio", "hf")
     """
     start: int
     end: int
     category: str
     confidence: float
     text: str
+    source: str = "unknown"
 
     def __post_init__(self):
         """Normalize the category after initialization."""
