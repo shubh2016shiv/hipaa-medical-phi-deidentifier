@@ -22,6 +22,7 @@ import spacy
 import yaml
 from presidio_analyzer import AnalyzerEngine
 from presidio_analyzer.nlp_engine import NlpEngineProvider
+from spacy.cli.download import download
 
 
 class ConfigurationError(Exception):
@@ -80,7 +81,7 @@ class ConfigurationLoader:
                 config_data = self._load_yaml_file(config_file)
                 break
 
-        if config_data is None:
+        if config_data is None or config_file is None:
             raise ConfigurationError(
                 f"No valid configuration file found. Tried: {', '.join(str(p) for p in paths_to_try)}"
             )
@@ -245,7 +246,7 @@ class ModelManager:
             # If loading fails, try to download it
             try:
                 print(f"Downloading spaCy model: {model_name}")
-                spacy.cli.download(model_name)
+                download(model_name)
                 nlp = spacy.load(model_name)
                 self._spacy_models[model_name] = nlp
                 return nlp
