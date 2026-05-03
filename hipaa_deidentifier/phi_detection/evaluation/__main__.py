@@ -84,7 +84,9 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="all",
         help=(
             "Comma-separated detector names to run. "
-            "Valid values: hf, presidio, heuristics, pipeline, all. "
+            "Valid values: hf, presidio, heuristics, pipeline, pipeline_filtered, all. "
+            "pipeline_filtered applies the FP guardrail after detection, matching "
+            "what production actually redacts. "
             "Default: all"
         ),
     )
@@ -246,11 +248,22 @@ def main(argv: list[str] | None = None) -> int:
             pipeline_ev = PipelineEvaluator(
                 document_path=str(document_path),
                 use_judge=use_judge,
+                use_guardrail=False,
             )
             pipeline_metrics = pipeline_ev.run()
             results["Full Pipeline (HF + Presidio + Heuristics, merged)"] = (
                 pipeline_metrics
             )
+
+        # --- Run post-guardrail pipeline if requested ---
+        if "pipeline_filtered" in detectors_lower or detectors_lower == "all":
+            filtered_ev = PipelineEvaluator(
+                document_path=str(document_path),
+                use_judge=use_judge,
+                use_guardrail=True,
+            )
+            filtered_metrics = filtered_ev.run()
+            results["Full Pipeline + FP Guardrail (post-filter)"] = filtered_metrics
 
         # --- Render report ---
         generator.render_console(results, document_name=document_path.stem)

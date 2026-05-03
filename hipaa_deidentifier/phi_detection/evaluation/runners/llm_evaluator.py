@@ -26,6 +26,7 @@ _DETECTOR_LABELS: Dict[str, str] = {
     "presidio": "PresidioIdentifier + spaCy (en_core_web_lg)",
     "heuristics": "Clinical Heuristics (section_headers + ages + numeric_ids)",
     "pipeline": "Full Pipeline (HF + Presidio + Heuristics, merged)",
+    "pipeline_filtered": "Full Pipeline + FP Guardrail (post-filter)",
 }
 
 _LLM_SYSTEM_PROMPT = """You are a HIPAA Safe Harbor evaluation specialist.
@@ -120,6 +121,8 @@ class LLMEvaluator:
                     entities = self._run_presidio_detector()
                 elif detector == "heuristics":
                     entities = self._run_heuristics_detector()
+                elif detector == "pipeline_filtered":
+                    entities = self._run_pipeline_filtered_detector()
                 else:
                     entities = self._run_pipeline_detector()
 
@@ -178,6 +181,13 @@ class LLMEvaluator:
         orchestrator = HIPAAPipelineOrchestrator()
         return orchestrator._detect_phi_entities(self._text)
 
+    def _run_pipeline_filtered_detector(self) -> List[PHIEntity]:
+        from hipaa_deidentifier.pipeline_orchestrator import HIPAAPipelineOrchestrator
+
+        orchestrator = HIPAAPipelineOrchestrator()
+        entities = orchestrator._detect_phi_entities(self._text)
+        return orchestrator.fp_guardrail.filter(entities, self._text)
+
     def _build_prompt(self, detector_results: dict[str, dict[str, Any]]) -> str:
         max_expected = self.config.llm_judge.max_expected_entities
         threshold = self.config.llm_judge.coverage_pass_threshold
@@ -212,9 +222,9 @@ class LLMEvaluator:
 
     @staticmethod
     def _parse_detectors(detectors_str: str) -> List[str]:
-        valid = {"hf", "presidio", "heuristics", "pipeline"}
+        valid = {"hf", "presidio", "heuristics", "pipeline", "pipeline_filtered"}
         if detectors_str.strip().lower() == "all":
-            return ["hf", "presidio", "heuristics", "pipeline"]
+            return ["hf", "presidio", "heuristics", "pipeline", "pipeline_filtered"]
 
         requested = [d.strip().lower() for d in detectors_str.split(",") if d.strip()]
         return [d for d in requested if d in valid]

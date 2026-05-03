@@ -54,6 +54,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _PIPELINE_LABEL: str = "Full Pipeline (HF + Presidio + Heuristics, merged)"
+_PIPELINE_FILTERED_LABEL: str = "Full Pipeline + FP Guardrail (post-filter)"
 
 
 class PipelineEvaluator:
@@ -80,18 +81,19 @@ class PipelineEvaluator:
         self,
         document_path: str,
         use_judge: bool = True,
+        use_guardrail: bool = False,
     ) -> None:
         """Initialise the pipeline evaluator.
 
         Args:
             document_path: Path to the clinical note file.
             use_judge: If True, call LM Studio judge on failures.
-
-        Example:
-            >>> ev = PipelineEvaluator("data/.../note.txt", use_judge=False)
+            use_guardrail: If True, apply FalsePositiveGuardrail after detection
+                so evaluation reflects the entities that would actually be redacted.
         """
         self.document_path = Path(document_path)
         self.use_judge = use_judge
+        self.use_guardrail = use_guardrail
 
         self._text: str = ""
         self._judge: Optional["LMStudioJudge"] = None
@@ -101,9 +103,10 @@ class PipelineEvaluator:
             self._judge = LMStudioJudge()
 
         logger.info(
-            "PipelineEvaluator initialised: doc=%s judge=%s",
+            "PipelineEvaluator initialised: doc=%s judge=%s guardrail=%s",
             self.document_path.name,
             "enabled" if use_judge else "disabled",
+            "enabled" if use_guardrail else "disabled",
         )
 
     def run(self) -> DetectorMetrics:
@@ -156,13 +159,17 @@ class PipelineEvaluator:
                 HIPAAPipelineOrchestrator,
             )
 
-            # WHY: We use the orchestrator's internal _detect_phi_entities method
-            # rather than the full process() method to isolate detection quality
-            # from redaction quality — the two must be evaluated independently.
             orchestrator = HIPAAPipelineOrchestrator()
             entities: List[PHIEntity] = orchestrator._detect_phi_entities(self._text)
 
-            logger.info("Full pipeline detected %d entities", len(entities))
+            if self.use_guardrail:
+                entities = orchestrator.fp_guardrail.filter(entities, self._text)
+                logger.info(
+                    "Full pipeline (post-guardrail) retained %d entities", len(entities)
+                )
+            else:
+                logger.info("Full pipeline detected %d entities", len(entities))
+
             return entities
 
         except Exception as exc:
@@ -183,8 +190,9 @@ class PipelineEvaluator:
         Returns:
             DetectorMetrics with status and entity count (no ground truth scoring).
         """
+        label = _PIPELINE_FILTERED_LABEL if self.use_guardrail else _PIPELINE_LABEL
         metrics = DetectorMetrics(
-            detector_name=_PIPELINE_LABEL,
+            detector_name=label,
             mode="token",
             status="ok",
         )
