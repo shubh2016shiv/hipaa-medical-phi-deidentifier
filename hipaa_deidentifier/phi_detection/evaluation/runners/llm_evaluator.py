@@ -126,28 +126,28 @@ class LLMEvaluator:
         # no-op for the OpenAI judge (it uses the SDK endpoint internally).
         if self.config.active_backend == "openai":
             _cfg = self.config.openai_api
-            _judge_kwargs = dict(
-                model=_cfg.model,
-                timeout_seconds=_cfg.timeout_seconds,
-                max_tokens=_cfg.max_tokens,
-                temperature=_cfg.temperature,
-            )
+            _judge_kwargs: dict[str, str | int | float] = {
+                "model": str(_cfg.model),
+                "timeout_seconds": float(_cfg.timeout_seconds),
+                "max_tokens": int(_cfg.max_tokens),
+                "temperature": float(_cfg.temperature),
+            }
         else:
             _cfg = self.config.lm_studio  # type: ignore[assignment]
-            _judge_kwargs = dict(
-                base_url=_cfg.base_url,
-                model=_cfg.model,
-                timeout_seconds=_cfg.timeout_seconds,
-                max_tokens=_cfg.max_tokens,
-                temperature=_cfg.temperature,
-            )
+            _judge_kwargs = {
+                "base_url": str(_cfg.base_url),
+                "model": str(_cfg.model),
+                "timeout_seconds": float(_cfg.timeout_seconds),
+                "max_tokens": int(_cfg.max_tokens),
+                "temperature": float(_cfg.temperature),
+            }
 
         response = self._judge.generate_json(
             prompt,
             self._build_response_schema(),
             system_prompt=_LLM_SYSTEM_PROMPT,
             use_response_format=self.config.llm_judge.use_response_format,
-            **_judge_kwargs,
+            **_judge_kwargs,  # type: ignore[arg-type]
         )
 
         result["llm_status"] = response["status"]

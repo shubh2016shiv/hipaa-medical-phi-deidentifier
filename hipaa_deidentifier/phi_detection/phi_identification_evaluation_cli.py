@@ -80,6 +80,38 @@ _HIPAA_CRITICAL = frozenset(
 )
 _RECALL_THRESHOLD = 0.95
 
+# Complete set of HIPAA Safe Harbor identifiers — the only categories that belong
+# in the expected-PHI set.  LLM judges sometimes label clinical content (MEDICATION,
+# VITAL_SIGN, DIAGNOSIS, ALLERGY, LAB_RESULT, AGE, TIME, etc.) that is not PHI.
+# Any expected entity whose category is not in this set is filtered before metrics.
+_HIPAA_ALLOWED_CATEGORIES = frozenset(
+    {
+        "NAME",
+        "DATE",
+        "PHONE_NUMBER",
+        "FAX_NUMBER",
+        "EMAIL_ADDRESS",
+        "US_SSN",
+        "MRN",
+        "ACCOUNT_NUMBER",
+        "CERTIFICATE_NUMBER",
+        "VIN",
+        "DEVICE_ID",
+        "URL",
+        "IP_ADDRESS",
+        "LOCATION",
+        "AGE_OVER_89",
+        "PROVIDER_NAME",
+        "ORGANIZATION",
+        "OTHER_ID",
+        # Alias / variant labels the LLM sometimes uses for the above
+        "HEALTH_PLAN_ID",
+        "ENCOUNTER_ID",
+        "LICENSE_NUMBER",
+        "NPI",
+    }
+)
+
 # Column order for all worksheets
 _COLUMNS: List[str] = [
     "note_category",
@@ -197,6 +229,34 @@ def compute_detector_metrics(
         precision, recall, f1, false_negative_rate, false_positive_rate,
         hipaa_critical, hipaa_pass.
     """
+    # Detectors label all person names as NAME regardless of patient vs provider.
+    # The LLM judge may split these into NAME and PROVIDER_NAME.  Merge both
+    # expected pools when evaluating NAME detections so that a detected NAME
+    # that matches a PROVIDER_NAME expected entity is counted as a TP, not a FP.
+    _NAME_ALIASES: Dict[str, frozenset] = {
+        "NAME": frozenset({"NAME", "PROVIDER_NAME"}),
+        "PROVIDER_NAME": frozenset({"NAME", "PROVIDER_NAME"}),
+    }
+    # Similarly, detectors may emit ENCOUNTER_ID / HEALTH_PLAN_ID / ACCOUNT_NUMBER
+    # for things the LLM calls OTHER_ID, and vice-versa.
+    _ID_ALIASES: Dict[str, frozenset] = {
+        "OTHER_ID": frozenset(
+            {
+                "OTHER_ID",
+                "ENCOUNTER_ID",
+                "HEALTH_PLAN_ID",
+                "IDENTIFICATION_NUMBER",
+                "CERTIFICATE_NUMBER",
+                "FINANCE_ID",
+                "FIN",
+                "NPI",
+            }
+        ),
+        "ENCOUNTER_ID": frozenset({"OTHER_ID", "ENCOUNTER_ID"}),
+        "HEALTH_PLAN_ID": frozenset({"OTHER_ID", "HEALTH_PLAN_ID"}),
+    }
+    _ALIASES: Dict[str, frozenset] = {**_NAME_ALIASES, **_ID_ALIASES}
+
     all_types: set[str] = set()
     for e in expected:
         all_types.add(e.get("category", "UNKNOWN"))
@@ -206,24 +266,54 @@ def compute_detector_metrics(
     total_tokens = max(1, len(re.findall(r"\S+", text)))
     rows: Dict[str, Dict[str, Any]] = {}
 
+    # Track which expected entities are already matched across alias groups
+    # so a single expected entity cannot satisfy multiple detected types.
+    globally_matched: set[tuple] = set()  # (category, index) pairs
+
     for etype in sorted(all_types):
         exp_t = [e for e in expected if e.get("category") == etype]
+        # For detection-side matching, allow detected NAME to cover PROVIDER_NAME
         det_t = [e for e in detected if e.get("category") == etype]
 
-        matched_exp: set[int] = set()
+        # Build the pool of expected entities this detector type can match against
+        alias_cats = _ALIASES.get(etype, frozenset({etype}))
+        exp_pool = [
+            (cat, i, e)
+            for cat in alias_cats
+            for i, e in enumerate(e_ for e_ in expected if e_.get("category") == cat)
+        ]
+
+        matched_exp: set[int] = set()  # indices into exp_t (exact-type)
         tp = fp = 0
         for d in det_t:
             found = False
+            # First try exact-type match
             for i, e in enumerate(exp_t):
-                if i not in matched_exp and _texts_overlap(d["text"], e["text"]):
+                key = (etype, i)
+                if key not in globally_matched and _texts_overlap(d["text"], e["text"]):
+                    globally_matched.add(key)
                     matched_exp.add(i)
                     tp += 1
                     found = True
                     break
+            if not found and alias_cats != frozenset({etype}):
+                # Try alias match (e.g. NAME detected → PROVIDER_NAME expected)
+                for cat, i, e in exp_pool:
+                    key = (cat, i)
+                    if key not in globally_matched and _texts_overlap(
+                        d["text"], e["text"]
+                    ):
+                        globally_matched.add(key)
+                        tp += 1
+                        found = True
+                        break
             if not found:
                 fp += 1
 
-        fn = len(exp_t) - len(matched_exp)
+        # Count FNs as expected entities not satisfied by either exact-type or alias-path matches.
+        # matched_exp only tracks exact-type hits; globally_matched also captures alias hits
+        # (e.g. NAME detector covering a PROVIDER_NAME expected entity), so use it here.
+        fn = sum(1 for i in range(len(exp_t)) if (etype, i) not in globally_matched)
         tn = max(0, total_tokens - tp - fp - fn)
 
         prec = tp / (tp + fp) if (tp + fp) > 0 else (1.0 if not det_t else 0.0)
@@ -356,7 +446,13 @@ def build_rows(
     Each row corresponds to one (detector, entity_type) combination and
     contains all metric fields defined in _COLUMNS.
     """
-    expected = llm_result.get("llm_expected_entities") or []
+    _raw_expected = llm_result.get("llm_expected_entities") or []
+    # Strip non-HIPAA categories the LLM judge sometimes labels (MEDICATION, VITAL_SIGN,
+    # DIAGNOSIS, AGE, ALLERGY, LAB_RESULT, TIME, etc.) — these are clinical facts, not
+    # Safe Harbor identifiers, and create phantom FNs that no detector should ever satisfy.
+    expected = [
+        e for e in _raw_expected if e.get("category") in _HIPAA_ALLOWED_CATEGORIES
+    ]
     detector_results = llm_result.get("detector_entities") or {}
     judgment = llm_result.get("llm_judgment") or {}
     llm_coverage = judgment.get("coverage_score") if judgment else None
@@ -719,9 +815,10 @@ def print_console_summary(all_rows: List[Dict[str, Any]]) -> None:
 
         recall = r.get("recall")
         f1 = r.get("f1")
-        llm_pass = r.get("llm_overall_pass")
         pass_flag = (
-            "PASS" if llm_pass is True else ("FAIL" if llm_pass is False else "N/A")
+            "PASS"
+            if recall is not None and recall >= _RECALL_THRESHOLD
+            else ("FAIL" if recall is not None else "N/A")
         )
         recall_str = f"{recall:.2%}" if recall is not None else "N/A"
         f1_str = f"{f1:.2%}" if f1 is not None else "N/A"
@@ -820,6 +917,49 @@ def _parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def _load_dotenv() -> None:
+    """Load .env from the project root into os.environ.
+
+    Tries python-dotenv first; if not installed, parses the file manually
+    so the CLI works without requiring an extra dependency.
+    Only sets variables that are not already present in the environment.
+    """
+    import os
+
+    # Walk up from this file's location to find the nearest .env
+    search = Path(__file__).resolve().parent
+    env_file: Optional[Path] = None
+    for _ in range(6):
+        candidate = search / ".env"
+        if candidate.exists():
+            env_file = candidate
+            break
+        search = search.parent
+
+    if env_file is None:
+        return
+
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(env_file, override=False)
+        return
+    except ImportError:
+        pass
+
+    # Fallback: manual KEY=VALUE parser (no extra dependency needed)
+    with env_file.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip("'\"")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
 def _configure_logging(verbose: bool) -> None:
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
@@ -834,6 +974,11 @@ def _configure_logging(verbose: bool) -> None:
 def main(argv: Optional[List[str]] = None) -> int:
     args = _parse_args(argv)
     _configure_logging(args.verbose)
+
+    # Load .env from the project root so OPENAI_API_KEY (and other secrets) are
+    # available before the judge is constructed.  python-dotenv is optional —
+    # if it's not installed we fall back to manually parsing the file.
+    _load_dotenv()
 
     root = Path(args.input_folder)
     if not root.exists():
@@ -862,9 +1007,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"   Categories  : {len(categories)}")
     print(f"   Total notes : {total_files}")
     print(f"   Detectors   : {args.detectors}")
-    print(
-        f"   LLM judge   : {'enabled (' + eval_config.lm_studio.model + ')' if use_judge else 'disabled — count-only mode'}"
-    )
+    if use_judge:
+        if eval_config.active_backend == "openai":
+            _judge_label = f"enabled — OpenAI ({eval_config.openai_api.model})"
+        else:
+            _judge_label = f"enabled — LM Studio ({eval_config.lm_studio.model})"
+    else:
+        _judge_label = "disabled — count-only mode"
+    print(f"   LLM judge   : {_judge_label}")
     print(f"   Output      : {output_dir.resolve()}\n")
 
     all_rows: List[Dict[str, Any]] = []
@@ -904,9 +1054,20 @@ def main(argv: Optional[List[str]] = None) -> int:
                 judgment = llm_result.get("llm_judgment") or {}
                 if judgment:
                     score = judgment.get("coverage_score")
-                    passed = "PASS" if judgment.get("overall_pass") else "FAIL"
                     score_str = (
                         f"{score:.2f}" if isinstance(score, float) else str(score)
+                    )
+                    # Pass/fail driven by computed recall against threshold, not LLM opinion
+                    _overall_recall = None
+                    for row in rows:
+                        if row.get("entity_type") == "OVERALL":
+                            _overall_recall = row.get("recall")
+                            break
+                    passed = (
+                        "PASS"
+                        if _overall_recall is not None
+                        and _overall_recall >= _RECALL_THRESHOLD
+                        else "FAIL"
                     )
                     print(f"coverage={score_str}  [{passed}]")
                 else:
