@@ -18,6 +18,7 @@ from ..evaluation_config import EvaluationConfig
 
 if TYPE_CHECKING:
     from ..judges.lm_studio_judge import LMStudioJudge
+    from ..judges.openai_judge import OpenAIJudge
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +30,30 @@ _DETECTOR_LABELS: Dict[str, str] = {
     "pipeline_filtered": "Full Pipeline + FP Guardrail (post-filter)",
 }
 
-_LLM_SYSTEM_PROMPT = """You are a HIPAA Safe Harbor evaluation specialist.
-You will receive a clinical document and PHI detector outputs. First identify
-the expected HIPAA Safe Harbor PHI entities in the document, then judge whether
-the detector outputs cover those entities. Return only JSON that matches the
-provided schema. Do not include markdown."""
+_LLM_SYSTEM_PROMPT = """You are a HIPAA Safe Harbor evaluation specialist (45 CFR §164.514(b)).
+
+Your task: identify ONLY the 18 HIPAA Safe Harbor identifiers in the document.
+DO NOT label clinical content (medications, diagnoses, vital signs, lab results,
+allergies, procedures, conditions, symptoms, BMI, weight, dosage values, A1c values,
+diagnosis years, scored assessments, or other medical facts) as PHI.
+DO NOT use OTHER_ID as a catch-all — only use it for an explicit labeled identifier
+(e.g. "Badge #: 45678", "License: RN-98765") that does not fit any other category.
+
+The ONLY valid entity types you may use in the `category` field are:
+  NAME, DATE, PHONE_NUMBER, FAX_NUMBER, EMAIL_ADDRESS, US_SSN, MRN,
+  ACCOUNT_NUMBER, CERTIFICATE_NUMBER, VIN, DEVICE_ID, URL, IP_ADDRESS,
+  LOCATION, AGE_OVER_89, PROVIDER_NAME, ORGANIZATION, OTHER_ID
+
+HIPAA date rule: ALL dates (with month or day) are PHI — including admission dates,
+discharge dates, appointment dates, procedure dates, lab dates, medication dates,
+and dates of birth. Year-only values (e.g. "2015") are NOT PHI.
+
+HIPAA age rule: ONLY label AGE_OVER_89 when the document explicitly states the
+patient is 90 or older, OR when a birth year implies age > 89. A patient described
+as "45-year-old", "62-year-old", "78-year-old" — any age 89 or under — is NOT PHI.
+Do NOT label every age mention as AGE_OVER_89.
+
+Return only JSON matching the provided schema. Do not include markdown."""
 
 
 class LLMEvaluator:
@@ -51,14 +71,28 @@ class LLMEvaluator:
         self.config = config
         self.use_judge = use_judge
         self._text = ""
-        self._judge: Optional["LMStudioJudge"] = None
+        self._judge: Optional["LMStudioJudge | OpenAIJudge"] = None
         if use_judge:
-            from ..judges.lm_studio_judge import LMStudioJudge
+            if config.active_backend == "openai":
+                from ..judges.openai_judge import OpenAIJudge
 
-            self._judge = LMStudioJudge(
-                base_url=config.lm_studio.base_url,
-                model=config.lm_studio.model,
-            )
+                oai = config.openai_api
+                self._judge = OpenAIJudge(
+                    model=oai.model,
+                    api_key_env=oai.api_key_env,
+                    timeout_seconds=oai.timeout_seconds,
+                    temperature=oai.temperature,
+                    max_tokens=oai.max_tokens,
+                )
+                logger.info("Judge backend: OpenAI (%s)", oai.model)
+            else:
+                from ..judges.lm_studio_judge import LMStudioJudge
+
+                self._judge = LMStudioJudge(
+                    base_url=config.lm_studio.base_url,
+                    model=config.lm_studio.model,
+                )
+                logger.info("Judge backend: LM Studio (%s)", config.lm_studio.model)
 
     def run(self) -> dict[str, Any]:
         if not self.document_path.exists():
@@ -86,16 +120,34 @@ class LLMEvaluator:
 
         prompt = self._build_prompt(detector_results)
         assert self._judge is not None
+
+        # Route config kwargs to whichever backend is active.
+        # Both judges share the same generate_json signature; base_url is a
+        # no-op for the OpenAI judge (it uses the SDK endpoint internally).
+        if self.config.active_backend == "openai":
+            _cfg = self.config.openai_api
+            _judge_kwargs = dict(
+                model=_cfg.model,
+                timeout_seconds=_cfg.timeout_seconds,
+                max_tokens=_cfg.max_tokens,
+                temperature=_cfg.temperature,
+            )
+        else:
+            _cfg = self.config.lm_studio  # type: ignore[assignment]
+            _judge_kwargs = dict(
+                base_url=_cfg.base_url,
+                model=_cfg.model,
+                timeout_seconds=_cfg.timeout_seconds,
+                max_tokens=_cfg.max_tokens,
+                temperature=_cfg.temperature,
+            )
+
         response = self._judge.generate_json(
             prompt,
             self._build_response_schema(),
             system_prompt=_LLM_SYSTEM_PROMPT,
-            base_url=self.config.lm_studio.base_url,
-            model=self.config.lm_studio.model,
-            timeout_seconds=self.config.lm_studio.timeout_seconds,
-            max_tokens=self.config.lm_studio.max_tokens,
-            temperature=self.config.lm_studio.temperature,
             use_response_format=self.config.llm_judge.use_response_format,
+            **_judge_kwargs,
         )
 
         result["llm_status"] = response["status"]
@@ -202,8 +254,11 @@ class LLMEvaluator:
             "Detector outputs JSON:\n"
             f"{json.dumps(detector_results, indent=2, ensure_ascii=False)}\n\n"
             "Instructions:\n"
-            "1. Identify expected HIPAA Safe Harbor PHI entities from the document.\n"
-            "2. Judge detector coverage against the expected PHI entities.\n"
+            "1. Identify ALL HIPAA Safe Harbor PHI entities from the document — use ONLY the allowed category names from the system prompt.\n"
+            "   - Include ALL dates that contain a month or day (admission, discharge, procedure, lab, medication, appointment, DOB).\n"
+            "   - Include ALL person names (patient and provider/physician names).\n"
+            "   - Do NOT label medications, diagnoses, vital signs, lab values, allergies, or other clinical facts.\n"
+            "2. Judge detector coverage against those expected PHI entities.\n"
             "3. Treat a detector entity as covering expected PHI when it captures the same PHI value or a materially equivalent substring.\n"
             "4. Mark risky misses clearly, especially names, MRNs, dates, account numbers, ages over 89, locations, SSNs, phones, emails, URLs, device IDs, and other identifiers.\n"
             "5. Return only JSON matching the schema."

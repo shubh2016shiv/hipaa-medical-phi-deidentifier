@@ -19,6 +19,18 @@ EvaluationMode = Literal["llm", "annotations", "auto"]
 
 
 @dataclass
+class OpenAIConfig:
+    """Settings for the OpenAI API judge backend."""
+
+    enabled: bool = False
+    model: str = "gpt-4.1-nano"
+    api_key_env: str = "OPENAI_API_KEY"
+    timeout_seconds: float = 60.0
+    temperature: float = 0.1
+    max_tokens: int = 4096
+
+
+@dataclass
 class LMStudioConfig:
     base_url: str = "http://localhost:1234/v1/chat/completions"
     model: str = "deepseek/deepseek-r1-0528-qwen3-8b"
@@ -49,10 +61,16 @@ class AnnotationConfig:
 @dataclass
 class EvaluationConfig:
     eval_mode: EvaluationMode = "llm"
+    openai_api: OpenAIConfig = field(default_factory=OpenAIConfig)
     lm_studio: LMStudioConfig = field(default_factory=LMStudioConfig)
     llm_judge: LLMJudgeConfig = field(default_factory=LLMJudgeConfig)
     reports: ReportConfig = field(default_factory=ReportConfig)
     annotations: AnnotationConfig = field(default_factory=AnnotationConfig)
+
+    @property
+    def active_backend(self) -> str:
+        """Return 'openai' or 'lm_studio' — whichever is active."""
+        return "openai" if self.openai_api.enabled else "lm_studio"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -104,6 +122,7 @@ def _build_config(data: Dict[str, Any]) -> EvaluationConfig:
             "eval_mode must be one of: llm, annotations, auto"
         )
 
+    oai_data = data.get("openai_api", {}) or {}
     lm_data = data.get("lm_studio", {}) or {}
     judge_data = data.get("llm_judge", {}) or {}
     report_data = data.get("reports", {}) or {}
@@ -117,6 +136,14 @@ def _build_config(data: Dict[str, Any]) -> EvaluationConfig:
 
     return EvaluationConfig(
         eval_mode=mode,
+        openai_api=OpenAIConfig(
+            enabled=bool(oai_data.get("enabled", False)),
+            model=str(oai_data.get("model", OpenAIConfig.model)),
+            api_key_env=str(oai_data.get("api_key_env", OpenAIConfig.api_key_env)),
+            timeout_seconds=float(oai_data.get("timeout_seconds", 60.0)),
+            temperature=float(oai_data.get("temperature", 0.1)),
+            max_tokens=int(oai_data.get("max_tokens", 4096)),
+        ),
         lm_studio=LMStudioConfig(
             base_url=str(lm_data.get("base_url", LMStudioConfig.base_url)),
             model=str(lm_data.get("model", LMStudioConfig.model)),

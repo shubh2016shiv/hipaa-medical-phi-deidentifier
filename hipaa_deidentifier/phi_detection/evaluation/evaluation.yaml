@@ -1,8 +1,21 @@
 eval_mode: llm
 
+# --- Judge backend selection ---
+# Set openai_api.enabled: true  to call the OpenAI API (model below).
+# Set openai_api.enabled: false to call LM Studio (lm_studio section below).
+# Exactly one backend is active at a time.
+
+openai_api:
+  enabled: true
+  model: "gpt-4o-mini"      # any OpenAI model name, e.g. gpt-4.1, o4-mini
+  api_key_env: "OPENAI_API_KEY" # name of the env-var that holds the key
+  timeout_seconds: 60
+  temperature: 0.1
+  max_tokens: 4096
+
 lm_studio:
   base_url: "http://localhost:1234/v1/chat/completions"
-  model: "google/gemma-3-4b"
+  model: "ibm/granite-4-h-tiny"
   timeout_seconds: 300
   temperature: 0.1
   max_tokens: 4096
