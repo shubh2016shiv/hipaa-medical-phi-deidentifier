@@ -72,7 +72,7 @@ class AgeOver89Recognizer(PatternRecognizer):
                 ),
                 Pattern(
                     "years_old_over_89",
-                    r"\b(9[0-9]|1[0-9]{2,})\s*(?:years?\s*old|y\.?o\.?|years?\s*of\s*age)\b",
+                    r"\b(9[0-9]|1[0-9]{2,})[\s\-]*(?:years?[\s\-]*old|y\.?o\.?|years?\s*of\s*age)\b",
                     RecognizerThresholds.VERY_HIGH_CONFIDENCE,
                 ),
                 Pattern(

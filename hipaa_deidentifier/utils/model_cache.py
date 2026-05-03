@@ -93,7 +93,7 @@ class ModelCache:
                 )
                 print(f"✓ Loaded Hugging Face model: {model_name}")
             except Exception as e:
-                print(f"✗ Error loading Hugging Face model {model_name}: {e}")
+                print(f"X Error loading Hugging Face model {model_name}: {e}")
                 return None
         else:
             print(f"✓ Using previously loaded Hugging Face model: {model_name}")

@@ -10,9 +10,8 @@ repos:
     hooks:
       - id: pyright
         name: pyright
-        entry: pyright
+        entry: uv run --frozen pyright
         language: system
         types: [python]
         pass_filenames: false
         args: [hipaa_deidentifier/phi_detection/evaluation]
-        stages: [commit]
