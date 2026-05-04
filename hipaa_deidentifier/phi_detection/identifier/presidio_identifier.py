@@ -123,6 +123,12 @@ class PresidioIdentifier(BaseIdentifier):
         # General entities (spaCy's strength - now integrated)
         "LOCATION",
         "DATE",
+        # HIPAA Safe Harbor identifiers with custom regex recognizers
+        "NAME",
+        "HEALTH_PLAN_ID",
+        "ACCOUNT_NUMBER",
+        "BIOMETRIC_ID",
+        "PHOTO_ID",
     }
 
     def __init__(self, config: Optional[Dict] = None):
