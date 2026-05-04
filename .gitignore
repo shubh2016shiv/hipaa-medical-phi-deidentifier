@@ -55,3 +55,8 @@ tmp/
 .coverage
 .pytest_cache/
 htmlcov/
+
+# Evaluation Results
+results/
+results_*/
+hipaa_deidentifier/phi_detection/evaluation/results/
