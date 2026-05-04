@@ -223,7 +223,7 @@ def section_entity_breakdown(agg: Dict[str, Dict[str, Any]]) -> str:
 
     # Sort: HIPAA-critical first (by recall desc), then others (by recall desc)
     def sort_key(item):
-        et, d = item
+        _, d = item
         return (not d["hipaa_critical"], -(d["recall"] or 0))
 
     rows = []

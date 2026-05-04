@@ -233,6 +233,127 @@ class ReportGenerator:
                     f"{entity.get('category', 'PHI')}: {entity.get('text', '')}"
                 )
 
+        # ── Label evaluation: show every category mismatch, not just the count ──
+        # A mismatch means the entity text WAS detected but with the wrong
+        # HIPAA category (e.g., a provider name labelled as LOCATION).
+        mismatches = judgment.get("category_mismatches") or []
+        if mismatches:
+            print("\nLabel Mismatches (text detected, wrong category):")
+            for m in mismatches[:15]:
+                print(
+                    f"  [{m.get('detector', '?')}] "
+                    f"{m.get('text', '')!r:30s}"
+                    f"  expected={m.get('expected_category', '?'):20s}"
+                    f"  detected={m.get('detected_category', '?')}"
+                )
+            if len(mismatches) > 15:
+                print(f"  ... and {len(mismatches) - 15} more (see JSON report)")
+
+        # ── Span evaluation: deterministic token-level and span-level metrics ──
+        # gold_spans_count: how many character spans the LLM resolved from its
+        # expected_entities list (one span per occurrence in the document).
+        # These are used as ground truth for the metrics below.
+        span_metrics = result.get("span_metrics")
+        gold_count = result.get("llm_gold_spans_count", 0)
+
+        if span_metrics:
+            print(
+                f"\n[SPAN METRICS] Deterministic Token & Span-Level Metrics"
+                f" ({gold_count} gold spans resolved from LLM ground truth)\n"
+            )
+            print(
+                "  Token-level: every character is a unit — partial span detection\n"
+                "               scores proportionally (primary HIPAA metric).\n"
+                "  Span-level : a prediction must cover ≥50 % of a gold span\n"
+                "               to count as TP — binary, no partial credit.\n"
+            )
+
+            # ── Overall summary table (one row per detector) ──────────────────
+            overall_rows = []
+            for det_name, sm in span_metrics.items():
+                ov = sm.get("overall", {})
+                overall_rows.append(
+                    [
+                        _shorten_detector_name(det_name),
+                        f"{ov.get('token_precision', 0.0) or 0.0:.3f}",
+                        f"{ov.get('token_recall', 0.0) or 0.0:.3f}",
+                        f"{ov.get('token_f1', 0.0) or 0.0:.3f}",
+                        f"{ov.get('token_false_negative_rate', 0.0) or 0.0:.3f}",
+                        f"{ov.get('span_precision', 0.0) or 0.0:.3f}",
+                        f"{ov.get('span_recall', 0.0) or 0.0:.3f}",
+                        f"{ov.get('span_f1', 0.0) or 0.0:.3f}",
+                    ]
+                )
+
+            print(
+                tabulate(
+                    overall_rows,
+                    headers=[
+                        "Detector",
+                        "Tok-P",
+                        "Tok-R",
+                        "Tok-F1",
+                        "Tok-FNR",
+                        "Span-P",
+                        "Span-R",
+                        "Span-F1",
+                    ],
+                    tablefmt="pipe",
+                    floatfmt=".3f",
+                )
+            )
+
+            # ── Per-entity-type breakdown (one block per detector) ─────────────
+            for det_name, sm in span_metrics.items():
+                per_type = sm.get("per_type", {})
+                if not per_type:
+                    continue
+
+                type_rows = []
+                for etype in sorted(per_type):
+                    pt = per_type[etype]
+                    # Skip rows where detector had no activity for this type
+                    tok_r = pt.get("token_recall") or 0.0
+                    spn_r = pt.get("span_recall") or 0.0
+                    tok_fnr = pt.get("token_false_negative_rate") or 0.0
+                    if tok_r == 0.0 and spn_r == 0.0 and tok_fnr == 0.0:
+                        continue
+                    type_rows.append(
+                        [
+                            f"  {etype}",
+                            f"{pt.get('token_precision') or 0.0:.3f}",
+                            f"{tok_r:.3f}",
+                            f"{pt.get('token_f1') or 0.0:.3f}",
+                            f"{tok_fnr:.3f}",
+                            f"{pt.get('span_precision') or 0.0:.3f}",
+                            f"{spn_r:.3f}",
+                            f"{pt.get('span_f1') or 0.0:.3f}",
+                        ]
+                    )
+
+                if type_rows:
+                    print(
+                        f"\n  {_shorten_detector_name(det_name)}"
+                        f" — Per-Entity-Type Breakdown:"
+                    )
+                    print(
+                        tabulate(
+                            type_rows,
+                            headers=[
+                                "Entity Type",
+                                "Tok-P",
+                                "Tok-R",
+                                "Tok-F1",
+                                "Tok-FNR",
+                                "Span-P",
+                                "Span-R",
+                                "Span-F1",
+                            ],
+                            tablefmt="pipe",
+                            floatfmt=".3f",
+                        )
+                    )
+
     def write_llm_json(
         self,
         result: dict[str, Any],

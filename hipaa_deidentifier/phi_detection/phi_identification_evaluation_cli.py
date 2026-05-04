@@ -638,7 +638,8 @@ def write_category_excel(
     out_path = cat_dir / "evaluation.xlsx"
 
     wb = openpyxl.Workbook()
-    wb.remove(wb.active)  # remove default blank sheet
+    if wb.active is not None:
+        wb.remove(wb.active)  # remove default blank sheet
 
     # Columns for note-specific sheets: exclude note_category/note_file (same for all rows)
     note_cols = [c for c in _COLUMNS if c not in {"note_category", "note_file"}]
@@ -679,7 +680,8 @@ def write_overall_summary(
 
     out_path = output_dir / "overall_summary.xlsx"
     wb = openpyxl.Workbook()
-    wb.remove(wb.active)
+    if wb.active is not None:
+        wb.remove(wb.active)
 
     # Sheet 1: every single row
     ws_all = wb.create_sheet(title="All_Results")

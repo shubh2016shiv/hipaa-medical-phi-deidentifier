@@ -490,7 +490,7 @@ def detect_long_numeric_ids(
 
 
 def detect_clinical_phi(
-    text: str, existing_entities: List[PHIEntity] = None
+    text: str, existing_entities: List[PHIEntity] | None = None
 ) -> List[PHIEntity]:
     """
     Detect PHI in clinical notes using specialized patterns.

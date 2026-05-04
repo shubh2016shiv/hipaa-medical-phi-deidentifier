@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -21,6 +23,31 @@ if TYPE_CHECKING:
     from ..judges.openai_judge import OpenAIJudge
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class _GoldSpan:
+    """Ground-truth span resolved from a single LLM-identified expected entity.
+
+    The LLM returns expected entities as {text, category} with no character
+    positions.  _resolve_gold_spans() locates every occurrence of each entity
+    text in the document and creates one _GoldSpan per occurrence, because the
+    same name or date may appear multiple times and each occurrence is an
+    independent PHI instance that must be redacted.
+
+    Attributes:
+        start: Inclusive start offset in the document string.
+        end: Exclusive end offset in the document string.
+        entity_type: HIPAA category as returned by the LLM (e.g. "NAME").
+        text: The matched document substring (may differ in case from the
+              LLM's entity text due to case-insensitive matching).
+    """
+
+    start: int
+    end: int
+    entity_type: str
+    text: str
+
 
 _DETECTOR_LABELS: Dict[str, str] = {
     "hf": "HFIdentifier (obi/deid_bert_i2b2)",
@@ -71,6 +98,10 @@ class LLMEvaluator:
         self.config = config
         self.use_judge = use_judge
         self._text = ""
+        # Populated by _run_detectors(); used by _compute_span_metrics()
+        # after the LLM response arrives so we can score each detector
+        # against the LLM-derived gold spans without re-running detection.
+        self._raw_entities: Dict[str, List[PHIEntity]] = {}
         self._judge: Optional["LMStudioJudge | OpenAIJudge"] = None
         if use_judge:
             if config.active_backend == "openai":
@@ -159,6 +190,12 @@ class LLMEvaluator:
             data = response["data"] or {}
             result["llm_expected_entities"] = data.get("expected_entities", [])
             result["llm_judgment"] = data.get("judgment", {})
+            # Resolve entity texts to character positions and compute
+            # deterministic token-level and span-level metrics for every
+            # detector that ran successfully.
+            gold_spans = self._resolve_gold_spans(result["llm_expected_entities"])
+            result["llm_gold_spans_count"] = len(gold_spans)
+            result["span_metrics"] = self._compute_span_metrics(gold_spans)
 
         return result
 
@@ -178,6 +215,7 @@ class LLMEvaluator:
                 else:
                     entities = self._run_pipeline_detector()
 
+                self._raw_entities[label] = entities
                 results[label] = {
                     "status": "ok",
                     "error_message": None,
@@ -274,6 +312,143 @@ class LLMEvaluator:
             "confidence": entity.confidence,
             "source": entity.source,
         }
+
+    def _resolve_gold_spans(
+        self, expected_entities: List[Dict[str, Any]]
+    ) -> List[_GoldSpan]:
+        """Resolve LLM-identified entity texts to character spans in the document.
+
+        For each expected entity the LLM returned, find every occurrence of
+        that text in the document using case-insensitive exact matching.  All
+        occurrences become separate gold spans because repeated names/dates are
+        each independently a PHI instance.
+
+        Deduplication: if the LLM lists the same (text, category) pair more
+        than once we only search once, so gold span counts are never inflated
+        by duplicate LLM output.
+
+        Args:
+            expected_entities: List of dicts with at least "text" and
+                               "category" keys, as returned by the LLM.
+
+        Returns:
+            Flat list of _GoldSpan objects ordered by occurrence in the text.
+        """
+        seen: set[tuple[str, str]] = set()
+        spans: List[_GoldSpan] = []
+
+        for entity in expected_entities:
+            raw_text = (entity.get("text") or "").strip()
+            entity_type = (entity.get("category") or "").strip().upper()
+            if not raw_text or not entity_type:
+                continue
+
+            dedup_key = (raw_text.lower(), entity_type)
+            if dedup_key in seen:
+                continue
+            seen.add(dedup_key)
+
+            try:
+                pattern = re.compile(re.escape(raw_text), re.IGNORECASE)
+                for match in pattern.finditer(self._text):
+                    spans.append(
+                        _GoldSpan(
+                            start=match.start(),
+                            end=match.end(),
+                            entity_type=entity_type,
+                            text=match.group(),
+                        )
+                    )
+            except re.error:
+                logger.warning(
+                    "Could not compile regex for entity text: %r — skipped", raw_text
+                )
+
+        logger.info(
+            "Resolved %d gold spans from %d expected entities (%d unique)",
+            len(spans),
+            len(expected_entities),
+            len(seen),
+        )
+        return spans
+
+    def _compute_span_metrics(self, gold_spans: List[_GoldSpan]) -> Dict[str, Any]:
+        """Compute token-level and span-level metrics for every detector.
+
+        Uses _resolve_gold_spans() output as ground truth.  Results are
+        returned as a plain serialisable dict so they can be embedded directly
+        in the JSON report without further processing.
+
+        Two complementary modes are computed and reported side-by-side:
+
+        Token-level (primary):
+            Every character position is a unit.  A detector that catches
+            "John" when the gold is "John Smith" still earns partial credit
+            for the four characters it did cover.  This is the right primary
+            metric for HIPAA because any leaked character is a risk.
+
+        Span-level (secondary / strict):
+            A predicted span must overlap ≥50% of a gold span to count as a
+            true positive.  No partial credit — either the span is covered or
+            it is not.  Used for HIPAA audit reporting where you need a
+            binary "was this entity fully redacted?" answer.
+
+        Args:
+            gold_spans: List of _GoldSpan objects from _resolve_gold_spans().
+
+        Returns:
+            Dict keyed by detector label → {overall: {...}, per_type: {...}}.
+        """
+        from ..metrics.span_metrics import compute_per_detector_metrics
+
+        result: Dict[str, Any] = {}
+
+        for label, entities in self._raw_entities.items():
+            token_m = compute_per_detector_metrics(
+                label, entities, gold_spans, self._text, mode="token"
+            )
+            span_m = compute_per_detector_metrics(
+                label, entities, gold_spans, self._text, mode="span"
+            )
+
+            # Build per-type table — union of types seen in token and span modes
+            all_types = sorted(set(token_m.per_type) | set(span_m.per_type))
+            per_type_out: Dict[str, Any] = {}
+            for etype in all_types:
+                tm = token_m.per_type.get(etype)
+                sm = span_m.per_type.get(etype)
+                per_type_out[etype] = {
+                    "token_precision": round(tm.precision, 4) if tm else None,
+                    "token_recall": round(tm.recall, 4) if tm else None,
+                    "token_f1": round(tm.f1, 4) if tm else None,
+                    "token_false_negative_rate": (
+                        round(tm.false_negative_rate, 4) if tm else None
+                    ),
+                    "span_precision": round(sm.precision, 4) if sm else None,
+                    "span_recall": round(sm.recall, 4) if sm else None,
+                    "span_f1": round(sm.f1, 4) if sm else None,
+                }
+
+            result[label] = {
+                "overall": {
+                    "token_precision": round(token_m.precision, 4),
+                    "token_recall": round(token_m.recall, 4),
+                    "token_f1": round(token_m.f1, 4),
+                    "token_false_negative_rate": round(token_m.false_negative_rate, 4),
+                    "span_precision": round(span_m.precision, 4),
+                    "span_recall": round(span_m.recall, 4),
+                    "span_f1": round(span_m.f1, 4),
+                },
+                "per_type": per_type_out,
+            }
+            logger.info(
+                "[%s] token recall=%.3f span recall=%.3f",
+                label,
+                token_m.recall,
+                span_m.recall,
+            )
+
+        return result
 
     @staticmethod
     def _parse_detectors(detectors_str: str) -> List[str]:
