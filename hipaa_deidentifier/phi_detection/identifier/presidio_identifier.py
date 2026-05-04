@@ -44,6 +44,9 @@ from hipaa_deidentifier.phi_detection.recognizer.biometric_id_recognizer import 
 from hipaa_deidentifier.phi_detection.recognizer.us_location_recognizer import (
     USLocationRecognizer,
 )
+from hipaa_deidentifier.phi_detection.recognizer.facility_location_recognizer import (
+    FacilityLocationRecognizer,
+)
 from config.config import config as global_config
 from hipaa_deidentifier.phi_detection.clinical_patterns import (
     detect_initials_and_nicknames,
@@ -118,9 +121,7 @@ class PresidioIdentifier(BaseIdentifier):
         "MEDICAL_DEVICE_ID",
         "MRN",
         # General entities (spaCy's strength - now integrated)
-        "NAME",
         "LOCATION",
-        "ORGANIZATION",
         "DATE",
     }
 
@@ -187,6 +188,9 @@ class PresidioIdentifier(BaseIdentifier):
         registry.add_recognizer(AccountNumberRecognizer())
         registry.add_recognizer(DeviceIDRecognizer())
         registry.add_recognizer(USLocationRecognizer())
+        # Promotes spaCy ORG entities that are healthcare facilities to LOCATION.
+        # Uses NER model output — no new regex vocabulary.
+        registry.add_recognizer(FacilityLocationRecognizer())
 
         # Add custom phone number recognizer with higher confidence
         from presidio_analyzer import Pattern, PatternRecognizer

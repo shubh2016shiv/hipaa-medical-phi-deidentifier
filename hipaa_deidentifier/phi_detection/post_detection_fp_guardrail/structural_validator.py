@@ -84,11 +84,10 @@ _REQUIRE_DIGIT_CATEGORIES: FrozenSet[str] = frozenset(
     {"ACCOUNT_NUMBER", "HEALTH_PLAN_ID", "ENCOUNTER_ID"}
 )
 
-# Extra DATE patterns not in DateRecognizer: times (10:00 AM) and named days
-_EXTRA_DATE_PATTERNS: List[str] = [
-    r"\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?\b",
-    r"\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b",
-]
+# Clock times (07:00 AM) and bare weekday names are not HIPAA Safe Harbor identifiers.
+# Keeping them caused spaCy DATE_TIME entities (which include shift times, vital-sign
+# timestamps, and scheduling references) to pass structural validation as DATE.
+_EXTRA_DATE_PATTERNS: List[str] = []
 
 
 class PresidioStructuralValidator:

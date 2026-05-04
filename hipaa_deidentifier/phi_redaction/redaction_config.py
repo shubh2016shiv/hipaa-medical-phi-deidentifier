@@ -161,6 +161,13 @@ class RedactionConfig:
         "morning",
         "dizziness",
         "Occasional",
+        "denies",
+        "reports",
+        "states",
+        "endorses",
+        "tolerating",
+        "ambulating",
+        "verbalized",
     }
 
     # Clinical phrases that should be preserved
@@ -171,6 +178,10 @@ class RedactionConfig:
         "mg BID",
         "mg TID",
         "mg QID",
+        "verbalized understanding",
+        "patient education",
+        "discharge instructions",
+        "informed consent",
     ]
 
     # Regex patterns for vitals and lab values
