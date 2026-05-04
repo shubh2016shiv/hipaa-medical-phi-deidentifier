@@ -8,9 +8,11 @@ import re
 from typing import Dict, List, Optional
 
 from ..models.phi_entity import PHIEntity
+from ..utils.logger import get_logger
 from ..utils.security import get_salt_from_config, PseudonymManager
-from ..utils.date_shifter import DateShifter
 from .redaction_config import RedactionConfig
+
+logger = get_logger("redactor")
 
 
 class PHIRedactor:
@@ -30,7 +32,6 @@ class PHIRedactor:
 
         # Initialize specialized managers for consistent transformations
         self.pseudonym_manager = PseudonymManager(config)
-        self.date_shifter = DateShifter(config)
 
         # Cache for clinical measurements to avoid redacting
         self.clinical_measurements_cache = {}
@@ -59,9 +60,12 @@ class PHIRedactor:
 
         # First pass: identify email addresses
         for entity in entities:
-            entity_text = text[entity.start : entity.end]
-            # Check for email addresses
-            if "@" in entity_text or (entity.category == "EMAIL_ADDRESS"):
+            # Expand EMAIL_ADDRESS entities to include the full whitespace-delimited
+            # token in case the detector captured only a partial span.  Gated
+            # strictly on category so that non-email entities whose text happens
+            # to contain "@" (social handles, templated strings) are not
+            # misclassified or have their boundaries silently altered.
+            if entity.category == "EMAIL_ADDRESS":
                 # Find the complete email address
                 email_start = entity.start
                 while email_start > 0 and text[email_start - 1] not in " \t\n\r":
@@ -124,8 +128,16 @@ class PHIRedactor:
             if overlapping:
                 continue
 
-            # Skip if this is a clinical measurement that should not be redacted
-            if self._is_clinical_measurement(text[entity.start : entity.end]):
+            # Skip if this is a clinical measurement that should not be redacted.
+            # The guard on PROTECTED_PHI_CATEGORIES ensures that entities the
+            # detection pipeline has explicitly classified as PHI (NAME, MRN,
+            # DATE, etc.) are never suppressed even if their extracted text
+            # string coincidentally matches a cached vital/lab value — e.g. a
+            # three-digit sodium reading ("142") colliding with an MRN fragment.
+            if (
+                entity.category not in RedactionConfig.PROTECTED_PHI_CATEGORIES
+                and self._is_clinical_measurement(text[entity.start : entity.end])
+            ):
                 continue
 
             # Get the original text of the entity
@@ -168,46 +180,40 @@ class PHIRedactor:
             category, self.config.get("transform", {}).get("default_action", "redact")
         )
 
-        # Fix issue #1: Header/Section Title Corruption
         # Don't transform common section headers or clinical terms
         if self._is_common_header(text) or self._is_clinical_term(text):
             return text
 
-        # Special handling for the full note header (Mercy River Medical Center — Outpatient Progress Note)
-        if "Medical Center" in text and "Progress Note" in text:
-            return text
-
         # Fix issue #2: Wrong PHI Categorization
-        # Special handling for ZIP+4 codes
+        # These reclassifications correct specific structural mismatches between
+        # what generic Presidio recognizers emit and what HIPAA categories the
+        # redaction config actually handles.  The elif chain makes priority
+        # explicit — the first match wins and no entity can be double-reclassified
+        # by later branches.
         if category == "US_SSN" and re.match(r"\d{5}-\d{4}", text):
+            # ZIP+4 codes (ddddd-dddd) are structurally indistinguishable from
+            # SSNs to generic recognizers; the five-digit prefix is the discriminator.
             category = "ZIP"
             rule = rules.get("ZIP", rule)
 
-        # Handle MRNs based on configuration
-        if (
+        elif (
             "MRN" in text
             or re.match(r"[A-Z]+-[A-Z]+-\d+", text)
             or re.match(r"MRN-[A-Z]+-\d+-\d+", text)
             or re.match(r"MR-\d+-\d+", text)
-        ):  # Add pattern for MR-2024-001234
+        ):
+            # MR-YYYY-NNNNNN is a subset of MR-\d+-\d+ so no separate branch needed.
             category = "MRN"
-            # Always use hash for MRNs
             rule = "hash"
 
-        # Handle US-specific Encounter IDs (e.g., ENC-2025-09-05-233)
-        if re.match(r"ENC-\d{4}-\d{2}-\d{2}-\d+", text):
+        elif re.match(r"ENC-\d{4}-\d{2}-\d{2}-\d+", text):
             category = "ENCOUNTER_ID"
-            rule = "redact"  # Always redact encounter IDs
+            rule = "redact"
 
-        # Special case for US state abbreviations
-        if text.upper() in RedactionConfig.US_STATE_ABBR:
+        elif text.upper() in RedactionConfig.US_STATE_ABBR:
+            # State abbreviations carry no generalizable form; redact directly.
             category = "LOCATION"
-            rule = "redact"  # Use redact instead of generalize for state abbreviations
-
-        # Special case for MR-YYYY-NNNNNN format
-        if re.match(r"MR-\d{4}-\d{6}", text):
-            category = "MRN"
-            rule = "hash"
+            rule = "redact"
 
         # Fix issue #5: Email & URL Corruption
         # Special handling for dates in format MM/DD/YYYY
@@ -224,32 +230,34 @@ class PHIRedactor:
         if category == "URL":
             return "[REDACTED:URL]"
 
-        # Fix issue #4: Hashes / Noise Injected
-        # Skip short text that's likely a false positive
+        # Skip short text that's likely a false positive (e.g. a lone initial
+        # "J" detected as NAME).  AGE and AGE_OVER_89 are exempt because
+        # single or two-digit ages are legitimate short PHI.
         if len(
             text.strip()
         ) < RedactionConfig.MIN_TEXT_LENGTH_GENERAL and category not in [
             "AGE",
             "AGE_OVER_89",
         ]:
+            logger.warning(
+                "Suppressing short entity without redaction "
+                "(category=%s, len=%d, text=%r) — verify this is not PHI",
+                category,
+                len(text.strip()),
+                text,
+            )
             return text
 
         # Apply the appropriate transformation
         if rule == "redact":
             return f"[REDACTED:{category}]"
 
-        elif rule == "hash":
-            # Skip hashing very short text (likely false positives)
+        elif rule in ("hash", "pseudonym"):
+            # Both rules delegate to the pseudonym manager which produces a
+            # deterministic HMAC-SHA256 code — the config key distinction is
+            # cosmetic and carries no behavioural difference today.
             if len(text.strip()) < RedactionConfig.MIN_TEXT_LENGTH_FOR_HASH:
                 return f"[REDACTED:{category}]"
-            # Use the pseudonym manager for consistent hashing
-            return self.pseudonym_manager.get_pseudonym(text, category, patient_id)
-
-        elif rule == "pseudonym":
-            # Skip pseudonyms for very short text (likely false positives)
-            if len(text.strip()) < RedactionConfig.MIN_TEXT_LENGTH_FOR_HASH:
-                return f"[REDACTED:{category}]"
-            # Use the pseudonym manager for consistent pseudonyms
             return self.pseudonym_manager.get_pseudonym(text, category, patient_id)
 
         elif rule == "generalize":

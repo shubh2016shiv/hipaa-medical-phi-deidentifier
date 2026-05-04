@@ -119,7 +119,11 @@ class RedactionConfig:
         "Assessment/Plan",
     }
 
-    # Header phrases that identify section headers
+    # Header phrases that identify document section headers (should not be redacted).
+    # IMPORTANT: never add healthcare facility keywords here (e.g. "Hospital",
+    # "Clinic", "Medical Center").  FacilityLocationRecognizer uses those exact
+    # strings as detection signals, so listing them here would silently block
+    # redaction of every facility-name entity that passes the FP Guardrail.
     HEADER_PHRASES: List[str] = [
         "Progress Note",
         "Visit Summary",
@@ -129,13 +133,41 @@ class RedactionConfig:
         "Operative Note",
         "Referral Letter",
         "HIPAA Safe Harbor",
-        "Medical Center",
-        "Hospital",
-        "Clinic",
         "Chief Complaint",
         "Assessment/Plan",
         "Follow-up",
     ]
+
+    # PHI categories that must never be suppressed by clinical-measurement
+    # heuristics.  Any entity whose category is in this set is redacted
+    # regardless of whether its extracted text string resembles a vital sign
+    # or lab value — the detection pipeline already confirmed it is PHI.
+    PROTECTED_PHI_CATEGORIES: frozenset = frozenset(
+        {
+            "NAME",
+            "DATE",
+            "LOCATION",
+            "EMAIL_ADDRESS",
+            "PHONE_NUMBER",
+            "FAX_NUMBER",
+            "US_SSN",
+            "MRN",
+            "ENCOUNTER_ID",
+            "ACCOUNT_NUMBER",
+            "HEALTH_PLAN_ID",
+            "LICENSE_NUMBER",
+            "VEHICLE_ID",
+            "DEVICE_ID",
+            "URL",
+            "IP_ADDRESS",
+            "BIOMETRIC_ID",
+            "PHOTO_ID",
+            "AGE",
+            "AGE_OVER_89",
+            "OTHER_ID",
+            "ORGANIZATION",
+        }
+    )
 
     # Clinical terms (medical abbreviations and terms)
     CLINICAL_TERMS: Set[str] = {
