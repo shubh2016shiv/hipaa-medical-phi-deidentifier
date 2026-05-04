@@ -44,7 +44,7 @@ class DeviceIDRecognizer(PatternRecognizer):
         self,
         name: str = "DEVICE_ID",
         supported_entity: str = "DEVICE_ID",
-        patterns: List[Pattern] = None,
+        patterns: List[Pattern] | None = None,
     ):
         """
         Initialize the device ID recognizer.

@@ -78,6 +78,32 @@ class HealthPlanIDRecognizer(PatternRecognizer):
                     r"\bMember\s*(?:ID|Number|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
                     RecognizerThresholds.MEDIUM_CONFIDENCE,
                 ),
+                # Insurance group number — appears as "Group Number: GRP-987654"
+                Pattern(
+                    "group_number_labeled",
+                    r"\bGroup\s*(?:Number|No\.?|ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{4,15})\b",
+                    RecognizerThresholds.HIGH_CONFIDENCE,
+                ),
+                # Medicare Beneficiary Identifier (MBI) — 11-char alphanumeric format
+                # introduced 2018: digit, char, char/digit, char, char/digit, digit,
+                # char, char/digit, digit, char, char (e.g. 1EG4-TE5-MK72)
+                Pattern(
+                    "medicare_mbi",
+                    r"\b[1-9][A-CEGHJ-NP-RT-Y][A-CEGHJ-NP-RT-Y0-9]\d[A-CEGHJ-NP-RT-Y][A-CEGHJ-NP-RT-Y0-9]\d[A-CEGHJ-NP-RT-Y]{2}\d{2}\b",
+                    RecognizerThresholds.HIGH_CONFIDENCE,
+                ),
+                # Medicare Number labeled — catches "Medicare Number: 1EG4-TE5-MK72"
+                Pattern(
+                    "medicare_number_labeled",
+                    r"\bMedicare\s*(?:Number|No\.?|ID|Beneficiary\s*ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{8,15})\b",
+                    RecognizerThresholds.HIGH_CONFIDENCE,
+                ),
+                # Medicaid member ID labeled
+                Pattern(
+                    "medicaid_id_labeled",
+                    r"\bMedicaid\s*(?:Number|No\.?|ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,15})\b",
+                    RecognizerThresholds.HIGH_CONFIDENCE,
+                ),
             ]
 
         super().__init__(

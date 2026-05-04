@@ -95,7 +95,7 @@ class DateRecognizer(EntityRecognizer):
         self,
         text: str,
         entities: List[str],
-        nlp_artifacts: NlpArtifacts = None,
+        nlp_artifacts: NlpArtifacts | None = None,
         **kwargs,
     ) -> List[RecognizerResult]:
         """Analyze text for date entities.
@@ -114,7 +114,7 @@ class DateRecognizer(EntityRecognizer):
             logger.debug("DATE not in requested entities, skipping")
             return results
 
-        for pattern_idx, pattern in enumerate(self.compiled_patterns):
+        for _, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 matched_text = match.group()
                 if self._is_valid_date(matched_text):
@@ -124,15 +124,35 @@ class DateRecognizer(EntityRecognizer):
                             start=match.start(),
                             end=match.end(),
                             score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
-                            analysis_explanation=f"Date pattern {pattern_idx + 1} matched",
                         )
                     )
                     logger.debug(
                         "Date at %d-%d: %s", match.start(), match.end(), matched_text
                     )
 
+        results = self._deduplicate_spans(results)
         logger.info("DateRecognizer found %d dates", len(results))
         return results
+
+    @staticmethod
+    def _deduplicate_spans(results: List[RecognizerResult]) -> List[RecognizerResult]:
+        """Keep the longest span when multiple patterns match overlapping regions.
+
+        Patterns 1+7 both fire on "03/15/2024 08:30 AM"; patterns 1+11 both fire
+        on "DOB: 02/18/1965".  Sorting by start then by descending length and
+        discarding any result fully contained within an already-kept result
+        ensures each physical date produces exactly one entity.
+        """
+        if len(results) < 2:
+            return results
+        sorted_results = sorted(results, key=lambda r: (r.start, -(r.end - r.start)))
+        deduped: List[RecognizerResult] = []
+        for result in sorted_results:
+            if not any(
+                k.start <= result.start and k.end >= result.end for k in deduped
+            ):
+                deduped.append(result)
+        return deduped
 
     def _is_valid_date(self, date_text: str) -> bool:
         """Validate detected text as a plausible date.

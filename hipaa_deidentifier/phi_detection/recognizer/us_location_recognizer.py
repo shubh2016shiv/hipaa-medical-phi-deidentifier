@@ -49,15 +49,29 @@ class USLocationRecognizer(EntityRecognizer):
     LOCATION_PATTERNS: List[str] = [
         # Full street address with optional apartment/unit, city, state, and ZIP
         r"\b\d+\s+[A-Za-z0-9\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Boulevard|Blvd|Lane|Ln|Place|Pl|Court|Ct|Circle|Cir|Way|Parkway|Pkwy|Highway|Hwy)(?:,\s*(?:Apt|Apartment|Unit|Suite|Ste)\s*[A-Za-z0-9-]+)?(?:,\s*[A-Za-z\s]+,\s*[A-Z]{2}\s+\d{5}(?:-\d{4})?)?\b",
-        # State abbreviations with ZIP codes
-        r"\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b",  # CA 90210 or CA 90210-1234
-        # City, state patterns
-        r"\b\w+,\s+([A-Z]{2})\b",  # Anytown, CA
-        r"\b\w+,\s+\w+,\s+([A-Z]{2})\b",  # 123 Main St, Anytown, CA
-        # ZIP codes
-        r"\b\d{5}(?:-\d{4})?\b",  # 90210 or 90210-1234
-        # Common US address formats
+        # State abbreviation + ZIP code (e.g. "CA 90210", "MA 02101-1234")
+        r"\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b",
+        # Multi-word city + state (e.g. "New York, NY") — Title-case words only,
+        # never a bare credential like "Johnson, MD" because credentials appear
+        # after a full name (uppercase first char + mixed case tail) and Pattern 3
+        # (\b\w+,\s+[A-Z]{2}\b) cannot distinguish them from city+state.
+        # Replaced with the city-state-ZIP form below and facility patterns.
+        r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s+[A-Z]{2}\s+\d{5}(?:-\d{4})?\b",
+        # "123 Main St, Anytown, CA" — word before state already anchored by street address
+        r"\b\w+,\s+\w+,\s+([A-Z]{2})\b",
+        # ZIP codes — only when preceded by a state abbreviation (avoids bare number FPs)
+        r"\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b",
+        # Common US address formats (street number + street type keyword)
         r"\b\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Boulevard|Blvd|Lane|Ln|Place|Pl|Court|Ct|Circle|Cir|Way|Parkway|Pkwy|Highway|Hwy)\b",
+        # Labeled location/facility field (e.g. "Location: City Hospital, Suite 3")
+        # Must be followed by a capitalised facility/room name; stops at newline.
+        # Negative lookahead rejects generic non-place values (Patient, Same, PACS).
+        r"\bLocation\s*[:#]\s*(?!(?:Patient|Same|PACS|N/?A)\b)[A-Z][A-Za-z0-9 \-\.,]{5,80}(?:(?:Clinic|Hospital|Center|Suite|Room|Floor|Building|Bldg|Ste|Dept|Department|Ward|Unit)[A-Za-z0-9 \-\.,]{0,40})",
+        # Named clinical facility with suite number — "Clinic/Hospital/Center, Suite NNN"
+        # The suite number is a structural anchor, not vocabulary enumeration.
+        # (Standalone facility names without a suite are handled by FacilityLocationRecognizer
+        # using spaCy's NER ORG label — no regex vocabulary needed.)
+        r"\b[A-Z][a-zA-Z \-\.]{3,50}(?:Clinic|Hospital|Medical Center|Health Center|Outpatient \w+)\s*,\s*(?:Suite|Ste|Bldg|Floor)\s+[A-Z0-9\-]+\b",
     ]
 
     def __init__(
@@ -92,7 +106,7 @@ class USLocationRecognizer(EntityRecognizer):
         self,
         text: str,
         entities: List[str],
-        nlp_artifacts: NlpArtifacts = None,
+        nlp_artifacts: NlpArtifacts | None = None,
         **kwargs,
     ) -> List[RecognizerResult]:
         """
@@ -120,7 +134,7 @@ class USLocationRecognizer(EntityRecognizer):
             return results
 
         # Find all pattern matches
-        for pattern_idx, pattern in enumerate(self.compiled_patterns):
+        for _, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 # Create a recognizer result
                 result = RecognizerResult(
@@ -128,7 +142,6 @@ class USLocationRecognizer(EntityRecognizer):
                     start=match.start(),
                     end=match.end(),
                     score=RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
-                    analysis_explanation=f"US location pattern {pattern_idx + 1} matched",
                 )
                 results.append(result)
                 logger.debug(

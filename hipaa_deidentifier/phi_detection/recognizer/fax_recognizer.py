@@ -87,7 +87,7 @@ class FaxRecognizer(EntityRecognizer):
         self,
         text: str,
         entities: List[str],
-        nlp_artifacts: NlpArtifacts = None,
+        nlp_artifacts: NlpArtifacts | None = None,
         **kwargs,
     ) -> List[RecognizerResult]:
         """
@@ -114,7 +114,7 @@ class FaxRecognizer(EntityRecognizer):
             return results
 
         # Check each pattern
-        for pattern_idx, pattern in enumerate(self.compiled_patterns):
+        for _, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 # Get the full match and extract fax number
                 full_match = match.group(0)
@@ -136,7 +136,6 @@ class FaxRecognizer(EntityRecognizer):
                         start=start,
                         end=end,
                         score=RecognizerThresholds.MEDIUM_HIGH_CONFIDENCE,
-                        analysis_explanation=f"Fax pattern {pattern_idx + 1} with explicit fax context",
                     )
                     results.append(result)
                     logger.debug(f"Fax number detected at {start}-{end}: {fax_number}")

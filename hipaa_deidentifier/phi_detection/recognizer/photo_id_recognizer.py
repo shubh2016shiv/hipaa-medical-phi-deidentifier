@@ -44,7 +44,7 @@ class PhotoIDRecognizer(PatternRecognizer):
         self,
         name: str = "PHOTO_ID",
         supported_entity: str = "PHOTO_ID",
-        patterns: List[Pattern] = None,
+        patterns: List[Pattern] | None = None,
     ):
         """
         Initialize the photo ID recognizer.

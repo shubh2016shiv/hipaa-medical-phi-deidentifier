@@ -89,7 +89,7 @@ class SSNRecognizer(EntityRecognizer):
         self,
         text: str,
         entities: List[str],
-        nlp_artifacts: NlpArtifacts = None,
+        nlp_artifacts: NlpArtifacts | None = None,
         **kwargs,
     ) -> List[RecognizerResult]:
         """Analyze text for SSN patterns.
@@ -108,7 +108,7 @@ class SSNRecognizer(EntityRecognizer):
             logger.debug("SSN not in requested entities, skipping")
             return results
 
-        for pattern_idx, pattern in enumerate(self.compiled_patterns):
+        for _, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 matched_text = match.group()
 
@@ -125,7 +125,6 @@ class SSNRecognizer(EntityRecognizer):
                             start=match.start(),
                             end=match.end(),
                             score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
-                            analysis_explanation=f"SSN pattern {pattern_idx + 1} matched and validated",
                         )
                     )
                     logger.debug("Valid SSN at %d-%d", match.start(), match.end())

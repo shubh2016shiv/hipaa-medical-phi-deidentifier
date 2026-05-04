@@ -102,7 +102,7 @@ class MRNRecognizer(EntityRecognizer):
         self,
         text: str,
         entities: List[str],
-        nlp_artifacts: NlpArtifacts = None,
+        nlp_artifacts: NlpArtifacts | None = None,
         **kwargs,
     ) -> List[RecognizerResult]:
         """
@@ -130,7 +130,7 @@ class MRNRecognizer(EntityRecognizer):
             return results
 
         # Find all MRN matches
-        for pattern_idx, pattern in enumerate(self.compiled_patterns):
+        for _, pattern in enumerate(self.compiled_patterns):
             for match in pattern.finditer(text):
                 # Validate the match
                 matched_text = match.group()
@@ -142,7 +142,6 @@ class MRNRecognizer(EntityRecognizer):
                         start=match.start(),
                         end=match.end(),
                         score=RecognizerThresholds.VERY_HIGH_CONFIDENCE,
-                        analysis_explanation=f"MRN pattern {pattern_idx + 1} matched",
                     )
                     results.append(result)
                     logger.debug(

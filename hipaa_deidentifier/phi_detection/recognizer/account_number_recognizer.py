@@ -63,6 +63,20 @@ class AccountNumberRecognizer(PatternRecognizer):
         """
         if patterns is None:
             patterns = [
+                # FIN (Financial Identity Number) — the standard hospital billing
+                # account number in Epic/Cerner/Meditech.  Appears as "FIN: FIN-XXXXXXXXX"
+                # or "FIN Number: FIN-XXXXXXXXX" in virtually every inpatient note header.
+                Pattern(
+                    "fin_labeled",
+                    r"\bFIN\s*(?:Number|No\.?|ID|#)?\s*[:#=\-]?\s*(?:FIN[-])?([0-9]{6,15})\b",
+                    RecognizerThresholds.VERY_HIGH_CONFIDENCE,
+                ),
+                Pattern(
+                    "fin_prefixed",
+                    r"\bFIN-([0-9]{6,15})\b",
+                    RecognizerThresholds.HIGH_CONFIDENCE,
+                ),
+                # Generic labeled account numbers (banking/administrative)
                 Pattern(
                     "account_number_labeled",
                     r"\b(?:Account|Acct|Bank|Financial|Payment)\s*(?:Number|ID|#)?\s*[:#=\-]?\s*([A-Z0-9\-]{6,20})\b",
