@@ -21,7 +21,7 @@ import importlib.util
 def check_python_version():
     """Check if Python version is compatible"""
     if sys.version_info < (3, 7):
-        print("❌ Error: Python 3.7 or higher is required")
+        print("Error: Python 3.7 or higher is required")
         print(f"   Current version: {sys.version}")
         return False
     return True
@@ -38,10 +38,10 @@ def check_dependencies():
             missing_packages.append(package)
 
     if missing_packages:
-        print("❌ Missing required packages:")
+        print("Missing required packages:")
         for package in missing_packages:
             print(f"   - {package}")
-        print("\n💡 Install missing packages with:")
+        print("\nInstall missing packages with:")
         print("   pip install -r requirements_dash.txt")
         return False
 
@@ -51,28 +51,28 @@ def check_dependencies():
 def install_dependencies():
     """Install required dependencies"""
     try:
-        print("📦 Installing required dependencies...")
+        print("Installing required dependencies...")
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", "-r", "requirements_dash.txt"]
         )
-        print("✅ Dependencies installed successfully")
+        print("Dependencies installed successfully")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to install dependencies: {e}")
+        print(f"Failed to install dependencies: {e}")
         return False
 
 
 def start_dash_ui():
     """Start the Dash UI application"""
     try:
-        print("🚀 Starting DEID Patients Dash UI...")
+        print("Starting DEID Patients Dash UI...")
         print("=" * 50)
-        print("🏥 DEID Patients - Professional Clinical Data De-identification")
-        print("👥 Target Audience: Clinicians and AI professionals")
-        print("🔒 Focus: HIPAA-compliant clinical data de-identification")
+        print("DEID Patients - Professional Clinical Data De-identification")
+        print("Target Audience: Clinicians and AI professionals")
+        print("Focus: HIPAA-compliant clinical data de-identification")
         print("=" * 50)
-        print("🔗 Application will be available at: http://localhost:8050")
-        print("⏹️  Press Ctrl+C to stop the application")
+        print("Application will be available at: http://localhost:8050")
+        print("Press Ctrl+C to stop the application")
         print("=" * 50)
 
         # Import and run the Dash app
@@ -81,20 +81,20 @@ def start_dash_ui():
         app.run_server(debug=False, host="0.0.0.0", port=8050)
 
     except ImportError as e:
-        print(f"❌ Failed to import dash_ui module: {e}")
+        print(f"Failed to import dash_ui module: {e}")
         print("   Make sure dash_ui.py is in the current directory")
         return False
     except KeyboardInterrupt:
-        print("\n👋 Application stopped by user")
+        print("\nApplication stopped by user")
         return True
     except Exception as e:
-        print(f"❌ Error starting application: {e}")
+        print(f"Error starting application: {e}")
         return False
 
 
 def main():
     """Main launcher function"""
-    print("🏥 DEID Patients - Dash UI Launcher")
+    print("DEID Patients - Dash UI Launcher")
     print("=" * 40)
 
     # Check Python version

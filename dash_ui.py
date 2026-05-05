@@ -83,7 +83,7 @@ HEALTHCARE_COLORS = {
     "info": "#17a2b8",  # Info blue
 }
 
-# HIPAA identifier patterns for highlighting
+# HIPAA identifier patterns for highlighting (fallback when backend is unavailable)
 HIPAA_PATTERNS = {
     "names": r"\b[A-Z][a-z]+ [A-Z][a-z]+\b",
     "ssn": r"\b\d{3}-\d{2}-\d{4}\b",
@@ -93,6 +93,59 @@ HIPAA_PATTERNS = {
     "dates": r"\b\d{1,2}/\d{1,2}/\d{4}\b",
     "medical_record": r"\bMRN\s*:?\s*\d+\b",
     "insurance": r"\bPolicy\s*:?\s*\d+\b",
+}
+
+# Single source of truth: canonical PHI category → highlight colour.
+# Covers all 18 HIPAA Safe Harbor identifier classes as represented by the
+# system's phi_taxonomy canonical labels.  The legend is built from this dict
+# so the colour shown in the legend always matches the colour in the output.
+ENTITY_COLOR_MAP: dict = {
+    "NAME": "#ffeb3b",  # Yellow        — person names
+    "DATE": "#4caf50",  # Green         — dates (DOB, visit dates)
+    "LOCATION": "#2196f3",  # Blue          — addresses, cities, states, ZIPs
+    "PHONE_NUMBER": "#f44336",  # Red           — phone numbers
+    "FAX_NUMBER": "#e91e63",  # Pink          — fax numbers
+    "EMAIL_ADDRESS": "#9c27b0",  # Purple        — email addresses
+    "URL": "#607d8b",  # Blue-Grey     — web URLs
+    "IP_ADDRESS": "#673ab7",  # Deep Purple   — IP addresses
+    "US_SSN": "#ff9800",  # Orange        — Social Security Numbers
+    "MRN": "#ff5722",  # Deep Orange   — Medical Record Numbers
+    "ENCOUNTER_ID": "#795548",  # Brown         — encounter / visit IDs
+    "ACCOUNT_NUMBER": "#009688",  # Teal          — financial account numbers
+    "HEALTH_PLAN_ID": "#3f51b5",  # Indigo        — health plan beneficiary IDs
+    "LICENSE_NUMBER": "#00bcd4",  # Cyan          — certificate / license numbers
+    "VEHICLE_ID": "#8bc34a",  # Light Green   — vehicle identifiers / VINs
+    "DEVICE_ID": "#ffc107",  # Amber         — medical device IDs
+    "BIOMETRIC_ID": "#ef9a9a",  # Light Red     — biometric identifiers
+    "PHOTO_ID": "#ffd54f",  # Light Amber   — full-face photographs
+    "AGE_OVER_89": "#ff6d00",  # Deep Orange   — ages over 89
+    "ORGANIZATION": "#26a69a",  # Teal-Green    — healthcare organisations
+    "OTHER_ID": "#9e9e9e",  # Grey          — other unique identifiers
+}
+
+# Human-readable labels shown in the legend, ordered by HIPAA grouping.
+LEGEND_LABELS: dict = {
+    "NAME": "Names",
+    "DATE": "Dates",
+    "LOCATION": "Address / Location",
+    "PHONE_NUMBER": "Phone",
+    "FAX_NUMBER": "Fax",
+    "EMAIL_ADDRESS": "Email",
+    "URL": "URL",
+    "IP_ADDRESS": "IP Address",
+    "US_SSN": "SSN",
+    "MRN": "Medical Record #",
+    "ENCOUNTER_ID": "Encounter ID",
+    "ACCOUNT_NUMBER": "Account #",
+    "HEALTH_PLAN_ID": "Health Plan ID",
+    "LICENSE_NUMBER": "License #",
+    "VEHICLE_ID": "Vehicle ID",
+    "DEVICE_ID": "Device ID",
+    "BIOMETRIC_ID": "Biometric",
+    "PHOTO_ID": "Photo ID",
+    "AGE_OVER_89": "Age > 89",
+    "ORGANIZATION": "Organization",
+    "OTHER_ID": "Other ID",
 }
 
 
@@ -171,7 +224,7 @@ def highlight_hipaa_identifiers(text):
         "#795548",
     ]
 
-    for i, (pattern_name, pattern) in enumerate(HIPAA_PATTERNS.items()):
+    for i, (_, pattern) in enumerate(HIPAA_PATTERNS.items()):
         color = colors[i % len(colors)]
         matches = re.finditer(pattern, highlighted_text, re.IGNORECASE)
 
@@ -193,22 +246,18 @@ def highlight_hipaa_identifiers(text):
     return highlighted_text
 
 
-def get_entity_color(entity_type, colors):
-    """Get color for entity type"""
-    color_map = {
-        "PERSON": colors[0],  # Yellow
-        "SSN": colors[1],  # Orange
-        "PHONE_NUMBER": colors[2],  # Red
-        "EMAIL_ADDRESS": colors[3],  # Purple
-        "LOCATION": colors[4],  # Blue
-        "DATE_TIME": colors[5],  # Green
-        "MEDICAL_RECORD_NUMBER": colors[6],  # Orange-red
-        "HEALTH_PLAN_ID": colors[7],  # Brown
-        "NAME": colors[0],  # Yellow
-        "ADDRESS": colors[4],  # Blue
-        "DATE": colors[5],  # Green
-    }
-    return color_map.get(entity_type, colors[0])
+def get_entity_color(entity_type: str, colors: list) -> str:
+    """Return the highlight colour for a PHI entity category.
+
+    ENTITY_COLOR_MAP is the canonical source so the highlight output and
+    the legend always use identical colours.  The ``colors`` list is kept
+    for backwards-compatibility with the regex fallback path but is not
+    consulted when the category is found in the map.
+    """
+    return ENTITY_COLOR_MAP.get(
+        entity_type,
+        ENTITY_COLOR_MAP.get("OTHER_ID", colors[0]),
+    )
 
 
 # Global de-identifier instance (initialized once)
@@ -681,7 +730,9 @@ app.layout = html.Div(
                             ],
                             style={"marginBottom": "30px"},
                         ),
-                        # HIPAA identifier legend
+                        # HIPAA identifier legend — built dynamically from
+                        # ENTITY_COLOR_MAP so adding a new category only
+                        # requires updating the map, not this layout.
                         html.Div(
                             [
                                 html.H4(
@@ -693,87 +744,28 @@ app.layout = html.Div(
                                 ),
                                 html.Div(
                                     [
-                                        html.Div(
-                                            [
-                                                html.Span(
-                                                    "Names",
-                                                    style={
-                                                        "backgroundColor": "#ffeb3b",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "SSN",
-                                                    style={
-                                                        "backgroundColor": "#ff9800",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Phone",
-                                                    style={
-                                                        "backgroundColor": "#f44336",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Email",
-                                                    style={
-                                                        "backgroundColor": "#9c27b0",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Address",
-                                                    style={
-                                                        "backgroundColor": "#2196f3",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Dates",
-                                                    style={
-                                                        "backgroundColor": "#4caf50",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Medical Records",
-                                                    style={
-                                                        "backgroundColor": "#ff5722",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                        "marginRight": "10px",
-                                                    },
-                                                ),
-                                                html.Span(
-                                                    "Insurance",
-                                                    style={
-                                                        "backgroundColor": "#795548",
-                                                        "padding": "4px 8px",
-                                                        "borderRadius": "3px",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"textAlign": "center"},
+                                        html.Span(
+                                            LEGEND_LABELS[category],
+                                            style={
+                                                "backgroundColor": color,
+                                                "padding": "4px 8px",
+                                                "borderRadius": "3px",
+                                                "marginRight": "8px",
+                                                "marginBottom": "8px",
+                                                "display": "inline-block",
+                                                "fontSize": "12px",
+                                                "color": "black",
+                                                "fontWeight": "500",
+                                            },
                                         )
+                                        for category, color in ENTITY_COLOR_MAP.items()
                                     ],
                                     style={
                                         "backgroundColor": "#f8f9fa",
                                         "padding": "15px",
                                         "borderRadius": "8px",
+                                        "textAlign": "center",
+                                        "lineHeight": "2.4",
                                     },
                                 ),
                             ],
@@ -874,6 +866,7 @@ app.layout = html.Div(
         Output("process-btn", "style"),
         Output("clear-btn", "disabled"),
         Output("clear-btn", "style"),
+        Output("raw-text-input", "disabled"),
     ],
     [Input("process-btn", "n_clicks"), Input("clear-btn", "n_clicks")],
     [State("raw-text-input", "value")],
@@ -897,6 +890,7 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
             dash.no_update,
             dash.no_update,
             dash.no_update,
+            dash.no_update,  # raw-text-input disabled
         )
 
     # Get the button that was clicked
@@ -986,6 +980,7 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
             default_process_button_style,
             False,
             default_clear_button_style,
+            False,  # raw-text-input disabled → re-enable on clear
         )
 
     elif button_id == "process-btn" and process_clicks and raw_text:
@@ -1003,7 +998,9 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         }
         progress_text = "Initializing de-identification process..."
 
-        # Store raw text and trigger next stage, disable both buttons
+        # Store raw text and trigger next stage, disable both buttons and
+        # the textarea — editing the input while the pipeline is running
+        # would have no effect and creates a misleading UX.
         return (
             dash.no_update,
             dash.no_update,
@@ -1017,6 +1014,7 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
             disabled_process_button_style,
             True,
             disabled_clear_button_style,
+            True,  # raw-text-input disabled → lock during processing
         )
 
     return (
@@ -1032,6 +1030,7 @@ def handle_processing_and_clear(process_clicks, clear_clicks, raw_text):
         dash.no_update,
         dash.no_update,
         dash.no_update,
+        dash.no_update,  # raw-text-input disabled
     )
 
 
@@ -1103,6 +1102,7 @@ def process_highlighting(raw_text, current_stage):
         Output("process-btn", "style", allow_duplicate=True),
         Output("clear-btn", "disabled", allow_duplicate=True),
         Output("clear-btn", "style", allow_duplicate=True),
+        Output("raw-text-input", "disabled", allow_duplicate=True),
     ],
     [Input("highlighted-text-store", "data")],
     [State("processing-stage-store", "data"), State("raw-text-store", "data")],
@@ -1195,6 +1195,7 @@ def process_deidentification(highlighted_data, current_stage, raw_text):
             default_process_button_style,
             False,
             default_clear_button_style,
+            False,  # raw-text-input disabled → re-enable on completion
         )
 
     return (
@@ -1206,6 +1207,7 @@ def process_deidentification(highlighted_data, current_stage, raw_text):
         dash.no_update,
         dash.no_update,
         dash.no_update,
+        dash.no_update,  # raw-text-input disabled
     )
 
 
